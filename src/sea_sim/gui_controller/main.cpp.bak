@@ -1,0 +1,97 @@
+#include <sea_sim/gui_controller/GUI.h>
+#include <sea_sim/gears/channels.hpp>
+#include <sea_sim/gears/channel_packet.h>
+#include <sea_sim/json/json.hpp>
+
+#include <thread>
+#include <fstream>
+#include <iostream>
+
+#include <string>
+
+nlohmann::json get_input_interface()
+{
+	std::ifstream ifs("input_interface.json");
+	nlohmann::json jf = nlohmann::json::parse(ifs);
+
+	if (!jf.empty())
+	{
+		// std::cout << jf;
+		return jf;
+	}
+	else
+	{
+		return
+		{
+			{{"type", "text"},
+			 {"meta", {
+			   {"value", std::u8string(u8"���������:")}
+			  }
+			 }
+			},
+			{{"type", "block"},
+			 {"meta", {}
+			 }
+			},
+			{{"type", "input_float"},
+			 {"meta", {
+			   {"label", "acceleration"}
+			  }
+			 }
+			},
+			{{"type", "button"},
+			 {"meta", {
+			   {"label", "send_acceleration"},
+			   {"value", std::u8string(u8"���������")}
+			  }
+			 }
+			}
+		};
+	}
+}
+nlohmann::json get_output_interface()
+{
+	return {};
+}
+
+int main()
+{
+	srand(static_cast<unsigned int>(time(NULL)));
+
+	auto [core_gui_channel_core_side, core_gui_channel_gui_side] = fdx::MakeChannel<channel_value_type>();
+
+	std::thread GUI(gui::launch_GUI, core_gui_channel_gui_side);
+	GUI.detach();
+
+	while (true)
+	{
+		if (auto response = core_gui_channel_core_side.TryRead())
+		{
+			auto& packet_to = response.value().to;
+			auto& packet_from = response.value().from;
+			auto& packet_event = response.value().event;
+			auto& packet_data = response.value().data;
+
+			if (packet_to == "core")
+			{
+				if (packet_event == "shutdown")
+				{
+					break;
+				}
+				else if (packet_event == "request_interface")
+				{
+					core_gui_channel_core_side.SendData({ "gui", "core", "set_input_interface", get_input_interface() });
+					core_gui_channel_core_side.SendData({ "gui", "core", "set_output_interface", get_output_interface() });
+				}
+			}
+			else
+			{
+				std::cout << packet_from << " > " << packet_to << " : " << packet_event << "\n";
+				std::cout << packet_data << std::endl;
+			}
+		}
+	}
+	std::cout << "Core is shutting down..." << std::endl;
+
+	return 0;
+}

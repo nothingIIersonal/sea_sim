@@ -1,0 +1,27 @@
+[
+ {"type": "text",
+  "meta": {
+    "value": "Ускорение:"
+   }
+ },
+ {"type": "block",
+  "meta": {}
+ },
+ {"type": "input_float",
+  "meta": {
+    "label": "acceleration"
+   }
+ },
+ {"type": "button",
+  "meta": {
+    "label": "send_acceleration",
+    "value": "Расчитать"
+   }
+ },
+ {"type": "button",
+  "meta": {
+    "label": "send_acceleration_x2",
+    "value": "Расчитать дважды"
+   }
+ }
+]
