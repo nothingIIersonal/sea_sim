@@ -1,0 +1,5 @@
+# build directory
+.build
+
+# vscode project directory
+.vscode

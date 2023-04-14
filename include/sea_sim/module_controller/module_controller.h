@@ -131,7 +131,7 @@ static const int load_module(const char *module_path, fdx::ChannelEndpoint<chann
     printf("Call init function...\n");
     int init_res = (* init)( Interconnect(module_endpoint) );
 #else
-    (* init)( Interconnect(module_endpoint) );
+    (* init)( Interconnect(module_endpoint, module_path) );
 #endif
 #ifdef __MC_DEBUG
     printf("Init function done with code %d\n", init_res);
@@ -180,7 +180,7 @@ static const int exec_module(const char *module_path, fdx::ChannelEndpoint<chann
             printf("Call exec function...\n");
             int exec_res = (* exec)( Interconnect(module_endpoint) );
 #else
-            (* exec)( Interconnect(module_endpoint) );
+            (* exec)( Interconnect(module_endpoint, module_path) );
 #endif
 #ifdef __MC_DEBUG
             printf("Exec function done with code %d\n", exec_res);
@@ -220,7 +220,7 @@ static const int unload_module(const char *module_path, fdx::ChannelEndpoint<cha
             printf("Call exit function...\n");
             int exit_res = (* exit)( Interconnect(module_endpoint) );
 #else
-            (* exit)( Interconnect(module_endpoint) );
+            (* exit)( Interconnect(module_endpoint, module_path) );
 #endif
 #ifdef __MC_DEBUG
             printf("Exit function done with code %d\n", exit_res);

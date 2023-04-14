@@ -9,39 +9,26 @@ extern "C"
 
 int sea_module_init(Interconnect &&ic)
 {
-    std::cout << "\n\n===============================\n"
-              << "Module 1 init function started"
-              << "\n===============================\n\n"
-              << std::endl;
+    ic.wgti_set_module_title("Супер-модуль");
+    ic.wgti_add_text("Text #1 in the World!");
+    ic.wgti_add_button("btn_res", "Agree");
 
-    ic.print_json();
-
-    ic.send_json({ "core", "module", "povestka", {{"fun_name", "init"}} });
+    ic.wgti_send();
 
     return 0;
 }
 
 int sea_module_exec(Interconnect &&ic)
 {
-    std::cout << "\n\n===============================\n"
-              << "Module 1 exec function started"
-              << "\n===============================\n\n"
-              << std::endl;
+    ic.wgto_add_text("Output text #1 in the World!");
 
-    ic.send_json({ "core", "module", "povestka", {{"fun_name", "exec"}} });
+    ic.wgto_send();
 
     return 0;
 }
 
 int sea_module_exit(Interconnect &&ic)
 {
-    std::cout << "\n\n===============================\n"
-              << "Module 1 exit function started"
-              << "\n===============================\n\n"
-              << std::endl;
-
-    ic.send_json({ "core", "module", "povestka", {{"fun_name", "exit"}} });
-
     return 0;
 }
 

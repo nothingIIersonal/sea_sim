@@ -14,22 +14,6 @@
 #endif
 
 
-nlohmann::json get_input_interface()
-{
-	std::ifstream ifs("input_interface.json");
-
-    if ( !ifs.is_open() )
-        return {};
-
-	nlohmann::json jf = nlohmann::json::parse(ifs);
-
-	if (!jf.empty())
-	    return jf;
-
-    return {};
-}
-
-
 void read_data(const Endpoint& core_endpoint)
 {
     if (const auto &val = core_endpoint.TryRead())
@@ -57,40 +41,40 @@ void read_data(const std::optional<channel_value_type> &val)
 int main()
 {
     // Launch GUI
-    {
-        auto [core_gui_channel_core_side, core_gui_channel_gui_side] = fdx::MakeChannel<channel_value_type>();
-        
-        auto gui_controller = std::thread(gui::launch_GUI, core_gui_channel_gui_side);
-        gui_controller.detach();
+    // {
+    //     auto [core_gui_channel_core_side, core_gui_channel_gui_side] = fdx::MakeChannel<channel_value_type>();
 
-        while (true)
-        {
-            if (const auto &val = core_gui_channel_core_side.TryRead())
-            {
-                if (val.value().event == "shutdown")
-                {
-                    break;
-                }
-                else if (val.value().event == "request_interface")
-                {
-                    core_gui_channel_core_side.SendData({ "gui", "core", "set_input_interface", get_input_interface() });
-                }
-                else
-                {
-                    read_data(val);
-                }
-            }
-        }
+    //     auto gui_controller = std::thread(gui::launch_GUI, core_gui_channel_gui_side);
+    //     gui_controller.detach();
 
-        std::cout << "\n\nBye-bye, my baby...\n\n";
-    }
+    //     while (true)
+    //     {
+    //         if (const auto &val = core_gui_channel_core_side.TryRead())
+    //         {
+    //             if (val.value().event == "shutdown")
+    //             {
+    //                 break;
+    //             }
+    //             else if (val.value().event == "request_interface")
+    //             {
+    //                 core_gui_channel_core_side.SendData({ "gui", "core", "set_input_interface", get_input_interface() });
+    //             }
+    //             else
+    //             {
+    //                 read_data(val);
+    //             }
+    //         }
+    //     }
+
+    //     std::cout << "\n\nBye-bye, my baby...\n\n";
+    // }
 
 
 
     {
         auto [core_endpoint, module_endpoint] = fdx::MakeChannel<channel_value_type>();
 
-        core_endpoint.SendData({ "module", "core", "test", {{"0", "Hello!"}, {"1", "Zapyataya"}} });
+        // core_endpoint.SendData({ "module", "core", "test", {{"0", "Hello!"}, {"1", "Zapyataya"}} });
 
         auto thr_module_controller = std::thread(load_module, LIB_PATH, module_endpoint);
         thr_module_controller.join();
