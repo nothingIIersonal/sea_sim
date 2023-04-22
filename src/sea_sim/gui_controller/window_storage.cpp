@@ -50,32 +50,51 @@ namespace gui
 				if (event.key.code >= 0 && event.key.code < sf::Keyboard::KeyCount)
 					keyHit[event.key.code] = false;
 				break;
+			default:
+				break;
 			}
 		}
 
 		while (auto response = channel_to_core.TryRead())
 		{
 			auto& packet_to = response.value().to;
+			auto& packet_from = response.value().from;
 			auto& packet_event = response.value().event;
 			auto& packet_data = response.value().data;
 
 			if (packet_to == "gui")
 			{
-				if (packet_event == "set_input_interface")
+				if (packet_event == "update_input_interface")
 				{
-					render_engine_.update_input_interface(fields_data_.selected_module, packet_data);
+					render_engine_.update_input_interface(packet_from, packet_data);
 				}
-				else if (packet_event == "set_output_interface")
+				else if (packet_event == "update_output_interface")
 				{
-
+					render_engine_.update_output_interface(packet_from, packet_data);
 				}
+                else if (packet_event == "remove_interface")
+                {
+                    render_engine_.remove_interface(packet_data["module_path"].get<std::string>());
+                }
+                else if (packet_event == "notify" || packet_event == "module_error")
+                {
+					windows_show_state_.exit_popup_new = false;
+					set_notification(packet_data["text"].get<std::string>());
+                }
+                else if (packet_event == "shutdown")
+                {
+                    window_close();
+                }
 			}
 		}
 	}
 	void WindowStorage::shutdown()
-	{
-		channel_to_core.SendData({ "core", "gui", "shutdown", {}});
-	}
+    {
+        channel_packet packet = { "core", "gui", "shutdown", {} };
+        send_to_core(packet);
+
+		shutdown_flag_ = true;
+    }
 
 	void WindowStorage::ImGui_init()
 	{
@@ -85,7 +104,6 @@ namespace gui
 		ImGuiIO& io = ImGui::GetIO();
 		font_x20_ = io.Fonts->AddFontFromFileTTF("4-font.ttf", 20, NULL,
 			io.Fonts->GetGlyphRangesCyrillic());
-
 		font_x16_ = io.Fonts->AddFontFromFileTTF("4-font.ttf", 16, NULL,
 			io.Fonts->GetGlyphRangesCyrillic());
 
@@ -173,44 +191,26 @@ namespace gui
 	// --- Windows
 
 	void WindowStorage::show_main()
-	{
-		ImGui::SetNextWindowPos({ 0, 0 }, ImGuiCond_Once);
-		ImGui::SetNextWindowSize(get_screen_size());
-		
-		ImGuiWindowFlags main_window_flags =
-			ImGuiWindowFlags_NoDocking |
-			ImGuiWindowFlags_MenuBar |
-			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoBringToFrontOnFocus;
+    {
+        show_main_menu_bar();
+        show_file_dialog();
 
-		if (ImGui::Begin("##MainMenu", NULL, main_window_flags))
-		{
-			show_main_menu_bar();
-
-			ImGuiID id = ImGui::GetID("MainWindowLayout");
-			ImGui::DockSpace(id, { 0, 0 }, ImGuiDockNodeFlags_PassthruCentralNode);
-
-			if (windows_show_state_.reset_docking_layout)
-			{
-				ImGui_reset_docking_layout();
-				windows_show_state_.reset_docking_layout = false;
-			}
-			
-			ImGui::End();
-		}
+        ImGuiID my_dockspace = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+        if (windows_show_state_.reset_docking_layout)
+        {
+            ImGui_reset_docking_layout(my_dockspace);
+            windows_show_state_.reset_docking_layout = false;
+        }
 	}
+
 	void WindowStorage::show_exit_popup()
 	{
-		if (windows_show_state_.exit_popup_new !=
-			windows_show_state_.exit_popup)
+		if (windows_show_state_.exit_popup_new == true &&
+			windows_show_state_.exit_popup     == false)
 		{
-			windows_show_state_.exit_popup_new ?
-				ImGui::OpenPopup(u8"Выход"_C)
-				:
-				ImGui::CloseCurrentPopup();
-			windows_show_state_.exit_popup = windows_show_state_.exit_popup_new;
+			ImGui::OpenPopup(u8"Выход"_C, ImGuiPopupFlags_NoOpenOverExistingPopup);
+
+			windows_show_state_.exit_popup = true;
 		}
 
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -222,26 +222,68 @@ namespace gui
 			ImGui::NewLine();
 			ImGui::Separator();
 
-			if (ImGui::Button(u8"Выйти"_C, ImVec2(120, 0)))
+			if (ImGui::Button(u8"Выйти"_C, ImVec2(120, 0)) || key_hit(sf::Keyboard::Enter))
 			{
+				windows_show_state_.exit_popup_new = false;
 				ImGui::CloseCurrentPopup();
-				window_close();
+				shutdown();
 			}
 			ImGui::SetItemDefaultFocus();
 			ImGui::SameLine();
-			if (ImGui::Button(u8"Остаться"_C, ImVec2(120, 0)) || key_hit(sf::Keyboard::Escape))
+			if (ImGui::Button(u8"Остаться"_C, ImVec2(120, 0)) || key_hit(sf::Keyboard::Escape) ||
+				windows_show_state_.exit_popup_new == false)
 			{
 				windows_show_state_.exit_popup_new = false;
+				windows_show_state_.exit_popup = false;
 				ImGui::CloseCurrentPopup();
 			}
 
 			ImGui::EndPopup();
 		}
-
-		if (windows_show_state_.exit_popup == false && key_hit(sf::Keyboard::Escape))
+		if (!ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel))
 		{
-			windows_show_state_.exit_popup_new = true;
+			if (windows_show_state_.exit_popup == false && key_hit(sf::Keyboard::Escape))
+			{
+				windows_show_state_.exit_popup_new = true;
+			}
 		}
+	}
+	void WindowStorage::show_notification_popup()
+	{
+		if (windows_show_state_.notification_popup_new == true &&
+			windows_show_state_.notification_popup     == false)
+		{
+			ImGui::OpenPopup(u8"Уведомление"_C, ImGuiPopupFlags_NoOpenOverExistingPopup);
+
+			windows_show_state_.notification_popup = true;
+		}
+
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+		if (ImGui::BeginPopupModal(u8"Уведомление"_C, NULL, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text("%s", windows_show_state_.notification_text.c_str());
+			ImGui::NewLine();
+			ImGui::Separator();
+
+			align_for_width(120);
+
+			if (ImGui::Button(u8"Принять"_C, ImVec2(120, 0)) || key_hit(sf::Keyboard::Enter) ||
+				windows_show_state_.notification_popup_new == false)
+			{
+				windows_show_state_.notification_popup_new = false;
+				windows_show_state_.notification_popup = false;
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+	void WindowStorage::set_notification(std::string text)
+	{
+		windows_show_state_.notification_popup_new = true;
+		windows_show_state_.notification_text = text;
 	}
 
 	void WindowStorage::show_child_input()
@@ -249,26 +291,12 @@ namespace gui
 		if (ImGui::Begin(u8"Ввод данных"_C))
 		{
 			ImGui::Text(u8"%.0f FPS"_C, ImGui::GetIO().Framerate);
-			ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_texture_.getSize().x, render_texture_.getSize().y);
+			ImGui::Text(u8"Îáëàñòü îòðèñîâêè: %ix%i ïêñ"_C, render_texture_.getSize().x, render_texture_.getSize().y);
 
 			ImGui::Separator();
 
-			if (ImGui::BeginCombo("##modules", fields_data_.selected_module.c_str()))
-			{
-				if (ImGui::Selectable("m1"))
-					fields_data_.selected_module = "m1";
-				if (ImGui::Selectable("m2"))
-					fields_data_.selected_module = "m2";
-
-				ImGui::EndCombo();
-			}
-
-			ImGui::Separator();
-
-			if (auto packet = render_engine_.render_inputs(fields_data_.selected_module))
-			{
+			if (auto packet = render_engine_.render_inputs())
 				send_to_core(packet.value());
-			}
 
 			ImGui::End();
 		}
@@ -279,6 +307,8 @@ namespace gui
 		{
 			// ImGui::ShowFontAtlas(font_x20_->ContainerAtlas);
 			// ImGui::ShowFontSelector("Fonts");
+			// ImGui::ShowStyleEditor();
+			render_engine_.render_outputs();
 
 			ImGui::End();
 		}
@@ -314,23 +344,23 @@ namespace gui
 
 	void WindowStorage::show_main_menu_bar()
 	{
-		if (ImGui::BeginMenuBar())
+		if (ImGui::BeginMainMenuBar())
 		{
-			if (ImGui::BeginMenu(u8"Меню"_C))
+			if (ImGui::BeginMenu(u8"Ìåíþ"_C))
 			{
-				if (ImGui::MenuItem(u8"Открыть"_C))
+				if (ImGui::MenuItem(u8"Îòêðûòü"_C))
 				{
 
 				}
 
-				if (ImGui::MenuItem(u8"Сохранить"_C))
+				if (ImGui::MenuItem(u8"Ñîõðàíèòü"_C))
 				{
 
 				}
 
 				ImGui::Separator();
 
-				if (ImGui::MenuItem(u8"Выйти"_C))
+				if (ImGui::MenuItem(u8"Âûéòè"_C))
 				{
 					if (windows_show_state_.exit_popup == false)
 					{
@@ -340,74 +370,101 @@ namespace gui
 
 				ImGui::Separator();
 
-				if (ImGui::MenuItem(u8"Форсировать выход"_C))
+				if (ImGui::MenuItem(u8"Ôîðñèðîâàòü âûõîä"_C))
 				{
-					window_close();
+					send_to_core("force_shutdown");
 				}
 
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu(u8"Вид"_C))
+			if (ImGui::BeginMenu(u8"Âèä"_C))
 			{
-				if (ImGui::MenuItem(u8"Восстановить"_C))
+#ifdef WIN32
+				if (ImGui::MenuItem(u8"Âîññòàíîâèòü"_C))
 				{
 					windows_show_state_.reset_docking_layout = true;
 				}
-
+#endif // WIN32
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu(u8"Плагины"_C))
+			if (ImGui::BeginMenu(u8"Ïëàãèíû"_C))
 			{
-				if (ImGui::MenuItem(u8"Добавить"_C))
+				if (ImGui::MenuItem(u8"Äîáàâèòü"_C))
 				{
-
-				}
-
-				ImGui::Separator();
-
-				if (ImGui::MenuItem(u8"Обновить интерфейс"_C))
-				{
-					if (!fields_data_.selected_module.empty())
-						send_to_core("request_interface");
+					if (!file_dialog_.is_open())
+					{
+						file_dialog_.open();
+					}
 				}
 
 				ImGui::EndMenu();
 			}
 
-			ImGui::EndMenuBar();
+			ImGui::EndMainMenuBar();
+		}
+	}
+	void WindowStorage::show_file_dialog()
+	{
+		if (file_dialog_.is_open())
+		{
+			if (auto file_path = file_dialog_.render_dialog())
+			{
+				if (auto file_path = file_dialog_.try_take_files())
+				{
+					send_to_core("load_module", { {"module_path", file_path.value().front()} });
+				}
+			}
+			if (key_hit(sf::Keyboard::Escape))
+				file_dialog_.close();
+			else if (key_hit(sf::Keyboard::Enter))
+			{
+				if (auto file_path = file_dialog_.try_take_files())
+				{
+					send_to_core("load_module", { {"module_path", file_path.value().front()} });
+				}
+			}
 		}
 	}
 
-	void WindowStorage::ImGui_reset_docking_layout()
-	{
-		ImGuiID id = ImGui::GetID("MainWindowLayout");
-		ImGui::DockBuilderRemoveNode(id);
-		ImGui::DockBuilderAddNode(id);
+	void WindowStorage::ImGui_reset_docking_layout(ImGuiID id)
+    {
+        ImGui::DockBuilderRemoveNode(id);
+        ImGui::DockBuilderAddNode(id);
+        ImGui::DockBuilderSetNodeSize(id, ImGui::GetMainViewport()->Size);
 
+        ImGuiID dock_view = ImGui::DockBuilderSplitNode(id, ImGuiDir_Left, 0.75f, nullptr, &id);
+        ImGuiID dock_input = ImGui::DockBuilderSplitNode(id, ImGuiDir_Right, 0.25f, nullptr, &id);
+        ImGuiID dock_output = ImGui::DockBuilderSplitNode(dock_input, ImGuiDir_Down, 0.5f, nullptr, &dock_input);
 
-		ImGuiID dock1 = ImGui::DockBuilderSplitNode(id, ImGuiDir_Left, 1.f, nullptr, &id);
+        ImGui::DockBuilderDockWindow(u8"Обзор"_C, dock_view);
+        ImGui::DockBuilderDockWindow(u8"Ввод данных"_C, dock_input);
+        ImGui::DockBuilderDockWindow(u8"Результаты"_C, dock_output);
 
-		ImGuiID dock2 = ImGui::DockBuilderSplitNode(dock1, ImGuiDir_Right, 0.25f, nullptr, &dock1);
+        ImGui::DockBuilderFinish(id);
+    }
+	void WindowStorage::align_for_width(float width, float alignment)
+    {
+        float avail = ImGui::GetContentRegionAvail().x;
+        float off = (avail - width) * alignment;
+        if (off > 0.0f)
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+    }
+    float WindowStorage::get_button_width(std::string text, ImGuiStyle& style)
+    {
+        return ImGui::CalcTextSize(text.c_str()).x + style.FramePadding.x * 2 + style.ItemSpacing.x;
+    }
 
-		ImGuiID dock3 = ImGui::DockBuilderSplitNode(dock2, ImGuiDir_Down, 0.5f, nullptr, &dock2);
-
-
-		ImGui::DockBuilderDockWindow(u8"Обзор"_C, dock1);
-		ImGui::DockBuilderDockWindow(u8"Ввод данных"_C, dock2);
-		ImGui::DockBuilderDockWindow(u8"Результаты"_C, dock3);
-
-		ImGui::DockBuilderFinish(id);
-	}
-
-	void WindowStorage::send_to_core(std::string event, nlohmann::json data)
-	{
-		channel_to_core.SendData({ "core", "gui", event, data });
-	}
-	void WindowStorage::send_to_core(channel_packet& packet)
-	{
-		channel_to_core.SendData(packet);
-	}
+    void WindowStorage::send_to_core(std::string event, nlohmann::json data)
+    {
+        if (!shutdown_flag_)
+            channel_to_core.SendData({ "core", "gui", event, data });
+    }
+    void WindowStorage::send_to_core(channel_packet& packet)
+    {
+        if (!shutdown_flag_)
+            channel_to_core.SendData(packet);
+    }
 
 } // namespace gui

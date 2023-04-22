@@ -1,12 +1,13 @@
 #pragma once
-
-
 #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/gui_controller/RenderEngine.h>
+#include <sea_sim/gui_controller/FileDialog.h>
 
 
 namespace gui
 {
+	using namespace utils;
+
 	class WindowStorage
 	{
 	public:
@@ -42,6 +43,8 @@ namespace gui
 		// Windows
 		void show_main();
 		void show_exit_popup();
+        void show_notification_popup();
+        void set_notification(std::string text);
 
 		void show_child_input();
 		void show_child_output();
@@ -49,8 +52,11 @@ namespace gui
 
 	private:
 		void show_main_menu_bar();
+		void show_file_dialog();
 
-		void ImGui_reset_docking_layout();
+		void ImGui_reset_docking_layout(ImGuiID id);
+		float get_button_width(std::string text, ImGuiStyle& style);
+        void align_for_width(float width, float alignment = 0.5f);
 
 		void send_to_core(std::string event, nlohmann::json data = {});
 		void send_to_core(channel_packet& packet);
@@ -64,6 +70,7 @@ namespace gui
 
 		sf::RenderTexture render_texture_;
 		RenderEngine render_engine_;
+		FileDialog file_dialog_;
 
 		Endpoint channel_to_core;
 
@@ -75,6 +82,12 @@ namespace gui
 			bool exit_popup = false;
 			bool exit_popup_new = false;
 
+            bool notification_popup = false;
+            bool notification_popup_new = false;
+            std::string notification_text = u8""_C;
+
+			bool show_file_dialog = false;
+
 			bool reset_docking_layout = true;
 			ImVec2 render_size = { 500, 500 };
 		} windows_show_state_;
@@ -83,5 +96,7 @@ namespace gui
 		{
 			std::string selected_module = "";
 		} fields_data_;
+
+		bool shutdown_flag_ = false;
 	};
 } // namespace gui

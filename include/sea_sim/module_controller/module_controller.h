@@ -23,11 +23,11 @@
 static void * dlopen(const char *fl, int m)
 {
     if ( !fl )
-        return (void *)(GetModuleHandle(0));
+        return (void *)(GetModuleHandle( 0 ));
     else if ( (m & RTLD_NOLOAD) )
-        return (void *)(GetModuleHandle(fl));
+        return (void *)(GetModuleHandle( fl ));
     else
-        return (void *)(LoadLibrary(fl));
+        return (void *)(LoadLibrary( fl ));
 }
 
 static const int dlclose(void *hdll)
@@ -57,7 +57,7 @@ static const size_t strnlen_t(const char *str, size_t maxlen)
     return i;
 }
 
-#endif
+#endif // WIN32
 
 
 #include <string.h>
@@ -83,10 +83,10 @@ static void print_error(const char *message, const size_t type)
         fprintf(stderr, "%s\n", dlerror());
     else
         fprintf(stderr, "%s\n", "Unknown error type");
-#endif
+#endif // WIN32
 }
 
-#endif
+#endif // __MC_DEBUG
 
 static const int check_error(int code, const char *message, int fail_code, size_t type)
 {
@@ -94,7 +94,7 @@ static const int check_error(int code, const char *message, int fail_code, size_
     {
 #ifdef __MC_DEBUG
         print_error(message, type);
-#endif
+#endif // __MC_DEBUG
         return -1;
     }
 
@@ -111,15 +111,19 @@ static _handler_storage handler_storage[MODULE_MAX_COUNT] = { {.module_path = {0
 static size_t handler_storage_size = 0;
 
 
-static const int load_module(const char *module_path, fdx::ChannelEndpoint<channel_value_type> &&module_endpoint)
+static const int load_module(const char *module_path, fdx::ChannelEndpoint<channel_value_type> module_endpoint)
 {
     void *handle = dlopen(module_path, RTLD_GLOBAL | RTLD_LAZY);
     if ( check_error(handle != nullptr, "Unable to open module", 0, DLERROR) )
+    {
+        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось загрузить модуль '" + std::string(module_path) + "'."}}} );
         return -1;
+    }
 
     int (* init)( Interconnect && ) = (int (*)( Interconnect && ))dlsym(handle, "sea_module_init");
     if ( check_error((* init) != nullptr, "Unable to get init function", 0, DLERROR) )
     {
+        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить init-функцию модуля '" + std::string(module_path) + "'."}}} );
         check_error(dlclose(handle), "Unable to close module", -1, DLERROR);
         return -1;
     }
@@ -129,28 +133,31 @@ static const int load_module(const char *module_path, fdx::ChannelEndpoint<chann
     printf("Init function address: 0x%p\n", init);
 
     printf("Call init function...\n");
-    int init_res = (* init)( Interconnect(module_endpoint) );
+    int init_res = (* init)( Interconnect(module_endpoint, module_path) );
 #else
     (* init)( Interconnect(module_endpoint, module_path) );
-#endif
+#endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Init function done with code %d\n", init_res);
-#endif
+#endif // __MC_DEBUG
 
 #ifdef WIN32
     size_t module_path_length = strnlen(module_path, MODULE_PATH_LENGTH);
 #else
     size_t module_path_length = strnlen_t(module_path, MODULE_PATH_LENGTH);
-#endif
+#endif // WIN32
 
     if ( check_error(module_path_length < MODULE_PATH_LENGTH, "Module path length is too big", 0, CUSTOMERROR) )
+    {
+        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Путь модуля '" + std::string(module_path) + "' слишком длинный. Максимальная длина пути: " + std::to_string(MODULE_PATH_LENGTH) + " символов."}}} );
         return -1;
+    }
 
 #ifdef WIN32
     strncpy_s(handler_storage[handler_storage_size].module_path, module_path, module_path_length);
 #else
     strncpy(handler_storage[handler_storage_size].module_path, module_path, module_path_length);
-#endif
+#endif // WIN32
     handler_storage[handler_storage_size].handle = handle;
 
     ++handler_storage_size;
@@ -158,7 +165,7 @@ static const int load_module(const char *module_path, fdx::ChannelEndpoint<chann
     return 0;
 }
 
-static const int exec_module(const char *module_path, fdx::ChannelEndpoint<channel_value_type> &&module_endpoint)
+static const int exec_module(const char *module_path, fdx::ChannelEndpoint<channel_value_type> module_endpoint)
 {
     for (size_t i = 0; i < handler_storage_size; ++i)
     {
@@ -169,6 +176,7 @@ static const int exec_module(const char *module_path, fdx::ChannelEndpoint<chann
             int (* exec)( Interconnect && ) = (int (*)( Interconnect && ))dlsym(handle, "sea_module_exec");
             if ( check_error((* exec) != nullptr, "Unable to get exec function", 0, DLERROR) )
             {
+                module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить exec-функцию модуля '" + std::string(module_path) + "'."}}} );
                 check_error(dlclose(handle), "Unable to close module", -1, DLERROR);
                 return -1;
             }
@@ -178,13 +186,13 @@ static const int exec_module(const char *module_path, fdx::ChannelEndpoint<chann
             printf("Exec function address: 0x%p\n", exec);
 
             printf("Call exec function...\n");
-            int exec_res = (* exec)( Interconnect(module_endpoint) );
+            int exec_res = (* exec)( Interconnect(module_endpoint, module_path) );
 #else
             (* exec)( Interconnect(module_endpoint, module_path) );
-#endif
+#endif // __MC_DEBUG
 #ifdef __MC_DEBUG
             printf("Exec function done with code %d\n", exec_res);
-#endif
+#endif // __MC_DEBUG
 
             return 0;
         }
@@ -192,11 +200,11 @@ static const int exec_module(const char *module_path, fdx::ChannelEndpoint<chann
 
 #ifdef __MC_DEBUG
     print_error("Unable to find module", CUSTOMERROR);
-#endif
+#endif // __MC_DEBUG
     return -1;
 }
 
-static const int unload_module(const char *module_path, fdx::ChannelEndpoint<channel_value_type> &&module_endpoint)
+static const int unload_module(const char *module_path, fdx::ChannelEndpoint<channel_value_type> module_endpoint)
 {
     for (size_t i = 0; i < handler_storage_size; ++i)
     {
@@ -206,9 +214,18 @@ static const int unload_module(const char *module_path, fdx::ChannelEndpoint<cha
 
             void *handle = handler_storage[i].handle;
 
+            if (handler_storage_size > i)
+            { // shift handler storage
+                for (size_t j = i + 1; j <= handler_storage_size; ++j)
+                {
+                    handler_storage[j - 1] = handler_storage[j];
+                }
+            }
+
             int (* exit)( Interconnect && ) = (int (*)( Interconnect && ))dlsym(handle, "sea_module_exit");
             if ( check_error((* exit) != nullptr, "Unable to get exit function", 0, DLERROR) )
             {
+                module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить exit-функцию модуля '" + std::string(module_path) + "'."}}} );
                 check_error(dlclose(handle), "Unable to close module", -1, DLERROR);
                 return -1;
             }
@@ -218,16 +235,19 @@ static const int unload_module(const char *module_path, fdx::ChannelEndpoint<cha
             printf("Exit function address: 0x%p\n", exit);
 
             printf("Call exit function...\n");
-            int exit_res = (* exit)( Interconnect(module_endpoint) );
+            int exit_res = (* exit)( Interconnect(module_endpoint, module_path) );
 #else
             (* exit)( Interconnect(module_endpoint, module_path) );
-#endif
+#endif // __MC_DEBUG
 #ifdef __MC_DEBUG
             printf("Exit function done with code %d\n", exit_res);
-#endif
+#endif // __MC_DEBUG
 
             if ( check_error(dlclose(handle), "Unable to close module", -1, DLERROR) )
+            {
+                module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось закрыть модуль '" + std::string(module_path) + "'."}}} );
                 return -1;
+            }
 
             return 0;
         }
@@ -235,7 +255,18 @@ static const int unload_module(const char *module_path, fdx::ChannelEndpoint<cha
 
 #ifdef __MC_DEBUG
     print_error("Unable to find module", CUSTOMERROR);
-#endif
+#endif // __MC_DEBUG
+    return -1;
+}
+
+static const int module_loaded(const char *module_path)
+{
+    for (size_t i = 0; i < handler_storage_size; ++i)
+    {
+        if ( strncmp(module_path, handler_storage[i].module_path, MODULE_PATH_LENGTH) == 0 )
+            return 0;
+    }
+
     return -1;
 }
 

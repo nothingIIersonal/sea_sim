@@ -1,6 +1,4 @@
 #pragma once
-
-
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <imgui_stdlib.h>
@@ -10,6 +8,7 @@
 
 #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/ModulePageStorage.h>
 
 
 namespace gui
@@ -19,19 +18,17 @@ namespace gui
 	public:
 		void update_input_interface(std::string module, nlohmann::json data);
 		void update_output_interface(std::string module, nlohmann::json data);
+		void remove_interface(std::string module);
 
 		void render_scene(sf::RenderTexture& texture);
 
-		std::optional<channel_packet> render_inputs(std::string module);
+		std::optional<std::string> render_modules_combo();
+		std::optional<channel_packet> render_inputs();
 		void render_outputs();
 	
 	private:
-		std::map<std::string, nlohmann::json> input_interface_storage_;
-		std::map<std::string, nlohmann::json> output_interface_storage_;
-
-		std::map<std::string, std::map<std::string, int        >>    int_fields_storage_;
-		std::map<std::string, std::map<std::string, float      >>  float_fields_storage_;
-		std::map<std::string, std::map<std::string, std::string>> string_fields_storage_;
+		std::string selected_module = "";
+		std::map<std::string, ModulePageStorage> module_pages;
 
 	};
 } // namespace gui

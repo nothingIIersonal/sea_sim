@@ -1,29 +1,31 @@
-#include <sea_sim/gui_controller/RenderEngine.h>
+﻿#include <sea_sim/gui_controller/RenderEngine.h>
 
-#include <iostream>
 
 namespace gui
 {
 	void RenderEngine::update_input_interface(std::string module, nlohmann::json data)
 	{
-		float_fields_storage_[module].clear();
+		if (!module_pages.contains(module))
+			selected_module = module;
 
-		input_interface_storage_[module] = data;
-
-		for (auto& widget : input_interface_storage_[module])
-		{
-			auto type = widget["type"].get<std::string>();
-			if (type == "input_float")
-			{
-				auto label = widget["meta"]["label"].get<std::string>();
-				float_fields_storage_[module][label] = 0.f;
-			}
-		}
+		module_pages[module].set_input_interface(data);
 	}
 	void RenderEngine::update_output_interface(std::string module, nlohmann::json data)
 	{
-		output_interface_storage_[module] = data;
+		module_pages[module].set_output_interface(data);
 	}
+	void RenderEngine::remove_interface(std::string module)
+    {
+		if (module_pages.contains(module))
+        {
+            module_pages.erase(module);
+
+            if (module_pages.empty())
+                selected_module = "";
+            else
+                selected_module = module_pages.begin()->first;
+        }
+    }
 
 	void RenderEngine::render_scene(sf::RenderTexture& texture)
 	{
@@ -47,69 +49,69 @@ namespace gui
 
 		return;
 	}
-	float a = 0;
-	std::optional<channel_packet> RenderEngine::render_inputs(std::string module)
+
+	std::optional<std::string> RenderEngine::render_modules_combo()
 	{
-		ImGui::SliderFloat("Percentage", &a, 0, 1);
-		ImGui::ProgressBar(a, { 256, 20 });
-
-		if (module.empty() || !input_interface_storage_.contains(module))
-			return std::nullopt;
-
-		channel_packet packet = {"core", "gui", ""};
-		int gl_id = 0;
-
-		for (auto& widget : input_interface_storage_[module])
-		{
-			ImGui::PushID(gl_id);
-
-			auto type = widget["type"].get<std::string>();
-
-			if (type == "text")
-			{
-				auto value = widget["meta"]["value"].get<std::string>();
-				ImGui::Text("%s", reinterpret_cast<const char*>(value.c_str()));
-			}
-			else if (type == "block")
-			{
-				ImGui::SameLine();
-			}
-			else if (type == "input_float")
-			{
-				auto label = widget["meta"]["label"].get<std::string>();
-				ImGui::InputFloat("", &float_fields_storage_[module][label]);
-			}
-			else if (type == "button")
-			{
-				auto value = widget["meta"]["value"].get<std::string>();
-				if (ImGui::Button(reinterpret_cast<const char*>(value.c_str())))
-				{
-					packet.to = module;
-					packet.event = widget["meta"]["label"].get<std::string>();
-
-					for (const auto& [key, value] : int_fields_storage_[module])
-						packet.data.push_back({ { key, value } });
-
-					for (const auto& [key, value] : float_fields_storage_[module])
-						packet.data.push_back({ { key, value } });
-
-					for (const auto& [key, value] : string_fields_storage_[module])
-						packet.data.push_back({ { key, value } });
-				}
-			}
-
-			ImGui::PopID();
-			++gl_id;
-		}
+		using namespace utils;
 		
-		if (packet.event != "")
-			return std::make_optional(packet);
-		else
-			return std::nullopt;
+		ImGui::Text("%s", u8"Ìîäóëü:"_C);
+
+		ImGui::SameLine();
+
+		std::string title = (module_pages.contains(selected_module)) ?
+			module_pages[selected_module].get_title() : "";
+
+		if (ImGui::BeginCombo("##module_selection_combo", title.c_str()))
+		{
+			for (auto& module : module_pages)
+			{
+				auto& title = module.second.get_title();
+				if (ImGui::Selectable(title.c_str(), module.first == selected_module))
+					selected_module = module.first;
+			}
+
+			ImGui::EndCombo();
+		}
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("X") && !selected_module.empty())
+        {
+            std::string buf = selected_module;
+
+            remove_interface(selected_module);
+
+            return buf;
+        }
+        return std::nullopt;
+	}
+
+	std::optional<channel_packet> RenderEngine::render_inputs()
+	{
+        if (auto remove_module = render_modules_combo())
+        {
+            return channel_packet{ "core", "gui", "unload_module", {{ "module_path", remove_module.value() }} };
+        }
+
+        ImGui::Separator();
+
+        if (selected_module.empty() || !module_pages.contains(selected_module))
+            return std::nullopt;
+
+        if (auto packet = module_pages[selected_module].render_input_interface())
+        {
+            packet.value()["module_path"] = selected_module;
+            return channel_packet{ "core", "gui", "exec_module", packet.value() };
+        }
+
+        return std::nullopt;
 	}
 	void RenderEngine::render_outputs()
 	{
+		if (selected_module.empty() || !module_pages.contains(selected_module))
+			return;
 
+		module_pages[selected_module].render_output_interface();
 	}
 
 } // namespace gui

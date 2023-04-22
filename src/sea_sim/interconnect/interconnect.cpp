@@ -1,18 +1,21 @@
 #include <sea_sim/interconnect/interconnect.h>
 
-Interconnect::Interconnect(Endpoint module_endpoint, std::string module_name) : module_endpoint(module_endpoint), module_name(module_name) {}
-
-void Interconnect::print_json()
+Interconnect::Interconnect(Endpoint module_endpoint, std::string module_name) : module_endpoint(module_endpoint), module_name(module_name)
 {
-    while (const auto &val = module_endpoint.TryRead())
+    if (const auto &packet = this->module_endpoint.TryRead())
     {
-        std::cout << "Received packet:\n";
-        std::cout << "\tTo: "    << val.value().to    << "\n";
-        std::cout << "\tFrom: "  << val.value().from  << "\n";
-        std::cout << "\tEvent: " << val.value().event << "\n";
-        std::cout << "\tData: "  << val.value().data  << "\n";
+        this->ui_fields = packet.value().data["fields"];
+        this->ui_trigger = packet.value().data["trigger"].get<std::string>();
     }
-    std::cout << std::endl;
+    else
+    {
+        this->ui_trigger = "";
+    }
+}
+
+Interconnect::~Interconnect()
+{
+    this->module_endpoint.SendData({ "core", this->module_name, "close_channel", {  } });
 }
 
 void Interconnect::wgti_send()
@@ -82,7 +85,7 @@ void Interconnect::wgti_add_button(std::string identifier, std::string text)
     );
 }
 
-void Interconnect::wgti_add_sliderint(std::string identifier, int64_t from, int64_t to, int64_t step)
+void Interconnect::wgti_add_sliderint(std::string identifier, int64_t from, int64_t to)
 {
     this->ui_input.push_back(
         {
@@ -92,14 +95,13 @@ void Interconnect::wgti_add_sliderint(std::string identifier, int64_t from, int6
                     {"identifier", identifier},
                     {"from", from},
                     {"to", to},
-                    {"step", step}
                 }
             }
         }
     );
 }
 
-void Interconnect::wgti_add_sliderfloat(std::string identifier, float from, float to, std::uint64_t precision)
+void Interconnect::wgti_add_sliderfloat(std::string identifier, float from, float to, uint64_t precision)
 {
     this->ui_input.push_back(
         {
@@ -131,30 +133,28 @@ void Interconnect::wgti_add_inputtext(std::string identifier, std::string placeh
     );
 }
 
-void Interconnect::wgti_add_inputint(std::string identifier, std::string placeholder)
+void Interconnect::wgti_add_inputint(std::string identifier)
 {
     this->ui_input.push_back(
         {
             {"type", "inputint"},
             {"widget",
                 {
-                    {"identifier", identifier},
-                    {"placeholder", placeholder}
+                    {"identifier", identifier}
                 }
             }
         }
     );
 }
 
-void Interconnect::wgti_add_inputfloat(std::string identifier, std::string placeholder)
+void Interconnect::wgti_add_inputfloat(std::string identifier)
 {
     this->ui_input.push_back(
         {
             {"type", "inputfloat"},
             {"widget",
                 {
-                    {"identifier", identifier},
-                    {"placeholder", placeholder}
+                    {"identifier", identifier}
                 }
             }
         }
@@ -232,4 +232,30 @@ void Interconnect::wgto_add_text(std::string text)
             }
         }
     );
+}
+
+std::string Interconnect::get_trigger()
+{
+    return this->ui_trigger;
+}
+
+std::optional<int> Interconnect::get_field_int(std::string field_name)
+{
+    if (this->ui_fields.contains(field_name) )
+        return this->ui_fields[field_name].get<int>();
+    return std::nullopt;
+}
+
+std::optional<float> Interconnect::get_field_float(std::string field_name)
+{
+    if (this->ui_fields.contains(field_name) )
+        return this->ui_fields[field_name].get<float>();
+    return std::nullopt;
+}
+
+std::optional<std::string> Interconnect::get_field_string(std::string field_name)
+{
+    if (this->ui_fields.contains(field_name) )
+        return this->ui_fields[field_name].get<std::string>();
+    return std::nullopt;
 }
