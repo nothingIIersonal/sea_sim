@@ -169,7 +169,7 @@ namespace gui
 			if (ImGui::BeginCombo(("##combo" + ident).c_str(), selected.c_str()))
 			{
 				for (auto& entry : vec)
-					if (ImGui::RadioButton(entry.c_str(), entry == selected))
+					if (ImGui::Selectable(entry.c_str(), entry == selected))
 						stored_value_ = entry;
 
 				ImGui::EndCombo();

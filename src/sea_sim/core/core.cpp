@@ -2,6 +2,7 @@
 #include <thread>
 #include <fstream>
 #include <stack>
+#include <chrono>
 
 
 #include <sea_sim/gui_controller/GUI.h>
@@ -59,8 +60,11 @@ int main()
     } shutdown_type = SHUTDOWN_TYPE_ENUM::NO_SHUTDOWN;
 
 
+    std::chrono::milliseconds timespan(17);
     while ( shutdown_type != SHUTDOWN_TYPE_ENUM::SHUTDOWN )
     {
+        std::this_thread::sleep_for(timespan);
+
         for (auto endpoint_iter = endpoint_storage.begin(); endpoint_iter != endpoint_storage.end();)
         {
             if (const auto &packet = endpoint_iter->second.TryRead())
