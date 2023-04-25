@@ -1,6 +1,6 @@
 #include <sea_sim/interconnect/interconnect.h>
 
-Interconnect::Interconnect(Endpoint module_endpoint, std::string module_name) : module_endpoint(module_endpoint), module_name(module_name)
+Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name) : module_endpoint(module_endpoint), module_name(module_name)
 {
     if (const auto &packet = this->module_endpoint.TryRead())
     {
@@ -28,7 +28,7 @@ void Interconnect::wgto_send()
     module_endpoint.SendData({ "gui", this->module_name, "update_output_interface", this->ui_output });
 }
 
-void Interconnect::wgti_set_module_title(std::string title)
+void Interconnect::wgti_set_module_title(const std::string& title)
 {
     this->ui_input.push_back(
         {
@@ -56,7 +56,7 @@ void Interconnect::wgti_sameline()
     );
 }
 
-void Interconnect::wgti_add_text(std::string text)
+void Interconnect::wgti_add_text(const std::string& text)
 {
     this->ui_input.push_back(
         {
@@ -70,7 +70,7 @@ void Interconnect::wgti_add_text(std::string text)
     );
 }
 
-void Interconnect::wgti_add_button(std::string identifier, std::string text)
+void Interconnect::wgti_add_button(const std::string& identifier, const std::string& text)
 {
     this->ui_input.push_back(
         {
@@ -85,7 +85,7 @@ void Interconnect::wgti_add_button(std::string identifier, std::string text)
     );
 }
 
-void Interconnect::wgti_add_sliderint(std::string identifier, int64_t from, int64_t to)
+void Interconnect::wgti_add_sliderint(const std::string& identifier, int64_t from, int64_t to)
 {
     this->ui_input.push_back(
         {
@@ -101,7 +101,7 @@ void Interconnect::wgti_add_sliderint(std::string identifier, int64_t from, int6
     );
 }
 
-void Interconnect::wgti_add_sliderfloat(std::string identifier, float from, float to, uint64_t precision)
+void Interconnect::wgti_add_sliderfloat(const std::string& identifier, float from, float to, uint64_t precision)
 {
     this->ui_input.push_back(
         {
@@ -118,7 +118,7 @@ void Interconnect::wgti_add_sliderfloat(std::string identifier, float from, floa
     );
 }
 
-void Interconnect::wgti_add_inputtext(std::string identifier, std::string placeholder)
+void Interconnect::wgti_add_inputtext(const std::string& identifier, const std::string& placeholder)
 {
     this->ui_input.push_back(
         {
@@ -133,7 +133,7 @@ void Interconnect::wgti_add_inputtext(std::string identifier, std::string placeh
     );
 }
 
-void Interconnect::wgti_add_inputint(std::string identifier)
+void Interconnect::wgti_add_inputint(const std::string& identifier)
 {
     this->ui_input.push_back(
         {
@@ -147,7 +147,7 @@ void Interconnect::wgti_add_inputint(std::string identifier)
     );
 }
 
-void Interconnect::wgti_add_inputfloat(std::string identifier)
+void Interconnect::wgti_add_inputfloat(const std::string& identifier)
 {
     this->ui_input.push_back(
         {
@@ -161,7 +161,7 @@ void Interconnect::wgti_add_inputfloat(std::string identifier)
     );
 }
 
-void Interconnect::wgti_add_checkbox(std::string identifier, std::string text)
+void Interconnect::wgti_add_checkbox(const std::string& identifier, const std::string& text)
 {
     this->ui_input.push_back(
         {
@@ -176,7 +176,7 @@ void Interconnect::wgti_add_checkbox(std::string identifier, std::string text)
     );
 }
 
-void Interconnect::wgti_add_radiobutton(std::string identifier, std::vector<std::string> elements)
+void Interconnect::wgti_add_radiobutton(const std::string& identifier, const std::vector<std::string>& elements)
 {
     this->ui_input.push_back(
         {
@@ -191,7 +191,7 @@ void Interconnect::wgti_add_radiobutton(std::string identifier, std::vector<std:
     );
 }
 
-void Interconnect::wgti_add_dropdownlist(std::string identifier, std::vector<std::string> elements)
+void Interconnect::wgti_add_dropdownlist(const std::string& identifier, const std::vector<std::string>& elements)
 {
     this->ui_input.push_back(
         {
@@ -220,7 +220,7 @@ void Interconnect::wgto_sameline()
     );
 }
 
-void Interconnect::wgto_add_text(std::string text)
+void Interconnect::wgto_add_text(const std::string& text)
 {
     this->ui_output.push_back(
         {
@@ -234,26 +234,26 @@ void Interconnect::wgto_add_text(std::string text)
     );
 }
 
-std::string Interconnect::get_trigger()
+const std::string& Interconnect::get_trigger()
 {
     return this->ui_trigger;
 }
 
-std::optional<int> Interconnect::get_field_int(std::string field_name)
+std::optional<int> Interconnect::get_field_int(const std::string& field_name)
 {
     if (this->ui_fields.contains(field_name) )
         return this->ui_fields[field_name].get<int>();
     return std::nullopt;
 }
 
-std::optional<float> Interconnect::get_field_float(std::string field_name)
+std::optional<float> Interconnect::get_field_float(const std::string& field_name)
 {
     if (this->ui_fields.contains(field_name) )
         return this->ui_fields[field_name].get<float>();
     return std::nullopt;
 }
 
-std::optional<std::string> Interconnect::get_field_string(std::string field_name)
+std::optional<std::string> Interconnect::get_field_string(const std::string& field_name)
 {
     if (this->ui_fields.contains(field_name) )
         return this->ui_fields[field_name].get<std::string>();

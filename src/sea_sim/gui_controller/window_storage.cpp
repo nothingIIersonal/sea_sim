@@ -127,6 +127,10 @@ namespace gui
 		ImGui::SFML::Shutdown();
 	}
 
+	void WindowStorage::set_fps_limit(int fps)
+    {
+        window_.setFramerateLimit(fps);
+    }
 	bool WindowStorage::window_is_open()
 	{
 		return window_.isOpen();

@@ -22,7 +22,7 @@ namespace gui
 		void ImGui_render();
 		void ImGui_shutdown();
 
-
+		void set_fps_limit(int fps);
 		bool window_is_open();
 		bool window_has_focus();
 		void window_close();
