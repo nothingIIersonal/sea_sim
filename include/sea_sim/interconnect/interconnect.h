@@ -22,6 +22,8 @@ private:
 
 public:
     Interconnect() noexcept = delete;
+    Interconnect(const Interconnect &) noexcept = delete;
+    void operator=(const Interconnect&) noexcept = delete;
     Interconnect(Endpoint, std::string);
     ~Interconnect();
 
