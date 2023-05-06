@@ -30,28 +30,28 @@ public:
     void wgti_send();
     void wgto_send();
 
-    void wgti_set_module_title(std::string);
+    void wgti_set_module_title(const std::string& title);
 
     void wgti_sameline();
-    void wgti_add_text(std::string);
-    void wgti_add_button(std::string, std::string);
-    void wgti_add_sliderint(std::string, int64_t, int64_t);
-    void wgti_add_sliderfloat(std::string, float, float, std::uint64_t);
-    void wgti_add_inputtext(std::string, std::string);
-    void wgti_add_inputint(std::string);
-    void wgti_add_inputfloat(std::string);
-    void wgti_add_checkbox(std::string, std::string);
-    void wgti_add_radiobutton(std::string, std::vector<std::string>);
-    void wgti_add_dropdownlist(std::string, std::vector<std::string>);
+    void wgti_add_text(const std::string& text);
+    void wgti_add_button(const std::string& identifier, const std::string& text);
+    void wgti_add_sliderint(const std::string& identifier, int64_t from, int64_t to);
+    void wgti_add_sliderfloat(const std::string& identifier, float from, float to, uint64_t precision);
+    void wgti_add_inputtext(const std::string& identifier, const std::string& placeholder);
+    void wgti_add_inputint(const std::string& identifier);
+    void wgti_add_inputfloat(const std::string& identifier);
+    void wgti_add_checkbox(const std::string& identifier, const std::string& text);
+    void wgti_add_radiobutton(const std::string& identifier, const std::vector<std::string>& elements);
+    void wgti_add_dropdownlist(const std::string& identifier, const std::vector<std::string>& elements);
 
     void wgto_sameline();
-    void wgto_add_text(std::string);
+    void wgto_add_text(const std::string& text);
 
-    std::string get_trigger();
+    const std::string& get_trigger();
 
-    std::optional<int> get_field_int(std::string);
-    std::optional<float> get_field_float(std::string);
-    std::optional<std::string> get_field_string(std::string);
+    std::optional<int> get_field_int(const std::string& field_name);
+    std::optional<float> get_field_float(const std::string& field_name);
+    std::optional<std::string> get_field_string(const std::string& field_name);
 };
 
 

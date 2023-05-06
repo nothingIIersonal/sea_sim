@@ -21,8 +21,11 @@ namespace gui
 
 			window_storage.poll_events();     // Process OS and Core calls
 			
-			if (!window_storage.window_has_focus()) { continue; } // IDLE
-			
+			if (window_storage.window_has_focus())
+				window_storage.set_fps_limit(240); // WORK
+			else
+				window_storage.set_fps_limit(1);   // IDLE
+		
 			window_storage.ImGui_update();    // Update GUI
 			
 			// --- Draw GUI Windows
