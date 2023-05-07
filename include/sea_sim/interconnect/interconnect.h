@@ -20,8 +20,13 @@ private:
     nlohmann::json ui_fields;
     std::string ui_trigger;
 
-public:
+protected:
     Interconnect() noexcept = delete;
+    Interconnect(const Interconnect&) = delete;
+
+    void operator=(const Interconnect&) = delete;
+
+public:
     Interconnect(const Endpoint& module_endpoint, const std::string& module_name);
     ~Interconnect();
 
