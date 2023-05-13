@@ -36,7 +36,6 @@ add_library(
 )
 target_link_libraries(module_1 interconnect)
 
-
 add_library(
     module_2 SHARED
     modules/module_2/src/module_2.cpp
@@ -59,6 +58,8 @@ add_executable(${PROJECT_NAME}
     src/sea_sim/gui_controller/window_storage.cpp
     src/sea_sim/gui_controller/FileDialog.cpp
     src/sea_sim/gui_controller/ModulePageStorage.cpp
+    src/sea_sim/gui_controller/ModuleDialog.cpp
+    src/sea_sim/gui_controller/GraphicsStorage.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} 

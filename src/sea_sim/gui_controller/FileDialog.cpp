@@ -232,7 +232,8 @@ namespace gui
 			ImGui::Separator();
 			
 			// Files list
-			if (ImGui::BeginListBox("##directory content", {-1.f, - ImGui::GetFrameHeightWithSpacing() - 4.f})) {
+			if (ImGui::BeginListBox("##directory content", {-1.f, - ImGui::GetFrameHeightWithSpacing() - 4.f})) 
+			{
 				for (auto& entry : current_directory_content)
 				{
 					if (selected_file_extension != ".*" && entry.isFile() && entry.ext != selected_file_extension)

@@ -1,19 +1,22 @@
 #pragma once
 
-
-
-class GraphicsStorage
+/*
+namespace gui
 {
-public:
-	GraphicsStorage();
+	class GraphicsStorage
+	{
+	public:
+		GraphicsStorage();
 
-	void insert();
-	void erase();
-	void clear();
+		void insert();
+		void erase();
+		void clear();
 
-	void render_graphics();
+		void render_graphics();
 
-private:
-	std::map<std::string, std::vector> elements;
+	private:
+		std::map<std::string, std::vector> elements;
 
-};
+	};
+} // namespace gui
+*/

@@ -72,15 +72,30 @@ namespace gui
 				{
 					render_engine_.update_output_interface(packet_from, packet_data);
 				}
-                else if (packet_event == "remove_interface")
+				else if (packet_event == "module_loaded")
+				{
+					auto module_path = packet_data["module_path"].get<std::string>();
+					module_dialog_.add_module(module_path);
+				}
+                else if (packet_event == "module_unloaded")
                 {
-                    render_engine_.remove_interface(packet_data["module_path"].get<std::string>());
+					auto module_path = packet_data["module_path"].get<std::string>();
+					module_dialog_.remove_module(module_path);
+                    render_engine_.remove_interface(module_path);
                 }
-                else if (packet_event == "notify" || packet_event == "module_error")
+                else if (packet_event == "notify")
                 {
 					windows_show_state_.exit_popup_new = false;
 					set_notification(packet_data["text"].get<std::string>());
                 }
+				else if (packet_event == "module_error")
+				{
+					// auto module_path = packet_data["module_path"].get<std::string>();
+					// module_dialog_.remove_module(module_path);
+
+					windows_show_state_.exit_popup_new = false;
+					set_notification(packet_data["text"].get<std::string>());
+				}
                 else if (packet_event == "shutdown")
                 {
                     window_close();
@@ -198,6 +213,7 @@ namespace gui
     {
         show_main_menu_bar();
         show_file_dialog();
+		show_module_dialog();
 
         ImGuiID my_dockspace = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
         if (windows_show_state_.reset_docking_layout)
@@ -350,21 +366,21 @@ namespace gui
 	{
 		if (ImGui::BeginMainMenuBar())
 		{
-			if (ImGui::BeginMenu(u8"Ìåíþ"_C))
+			if (ImGui::BeginMenu(u8"Меню"_C))
 			{
-				if (ImGui::MenuItem(u8"Îòêðûòü"_C))
+				if (ImGui::MenuItem(u8"Открыть"_C))
 				{
 
 				}
 
-				if (ImGui::MenuItem(u8"Ñîõðàíèòü"_C))
+				if (ImGui::MenuItem(u8"Сохранить"_C))
 				{
 
 				}
 
 				ImGui::Separator();
 
-				if (ImGui::MenuItem(u8"Âûéòè"_C))
+				if (ImGui::MenuItem(u8"Выйти"_C))
 				{
 					if (windows_show_state_.exit_popup == false)
 					{
@@ -374,7 +390,7 @@ namespace gui
 
 				ImGui::Separator();
 
-				if (ImGui::MenuItem(u8"Ôîðñèðîâàòü âûõîä"_C))
+				if (ImGui::MenuItem(u8"Форсировать выход"_C))
 				{
 					send_to_core("force_shutdown");
 				}
@@ -382,10 +398,10 @@ namespace gui
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu(u8"Âèä"_C))
+			if (ImGui::BeginMenu(u8"Вид"_C))
 			{
 #ifdef WIN32
-				if (ImGui::MenuItem(u8"Âîññòàíîâèòü"_C))
+				if (ImGui::MenuItem(u8"Восстановить"_C))
 				{
 					windows_show_state_.reset_docking_layout = true;
 				}
@@ -393,13 +409,23 @@ namespace gui
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu(u8"Ïëàãèíû"_C))
+			if (ImGui::BeginMenu(u8"Плагины"_C))
 			{
-				if (ImGui::MenuItem(u8"Äîáàâèòü"_C))
+				if (ImGui::MenuItem(u8"Добавить"_C))
 				{
 					if (!file_dialog_.is_open())
 					{
 						file_dialog_.open();
+					}
+				}
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem(u8"Менеджер модулей"_C))
+				{
+					if (!module_dialog_.is_open())
+					{
+						module_dialog_.open();
 					}
 				}
 
@@ -429,6 +455,18 @@ namespace gui
 					send_to_core("load_module", { {"module_path", file_path.value().front()} });
 				}
 			}
+		}
+	}
+	void WindowStorage::show_module_dialog()
+	{
+		if (module_dialog_.is_open())
+		{
+			if (auto packets = module_dialog_.render_dialog())
+				for (auto& packet : packets.value())
+					send_to_core(packet);
+
+			if (key_hit(sf::Keyboard::Escape))
+				module_dialog_.close();
 		}
 	}
 

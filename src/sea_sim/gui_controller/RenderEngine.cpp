@@ -79,8 +79,6 @@ namespace gui
         {
             std::string buf = selected_module;
 
-            remove_interface(selected_module);
-
             return buf;
         }
         return std::nullopt;

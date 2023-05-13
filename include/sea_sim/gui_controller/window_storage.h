@@ -2,6 +2,7 @@
 #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/gui_controller/RenderEngine.h>
 #include <sea_sim/gui_controller/FileDialog.h>
+#include <sea_sim/gui_controller/ModuleDialog.h>
 
 
 namespace gui
@@ -53,6 +54,7 @@ namespace gui
 	private:
 		void show_main_menu_bar();
 		void show_file_dialog();
+		void show_module_dialog();
 
 		void ImGui_reset_docking_layout(ImGuiID id);
 		float get_button_width(std::string text, ImGuiStyle& style);
@@ -71,6 +73,7 @@ namespace gui
 		sf::RenderTexture render_texture_;
 		RenderEngine render_engine_;
 		FileDialog file_dialog_;
+		ModuleDialog module_dialog_;
 
 		Endpoint channel_to_core;
 
@@ -87,6 +90,7 @@ namespace gui
             std::string notification_text = u8""_C;
 
 			bool show_file_dialog = false;
+			bool show_module_dialog = false;
 
 			bool reset_docking_layout = true;
 			ImVec2 render_size = { 500, 500 };
