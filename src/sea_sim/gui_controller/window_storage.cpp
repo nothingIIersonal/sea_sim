@@ -336,6 +336,9 @@ namespace gui
 				view_area.y = max(1, view_area.y - 2);
 
 				render_texture_.create(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
+
+				sf::Vector2u scene_size = render_texture_.getSize();
+				//send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 			}
 			
 			render_engine_.render_scene(render_texture_);
@@ -459,6 +462,8 @@ namespace gui
     {
         return ImGui::CalcTextSize(text.c_str()).x + style.FramePadding.x * 2 + style.ItemSpacing.x;
     }
+
+	// --- Communication
 
     void WindowStorage::send_to_core(std::string event, nlohmann::json data)
     {
