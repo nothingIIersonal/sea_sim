@@ -10,6 +10,8 @@
 #include <optional>
 #include <variant>
 
+#include <sea_sim/gui_controller/functions.h>
+
 
 namespace gui
 {
@@ -18,8 +20,8 @@ namespace gui
 	public:
 		ModulePageStorage();
 
-		void set_input_interface(nlohmann::json input_interface);
-		void set_output_interface(nlohmann::json output_interface);
+		void set_input_interface(nlohmann::json& input_interface);
+		void set_output_interface(nlohmann::json& output_interface);
 
 		std::optional<nlohmann::json> render_input_interface();
 		void render_output_interface();
@@ -31,11 +33,13 @@ namespace gui
 		class WidgetElement
 		{
 		public:
-			WidgetElement(nlohmann::json widget);
+			WidgetElement(nlohmann::json widget, nlohmann::json stored_value = {});
 
 			std::optional<std::string> render_widget(std::string ident);
 
 			std::optional<nlohmann::json> get_field();
+
+			std::optional<std::string> get_identifier();
 
 		private:
 			enum class WidgetEnum
@@ -62,7 +66,6 @@ namespace gui
 
 		public:
 			std::string get_WidgetType(WidgetEnum& widget_type);
-
 		};
 
 		std::string module_title_;
@@ -74,6 +77,8 @@ namespace gui
 		std::vector<WidgetElement> output_widgets_vector_ = {};
 
 		static uint32_t gl_id_;
+
+		std::optional<nlohmann::json> get_field_by_identifier(const std::string& identifier);
 	};
 
 } // namespace gui

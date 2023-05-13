@@ -3,3 +3,8 @@
 
 # vscode project directory
 .vscode
+
+# VS project directory
+.vs
+out
+CMakePresets.json
