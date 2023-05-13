@@ -29,9 +29,6 @@ private:
     std::map<std::string, Isle> ::iterator isle_storage_it;
     static std::shared_mutex isle_storage_mutex;
 
-    friend class WGTI;
-    friend class WGTO;
-
     class WGTI
     {
     private:
