@@ -28,7 +28,7 @@ namespace gui
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 250));
 		ImGui::SetNextWindowSize(ImVec2(800, 500), ImGuiCond_Once);
 
-		if (ImGui::Begin(u8"Список модулей"_C, NULL, ImGuiWindowFlags_NoDocking))
+		if (ImGui::Begin(u8"РЎРїРёСЃРѕРє РјРѕРґСѓР»РµР№"_C, NULL, ImGuiWindowFlags_NoDocking))
 		{
 			if (ImGui::BeginListBox("##modules list", { -1.f, -ImGui::GetFrameHeightWithSpacing() - 4.f }))
 			{
@@ -95,7 +95,7 @@ namespace gui
 				ImGui::EndListBox();
 			}
 
-			if (ImGui::Button(u8"Отмена"_C))
+			if (ImGui::Button(u8"ГЋГІГ¬ГҐГ­Г "_C))
 				close();
 
 			ImGui::End();
