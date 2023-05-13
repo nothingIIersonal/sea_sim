@@ -8,7 +8,7 @@
 #include <filesystem>
 #include <algorithm>
 
-#include <sea_sim/gears/channel_packet.h>
+// #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/gui_controller/functions.h>
 
 #ifdef WIN32

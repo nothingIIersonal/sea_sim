@@ -196,7 +196,7 @@ namespace gui
 			auto vec = widget_info_["elements"].get<std::vector<std::string>>();
 			auto& selected = std::get<std::string>(stored_value_);
 
-			ImGui::PushItemWidth(300);
+			ImGui::PushItemWidth(200);
 			if (ImGui::BeginCombo(("##combo" + ident).c_str(), selected.c_str()))
 			{
 				for (auto& entry : vec)

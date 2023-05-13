@@ -37,7 +37,7 @@ namespace gui
 			window_storage.show_child_input();
 			window_storage.show_child_output();
 			window_storage.show_child_view();
-			
+
 			// --- Render
 			
 			window_storage.window_cls();      // Clear screen

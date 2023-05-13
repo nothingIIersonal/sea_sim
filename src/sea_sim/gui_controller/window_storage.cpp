@@ -198,6 +198,7 @@ namespace gui
     {
         show_main_menu_bar();
         show_file_dialog();
+		show_module_dialog();
 
         ImGuiID my_dockspace = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
         if (windows_show_state_.reset_docking_layout)
@@ -429,6 +430,15 @@ namespace gui
 					send_to_core("load_module", { {"module_path", file_path.value().front()} });
 				}
 			}
+		}
+	}
+	void WindowStorage::show_module_dialog()
+	{
+		if (module_dialog_.is_open())
+		{
+			if (auto packets = module_dialog_.render_dialog())
+				for (auto& packet : packets.value())
+					send_to_core(packet);
 		}
 	}
 
