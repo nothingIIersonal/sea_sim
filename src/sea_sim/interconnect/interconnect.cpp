@@ -1,5 +1,9 @@
 #include <sea_sim/interconnect/interconnect.h>
 
+
+#define container_of(ptr, type, member) ((type *)((size_t)(ptr) - ((size_t)&(((type *)0)->member))))
+
+
 Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name) : module_endpoint(module_endpoint), module_name(module_name)
 {
     if (const auto &packet = this->module_endpoint.TryRead())
@@ -18,17 +22,19 @@ Interconnect::~Interconnect()
     this->module_endpoint.SendData({ "core", this->module_name, "close_channel", {  } });
 }
 
-void Interconnect::wgti_send()
+void Interconnect::WGTI::send()
 {
-    module_endpoint.SendData({ "gui", this->module_name, "update_input_interface", this->ui_input });
+    Interconnect *ic = container_of(this, Interconnect, wgti);
+    ic->module_endpoint.SendData({ "gui", ic->module_name, "update_input_interface", this->ui_input });
 }
 
-void Interconnect::wgto_send()
+void Interconnect::WGTO::send()
 {
-    module_endpoint.SendData({ "gui", this->module_name, "update_output_interface", this->ui_output });
+    Interconnect *ic = container_of(this, Interconnect, wgto);
+    ic->module_endpoint.SendData({ "gui", ic->module_name, "update_output_interface", this->ui_output });
 }
 
-void Interconnect::wgti_set_module_title(const std::string& title)
+void Interconnect::WGTI::set_module_title(const std::string& title)
 {
     this->ui_input.push_back(
         {
@@ -42,7 +48,7 @@ void Interconnect::wgti_set_module_title(const std::string& title)
     );
 }
 
-void Interconnect::wgti_sameline()
+void Interconnect::WGTI::sameline()
 {
     this->ui_input.push_back(
         {
@@ -56,7 +62,7 @@ void Interconnect::wgti_sameline()
     );
 }
 
-void Interconnect::wgti_add_text(const std::string& text)
+void Interconnect::WGTI::add_text(const std::string& text)
 {
     this->ui_input.push_back(
         {
@@ -70,7 +76,7 @@ void Interconnect::wgti_add_text(const std::string& text)
     );
 }
 
-void Interconnect::wgti_add_button(const std::string& identifier, const std::string& text)
+void Interconnect::WGTI::add_button(const std::string& identifier, const std::string& text)
 {
     this->ui_input.push_back(
         {
@@ -85,13 +91,14 @@ void Interconnect::wgti_add_button(const std::string& identifier, const std::str
     );
 }
 
-void Interconnect::wgti_add_sliderint(const std::string& identifier, int64_t from, int64_t to)
+void Interconnect::WGTI::add_sliderint(const std::string& identifier, int64_t from, int64_t to, bool keep_value)
 {
     this->ui_input.push_back(
         {
             {"type", "sliderint"},
             {"widget",
                 {
+                    {"keep_value", keep_value},
                     {"identifier", identifier},
                     {"from", from},
                     {"to", to},
@@ -101,13 +108,14 @@ void Interconnect::wgti_add_sliderint(const std::string& identifier, int64_t fro
     );
 }
 
-void Interconnect::wgti_add_sliderfloat(const std::string& identifier, float from, float to, uint64_t precision)
+void Interconnect::WGTI::add_sliderfloat(const std::string& identifier, float from, float to, uint64_t precision, bool keep_value)
 {
     this->ui_input.push_back(
         {
             {"type", "sliderfloat"},
             {"widget",
                 {
+                    {"keep_value", keep_value},
                     {"identifier", identifier},
                     {"from", from},
                     {"to", to},
@@ -118,13 +126,14 @@ void Interconnect::wgti_add_sliderfloat(const std::string& identifier, float fro
     );
 }
 
-void Interconnect::wgti_add_inputtext(const std::string& identifier, const std::string& placeholder)
+void Interconnect::WGTI::add_inputtext(const std::string& identifier, const std::string& placeholder, bool keep_value)
 {
     this->ui_input.push_back(
         {
             {"type", "inputtext"},
             {"widget",
                 {
+                    {"keep_value", keep_value},
                     {"identifier", identifier},
                     {"placeholder", placeholder}
                 }
@@ -133,13 +142,14 @@ void Interconnect::wgti_add_inputtext(const std::string& identifier, const std::
     );
 }
 
-void Interconnect::wgti_add_inputint(const std::string& identifier)
+void Interconnect::WGTI::add_inputint(const std::string& identifier, bool keep_value)
 {
     this->ui_input.push_back(
         {
             {"type", "inputint"},
             {"widget",
                 {
+                    {"keep_value", keep_value},
                     {"identifier", identifier}
                 }
             }
@@ -147,13 +157,14 @@ void Interconnect::wgti_add_inputint(const std::string& identifier)
     );
 }
 
-void Interconnect::wgti_add_inputfloat(const std::string& identifier)
+void Interconnect::WGTI::add_inputfloat(const std::string& identifier, bool keep_value)
 {
     this->ui_input.push_back(
         {
             {"type", "inputfloat"},
             {"widget",
                 {
+                    {"keep_value", keep_value},
                     {"identifier", identifier}
                 }
             }
@@ -161,13 +172,14 @@ void Interconnect::wgti_add_inputfloat(const std::string& identifier)
     );
 }
 
-void Interconnect::wgti_add_checkbox(const std::string& identifier, const std::string& text)
+void Interconnect::WGTI::add_checkbox(const std::string& identifier, const std::string& text, bool keep_value)
 {
     this->ui_input.push_back(
         {
             {"type", "checkbox"},
             {"widget",
                 {
+                    {"keep_value", keep_value},
                     {"identifier", identifier},
                     {"text", text}
                 }
@@ -176,13 +188,14 @@ void Interconnect::wgti_add_checkbox(const std::string& identifier, const std::s
     );
 }
 
-void Interconnect::wgti_add_radiobutton(const std::string& identifier, const std::vector<std::string>& elements)
+void Interconnect::WGTI::add_radiobutton(const std::string& identifier, const std::vector<std::string>& elements, bool keep_value)
 {
     this->ui_input.push_back(
         {
             {"type", "radiobutton"},
             {"widget",
                 {
+                    {"keep_value", keep_value},
                     {"identifier", identifier},
                     {"elements", elements}
                 }
@@ -191,13 +204,14 @@ void Interconnect::wgti_add_radiobutton(const std::string& identifier, const std
     );
 }
 
-void Interconnect::wgti_add_dropdownlist(const std::string& identifier, const std::vector<std::string>& elements)
+void Interconnect::WGTI::add_dropdownlist(const std::string& identifier, const std::vector<std::string>& elements, bool keep_value)
 {
     this->ui_input.push_back(
         {
             {"type", "dropdownlist"},
             {"widget",
                 {
+                    {"keep_value", keep_value},
                     {"identifier", identifier},
                     {"elements", elements}
                 }
@@ -206,7 +220,7 @@ void Interconnect::wgti_add_dropdownlist(const std::string& identifier, const st
     );
 }
 
-void Interconnect::wgto_sameline()
+void Interconnect::WGTO::sameline()
 {
     this->ui_output.push_back(
         {
@@ -220,7 +234,7 @@ void Interconnect::wgto_sameline()
     );
 }
 
-void Interconnect::wgto_add_text(const std::string& text)
+void Interconnect::WGTO::add_text(const std::string& text)
 {
     this->ui_output.push_back(
         {
@@ -258,4 +272,56 @@ std::optional<std::string> Interconnect::get_field_string(const std::string& fie
     if (this->ui_fields.contains(field_name) )
         return this->ui_fields[field_name].get<std::string>();
     return std::nullopt;
+}
+
+
+std::map<std::string, Ship> Interconnect::ship_storage = {};
+std::shared_mutex Interconnect::ship_storage_mutex = {};
+std::map<std::string, Isle> Interconnect::isle_storage = {};
+std::shared_mutex Interconnect::isle_storage_mutex = {};
+
+
+int Interconnect::object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff)
+{
+    std::unique_lock lock(Interconnect::ship_storage_mutex);
+
+    Interconnect::ship_storage.insert( {identifier, {identifier, x, y, staff}} );
+
+    return 0;
+}
+
+std::optional<Ship> Interconnect::object_ship_get(const std::string& identifier)
+{
+    std::shared_lock lock(Interconnect::ship_storage_mutex);
+
+    for (auto it = Interconnect::ship_storage.begin(); it != Interconnect::ship_storage.end();)
+    {
+        if ( it->second.get_identifier() == identifier )
+            return it->second;
+    }
+
+    return std::nullopt;
+}
+
+std::optional<Ship> Interconnect::object_ship_get_next()
+{
+    std::shared_lock lock(Interconnect::ship_storage_mutex);
+
+    if ( this->ship_storage_it == Interconnect::ship_storage.end() )
+        return std::nullopt;
+
+    return (this->ship_storage_it++)->second;
+}
+
+std::optional<std::vector<std::string>> Interconnect::object_ship_get_staff(const std::string& identifier)
+{
+    if ( Interconnect::ship_storage.contains(identifier) )
+        return Interconnect::ship_storage.at(identifier).get_staff();
+
+    return std::nullopt;
+}
+
+void Interconnect::object_ship_iterator_reset()
+{
+    this->ship_storage_it = Interconnect::ship_storage.begin();
 }

@@ -43,6 +43,12 @@ add_library(
 )
 target_link_libraries(module_2 interconnect)
 
+add_library(
+    module_3 SHARED
+    modules/module_3/src/module_3.cpp
+)
+target_link_libraries(module_3 interconnect)
+
 
 add_executable(${PROJECT_NAME} 
     src/sea_sim/core/core.cpp

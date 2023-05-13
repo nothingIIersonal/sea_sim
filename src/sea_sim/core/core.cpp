@@ -1,7 +1,6 @@
 #include <iostream>
 #include <thread>
 #include <fstream>
-#include <stack>
 #include <chrono>
 
 
@@ -60,10 +59,9 @@ int main()
     } shutdown_type = SHUTDOWN_TYPE_ENUM::NO_SHUTDOWN;
 
 
-    std::chrono::milliseconds timespan(17);
     while ( shutdown_type != SHUTDOWN_TYPE_ENUM::SHUTDOWN )
     {
-        std::this_thread::sleep_for(timespan);
+        auto timer_start = std::chrono::steady_clock::now();
 
         for (auto endpoint_iter = endpoint_storage.begin(); endpoint_iter != endpoint_storage.end();)
         {
@@ -74,8 +72,8 @@ int main()
 #endif // __CORE_DEBUG
                 if (packet.value().to == "core")
                 {
-                    const auto event = packet.value().event;
-                    const auto from = packet.value().from;
+                    const auto& event = packet.value().event;
+                    const auto& from = packet.value().from;
 
                     if (from == "gui")
                     {
@@ -90,7 +88,7 @@ int main()
                             break;
                         }
 
-                        const auto data = packet.value().data;
+                        const auto& data = packet.value().data;
                         const auto module_path = data["module_path"].get<std::string>();
 
                         if ( endpoint_storage.contains(module_path) )
@@ -98,12 +96,12 @@ int main()
                             endpoint_storage.at("gui").SendData( {"gui", "core", "notify", {{"text", "Подождите завершения предыдущего действия с модулем '" + module_path + "', прежде чем начинать новое."}}} );
                             continue;
                         }
-                        else if ( module_loaded(module_path.c_str()) == 0 && event == "load_module" )
+                        else if ( module_storage.contains(module_path) && event == "load_module" )
                         {
                             endpoint_storage.at("gui").SendData( {"gui", "core", "notify", {{"text", "Модуль '" + module_path + "' уже загружен."}}} );
                             continue;
                         }
-                        else if ( module_loaded(module_path.c_str()) != 0 && event == "unload_module" )
+                        else if ( !module_storage.contains(module_path) && event == "unload_module" )
                         {
                             endpoint_storage.at("gui").SendData( {"gui", "core", "notify", {{"text", "Модуль '" + module_path + "' не загружен."}}} );
                             continue;
@@ -117,14 +115,14 @@ int main()
                         }
                         else if (event == "exec_module")
                         {
+                            module_storage.set_state(module_path, Module::ModuleStateEnum::EXEC);
                             core_module_channel_core_side.SendData( {module_path, "core", "fields", data} );
-
                             stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, exec_module) );
                         }
                         else if (event == "unload_module")
                         {
+                            module_storage.set_state(module_path, Module::ModuleStateEnum::UNLOAD);
                             endpoint_storage.at("gui").SendData( { "gui", "core", "remove_interface", {{"module_path", module_path}} } );
-
                             stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, unload_module) );
                         }
                         else
@@ -132,7 +130,7 @@ int main()
                             continue;
                         }
 
-                        endpoint_storage.insert( {std::move(module_path), std::move(core_module_channel_core_side)} );
+                        endpoint_storage.insert( {module_path, std::move(core_module_channel_core_side)} );
                     }
                     else // receive from module
                     {
@@ -154,34 +152,43 @@ int main()
             ++endpoint_iter;
         }
 
+        for ( const auto& path : module_storage.get_paths() )
+        {
+            if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
+            {
+                auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
+
+                module_storage.set_state(path, Module::ModuleStateEnum::HOT);
+                run_hot_function(path.c_str(), core_module_channel_module_side);
+
+                while (const auto& packet = core_module_channel_core_side.TryRead())
+                {
+                    if ( packet.value().to == "gui" )
+                        endpoint_storage.at(packet.value().to).SendData( packet.value() );
+                }
+            }
+        }
+
         if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_0 && endpoint_storage.size() == 1 )
         {
             shutdown_type = SHUTDOWN_TYPE_ENUM::STAGE_1;
 
-            size_t module_count = handler_storage_size;
-            std::stack<std::string> module_paths;
-
-            for (size_t i = 0; i < module_count; ++i)
-                module_paths.push( std::string(handler_storage[i].module_path) );
-
-            while ( module_count-- )
+            for (const auto& path : module_storage.get_paths())
             {
                 auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
-
-                std::string module_path = module_paths.top();
-                module_paths.pop();
-
-                auto [mn, nm] = endpoint_storage.insert( {module_path, std::move(core_module_channel_core_side)} );
-
-                endpoint_storage.at("gui").SendData( { "gui", "core", "remove_interface", {{"module_path", module_path}} } );
-
-                stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, unload_module) );
+                auto [mn, nm] = endpoint_storage.insert( {path, std::move(core_module_channel_core_side)} );
+                endpoint_storage.at("gui").SendData( { "gui", "core", "remove_interface", {{"module_path", path}} } );
+                stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
             }
         }
         else if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_1 && endpoint_storage.size() == 1 )
         {
             shutdown_type = SHUTDOWN_TYPE_ENUM::SHUTDOWN;
         }
+
+        auto timer_stop = std::chrono::steady_clock::now();
+        const std::chrono::duration<double, std::milli> timer_elapsed = std::chrono::duration<double, std::milli>(1000. / 60.) - (timer_start - timer_stop);
+        std::this_thread::sleep_for(timer_elapsed);
     }
 
 
