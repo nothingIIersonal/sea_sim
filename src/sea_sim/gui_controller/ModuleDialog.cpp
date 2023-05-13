@@ -1,4 +1,4 @@
-#include <sea_sim/gui_controller/ModuleDialog.h>
+﻿#include <sea_sim/gui_controller/ModuleDialog.h>
 
 #include <iostream>
 
