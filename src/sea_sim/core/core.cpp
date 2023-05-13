@@ -122,7 +122,7 @@ int main()
                         else if (event == "unload_module")
                         {
                             module_storage.set_state(module_path, Module::ModuleStateEnum::UNLOAD);
-                            endpoint_storage.at("gui").SendData( { "gui", "core", "remove_interface", {{"module_path", module_path}} } );
+                            endpoint_storage.at("gui").SendData( { "gui", "core", "module_unloaded", {{"module_path", module_path}} } );
                             stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, unload_module) );
                         }
                         else
@@ -177,7 +177,7 @@ int main()
             {
                 auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
                 auto [mn, nm] = endpoint_storage.insert( {path, std::move(core_module_channel_core_side)} );
-                endpoint_storage.at("gui").SendData( { "gui", "core", "remove_interface", {{"module_path", path}} } );
+                endpoint_storage.at("gui").SendData( { "gui", "core", "module_unloaded", {{"module_path", path}} } );
                 stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
             }
         }

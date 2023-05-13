@@ -72,7 +72,11 @@ namespace gui
 				{
 					render_engine_.update_output_interface(packet_from, packet_data);
 				}
-                else if (packet_event == "remove_interface")
+				else if (packet_event == "module_loaded")
+				{
+					
+				}
+                else if (packet_event == "module_unloaded")
                 {
                     render_engine_.remove_interface(packet_data["module_path"].get<std::string>());
                 }
