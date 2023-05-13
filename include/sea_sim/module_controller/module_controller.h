@@ -244,8 +244,6 @@ static const int load_module(const char *module_path, Endpoint module_endpoint)
     printf("Init function done with code %d\n", init_res);
 #endif // __MC_DEBUG
 
-    module_endpoint.SendData( {"gui", "core", "module_loaded", {{"module_path", std::string(module_path)}}} );
-
     module_storage.set_state(module_path, Module::ModuleStateEnum::IDLE);
 
     return 0;

@@ -111,6 +111,7 @@ int main()
 
                         if (event == "load_module")
                         {
+                            endpoint_storage.at("gui").SendData( { "gui", "core", "module_loaded", {{"module_path", module_path}} } );
                             stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, load_module) );
                         }
                         else if (event == "exec_module")

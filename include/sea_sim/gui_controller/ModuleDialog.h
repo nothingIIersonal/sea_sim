@@ -23,8 +23,14 @@ namespace gui
 
 		std::optional<std::vector<channel_packet>> render_dialog();
 
+		void add_module(std::string& module_path);
+		void remove_module(std::string& module_path);
+
 	private:
 		bool is_open_ = false;
+
+		std::map<std::string, bool> modules_map_;
+		std::vector<std::string> modules_order_;
 
 	};
 } // namespace gui
