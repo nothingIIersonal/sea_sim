@@ -136,7 +136,7 @@ namespace gui
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 250));
 		ImGui::SetNextWindowSize(ImVec2(800, 500), ImGuiCond_Once);
 
-		if (ImGui::Begin(u8"Îòêðûòü ôàéë"_C, NULL, ImGuiWindowFlags_NoDocking))
+		if (ImGui::Begin(u8"Открыть файл"_C, NULL, ImGuiWindowFlags_NoDocking))
 		{
 			auto& style = ImGui::GetStyle();
 
@@ -374,6 +374,8 @@ namespace gui
 
 	void FileDialog::sort_directory_content_by(SortingTypeEnum type)
 	{
+		update_directory_content();
+
 		selected_sorting_type = type;
 
 		switch (selected_sorting_type)
@@ -467,6 +469,8 @@ namespace gui
 		}
 		else if (lhs.ext < rhs.ext)
 			return true;
+		else if (lhs.name < rhs.name)
+			return true;
 		return false;
 	}
 
@@ -484,8 +488,8 @@ namespace gui
 	{
 		switch (type)
 		{
-		case FileDialog::SortingTypeEnum::byExtension: return u8"ïî òèïó"_C;
-		case FileDialog::SortingTypeEnum::byFileName:  return u8"ïî èìåíè"_C;
+		case FileDialog::SortingTypeEnum::byExtension: return u8"по типу"_C;
+		case FileDialog::SortingTypeEnum::byFileName:  return u8"по имени"_C;
 		default:								       return "ERR";
 		}
 	}

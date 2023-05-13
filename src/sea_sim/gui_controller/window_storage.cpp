@@ -295,7 +295,7 @@ namespace gui
 		if (ImGui::Begin(u8"Ввод данных"_C))
 		{
 			ImGui::Text(u8"%.0f FPS"_C, ImGui::GetIO().Framerate);
-			ImGui::Text(u8"Îáëàñòü îòðèñîâêè: %ix%i ïêñ"_C, render_texture_.getSize().x, render_texture_.getSize().y);
+			ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_texture_.getSize().x, render_texture_.getSize().y);
 
 			ImGui::Separator();
 
@@ -309,9 +309,6 @@ namespace gui
 	{
 		if (ImGui::Begin(u8"Результаты"_C))
 		{
-			// ImGui::ShowFontAtlas(font_x20_->ContainerAtlas);
-			// ImGui::ShowFontSelector("Fonts");
-			// ImGui::ShowStyleEditor();
 			render_engine_.render_outputs();
 
 			ImGui::End();
