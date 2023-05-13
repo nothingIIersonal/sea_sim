@@ -74,8 +74,8 @@ int main()
 #endif // __CORE_DEBUG
                 if (packet.value().to == "core")
                 {
-                    const auto& event = packet.value().event;
-                    const auto& from = packet.value().from;
+                    const auto event = packet.value().event;
+                    const auto from = packet.value().from;
 
                     if (from == "gui")
                     {
@@ -90,7 +90,7 @@ int main()
                             break;
                         }
 
-                        const auto& data = packet.value().data;
+                        const auto data = packet.value().data;
                         const auto module_path = data["module_path"].get<std::string>();
 
                         if ( endpoint_storage.contains(module_path) )
@@ -132,7 +132,7 @@ int main()
                             continue;
                         }
 
-                        endpoint_storage.insert( {module_path, std::move(core_module_channel_core_side)} );
+                        endpoint_storage.insert( {std::move(module_path), std::move(core_module_channel_core_side)} );
                     }
                     else // receive from module
                     {
