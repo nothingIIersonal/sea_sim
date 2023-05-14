@@ -17,7 +17,7 @@ int sea_module_init(Interconnect &&ic)
     return 0;
 }
 
-int sea_module_sexec(Interconnect &&ic)
+int sea_module_exec(Interconnect &&ic)
 {
     ic.wgto.add_text("Картофельное блюдо №1 в России");
 
