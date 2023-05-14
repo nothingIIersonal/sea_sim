@@ -51,7 +51,22 @@ namespace gui
 
 	std::string FileInfo::get_short_name()
 	{
-		return "[" + get_FileTypeName(file_type) + "] " + name;
+		switch (file_type)
+		{
+		case gui::FileInfo::FileTypeEnum::DIRECTORY:
+			return ICON_sea_sim__FOLDER_OPEN " " + name;
+		case gui::FileInfo::FileTypeEnum::FILE:
+			return ICON_sea_sim__FILE_O " " + name;
+		default:
+			return ICON_sea_sim__FILE_O " " + name;
+		}
+	}
+
+	void SelectableColor(ImU32 color)
+	{
+		ImVec2 p_min = ImGui::GetItemRectMin();
+		ImVec2 p_max = ImGui::GetItemRectMax();
+		ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color);
 	}
 
 	bool FileInfo::update_from_name(fs::path current_path)
@@ -136,12 +151,12 @@ namespace gui
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 250));
 		ImGui::SetNextWindowSize(ImVec2(800, 500), ImGuiCond_Once);
 
-		if (ImGui::Begin(u8"Открыть файл"_C, NULL, ImGuiWindowFlags_NoDocking))
+		if (ImGui::Begin(u8"Открыть файл"_C, &is_open_, ImGuiWindowFlags_NoDocking))
 		{
 			auto& style = ImGui::GetStyle();
 
 			// Navigation and drives
-			if (ImGui::Button("^"))
+			if (ImGui::Button(ICON_sea_sim__ARROW_UP))
 			{
 				if (current_path_tokens.size() > STOP_POP_OF_PATH_AT)
 				{
@@ -154,7 +169,7 @@ namespace gui
 
 			ImGui::SameLine();
 
-			if (ImGui::Button("O"))
+			if (ImGui::Button(ICON_sea_sim__REFRESH))
 			{
 				update_directory_content();
 				sort_directory_content_by(selected_sorting_type);
@@ -234,10 +249,15 @@ namespace gui
 			// Files list
 			if (ImGui::BeginListBox("##directory content", {-1.f, - ImGui::GetFrameHeightWithSpacing() - 4.f})) 
 			{
+				ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
 				for (auto& entry : current_directory_content)
 				{
 					if (selected_file_extension != ".*" && entry.isFile() && entry.ext != selected_file_extension)
 						continue;
+
+					draw_list->ChannelsSplit(2);
+					draw_list->ChannelsSetCurrent(1);
 
 					if (ImGui::Selectable(entry.name_optimized.c_str(), selected_file.name_optimized == entry.name_optimized))
 					{
@@ -261,6 +281,14 @@ namespace gui
 						else
 							selected_file = entry;
 					}
+
+					if (entry.ext == LIB_EXT)
+					{
+						draw_list->ChannelsSetCurrent(0);
+						SelectableColor(IM_COL32(100.f, 140.f, 100.f, 100.f));
+					}
+
+					draw_list->ChannelsMerge();
 				}
 
 				ImGui::EndListBox();

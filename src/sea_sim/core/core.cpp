@@ -144,9 +144,12 @@ int main()
                 }
                 else
                 {
-                    if ( packet.value().to == "gui" && packet.value().event == "module_error" )
+                    if (packet.value().to == "gui" && packet.value().event == "module_error")
+                    {
+                        endpoint_storage.at("gui").SendData({ "gui", "core", "module_unloaded", {{"module_path", endpoint_iter->first}} });
                         endpoint_iter = endpoint_storage.erase(endpoint_iter);
-                    endpoint_storage.at(packet.value().to).SendData( packet.value() );
+                    }
+                    endpoint_storage.at(packet.value().to).SendData(packet.value());
                 }
             }
 
