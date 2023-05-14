@@ -27,7 +27,7 @@ public:
 class Ship : public Object
 {
 private:
-    coord_i coords;
+    Coord2i coords;
     std::vector<std::string> staff;
 
 public:
