@@ -188,7 +188,9 @@ int main()
                         if ( packet.value().event == "module_error" )
                         {
                             auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
-                            unload_module(path.c_str(), core_module_channel_module_side_err);
+                            module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
+                            stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
+                            endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
                         }
                     }
                 }
