@@ -90,8 +90,8 @@ namespace gui
                 }
 				else if (packet_event == "module_error")
 				{
-					// auto module_path = packet_data["module_path"].get<std::string>();
-					// module_dialog_.remove_module(module_path);
+					auto module_path = packet_data["module_path"].get<std::string>();
+					module_dialog_.remove_module(module_path);
 
 					windows_show_state_.exit_popup_new = false;
 					set_notification(packet_data["text"].get<std::string>());

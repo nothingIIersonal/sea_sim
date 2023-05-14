@@ -2,6 +2,7 @@
 #include <thread>
 #include <fstream>
 #include <chrono>
+#include <cstring>
 
 
 #include <sea_sim/gui_controller/GUI.h>
@@ -144,9 +145,25 @@ int main()
                 }
                 else
                 {
-                    if ( packet.value().to == "gui" && packet.value().event == "module_error" )
-                        endpoint_iter = endpoint_storage.erase(endpoint_iter);
                     endpoint_storage.at(packet.value().to).SendData( packet.value() );
+
+                    if ( packet.value().to == "gui" && packet.value().event == "module_error" )
+                    {
+                        std::string module_path = endpoint_iter->first;
+
+                        if ( module_storage.get_state(module_path) == Module::ModuleStateEnum::EXEC )
+                        {
+                            auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
+                            std::memcpy(&endpoint_storage.at(module_path), &core_module_channel_core_side, sizeof(Endpoint));
+                            module_storage.set_state(module_path, Module::ModuleStateEnum::UNLOAD);
+                            stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, unload_module) );
+                        }
+                        else
+                        {
+                            endpoint_storage.at("gui").SendData( { "gui", "core", "module_unloaded", {{"module_path", module_path}} } );
+                            endpoint_iter = endpoint_storage.erase(endpoint_iter);
+                        }
+                    }
                 }
             }
 
@@ -165,7 +182,15 @@ int main()
                 while (const auto& packet = core_module_channel_core_side.TryRead())
                 {
                     if ( packet.value().to == "gui" )
+                    {
                         endpoint_storage.at(packet.value().to).SendData( packet.value() );
+
+                        if ( packet.value().event == "module_error" )
+                        {
+                            auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
+                            unload_module(path.c_str(), core_module_channel_module_side_err);
+                        }
+                    }
                 }
             }
         }

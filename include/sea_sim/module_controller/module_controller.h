@@ -2,7 +2,7 @@
 #define MODULE_CONTROLLER
 
 
-// #define __MC_DEBUG
+#define __MC_DEBUG
 
 
 #include <vector>
@@ -264,7 +264,6 @@ static const int exec_module(const char *module_path, Endpoint module_endpoint)
     if ( check_error((* exec) != nullptr, "Unable to get exec function", 0, DLERROR) )
     {
         module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить exec-функцию модуля '" + std::string(module_path) + "'."}}} );
-        check_error(dlclose(handle), "Unable to close module", -1, DLERROR);
         return -1;
     }
 
@@ -301,6 +300,7 @@ static const int unload_module(const char *module_path, Endpoint module_endpoint
     if ( check_error((* exit) != nullptr, "Unable to get exit function", 0, DLERROR) )
     {
         module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить exit-функцию модуля '" + std::string(module_path) + "'."}}} );
+        module_storage.erase(module_path);
         check_error(dlclose(handle), "Unable to close module", -1, DLERROR);
         return -1;
     }
@@ -321,6 +321,7 @@ static const int unload_module(const char *module_path, Endpoint module_endpoint
     if ( check_error(dlclose(handle), "Unable to close module", -1, DLERROR) )
     {
         module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось закрыть модуль '" + std::string(module_path) + "'."}}} );
+        module_storage.erase(module_path);
         return -1;
     }
 
@@ -344,15 +345,14 @@ static const int run_hot_function(const char *module_path, Endpoint module_endpo
     if ( check_error((* hotf) != nullptr, "Unable to get hot function", 0, DLERROR) )
     {
         module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить hot-функцию модуля '" + std::string(module_path) + "'."}}} );
-        check_error(dlclose(handle), "Unable to close module", -1, DLERROR);
         return -1;
     }
 
 #ifdef __MC_DEBUG
     printf("Handle address: 0x%p\n", handle);
-    printf("Not function address: 0x%p\n", hotf);
+    printf("Hot function address: 0x%p\n", hotf);
 
-    printf("Call hotf function...\n");
+    printf("Call hot function...\n");
     int hotf_res = (* hotf)( Interconnect(module_endpoint, module_path) );
 #else
     (* hotf)( Interconnect(module_endpoint, module_path) );
