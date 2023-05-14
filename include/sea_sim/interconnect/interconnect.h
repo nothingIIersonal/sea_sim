@@ -66,7 +66,7 @@ protected:
 
 public:
     Interconnect(const Endpoint& module_endpoint, const std::string& module_name);
-    ~Interconnect();
+    ~Interconnect() noexcept = default;
 
     WGTI wgti;
     WGTO wgto;

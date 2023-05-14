@@ -61,6 +61,8 @@ namespace gui
 		std::string title = (module_pages.contains(selected_module)) ?
 			module_pages[selected_module].get_title() : "";
 
+		ImGui::PushItemWidth(250);
+
 		if (ImGui::BeginCombo("##module_selection_combo", title.c_str()))
 		{
 			for (auto& module : module_pages)
@@ -73,14 +75,17 @@ namespace gui
 			ImGui::EndCombo();
 		}
 
+		ImGui::PopItemWidth();
+
         ImGui::SameLine();
 
-        if (ImGui::Button("X") && !selected_module.empty())
+        if (ImGui::Button(ICON_sea_sim__TIMES) && !selected_module.empty())
         {
             std::string buf = selected_module;
 
             return buf;
         }
+
         return std::nullopt;
 	}
 

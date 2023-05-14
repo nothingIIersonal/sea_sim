@@ -3,6 +3,7 @@
 #include <sea_sim/gui_controller/RenderEngine.h>
 #include <sea_sim/gui_controller/FileDialog.h>
 #include <sea_sim/gui_controller/ModuleDialog.h>
+#include <sea_sim/gui_controller/Fonts.h>
 
 
 namespace gui
@@ -68,7 +69,6 @@ namespace gui
 		sf::Clock deltaClock_;
 
 		ImFont* font_x20_;
-		ImFont* font_x16_;
 
 		sf::RenderTexture render_texture_;
 		RenderEngine render_engine_;

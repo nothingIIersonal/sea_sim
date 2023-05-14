@@ -17,11 +17,6 @@ Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& m
     }
 }
 
-Interconnect::~Interconnect()
-{
-    this->module_endpoint.SendData({ "core", this->module_name, "close_channel", {  } });
-}
-
 void Interconnect::WGTI::send()
 {
     Interconnect *ic = container_of(this, Interconnect, wgti);

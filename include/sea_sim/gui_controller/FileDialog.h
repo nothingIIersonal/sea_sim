@@ -8,8 +8,9 @@
 #include <filesystem>
 #include <algorithm>
 
-// #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/Fonts.h>
+
 
 #ifdef WIN32
 #include <Windows.h>
@@ -54,6 +55,8 @@ namespace gui
 
 	private:
 		std::string get_short_name();
+
+		void SelectableColor(ImU32 color);
 		
 	};
 

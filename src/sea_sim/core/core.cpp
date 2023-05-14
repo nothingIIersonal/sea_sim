@@ -2,6 +2,7 @@
 #include <thread>
 #include <fstream>
 #include <chrono>
+#include <cstring>
 
 
 #include <sea_sim/gui_controller/GUI.h>
@@ -123,7 +124,6 @@ int main()
                         else if (event == "unload_module")
                         {
                             module_storage.set_state(module_path, Module::ModuleStateEnum::UNLOAD);
-                            endpoint_storage.at("gui").SendData( { "gui", "core", "module_unloaded", {{"module_path", module_path}} } );
                             stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, unload_module) );
                         }
                         else
@@ -144,9 +144,25 @@ int main()
                 }
                 else
                 {
-                    if ( packet.value().to == "gui" && packet.value().event == "module_error" )
-                        endpoint_iter = endpoint_storage.erase(endpoint_iter);
                     endpoint_storage.at(packet.value().to).SendData( packet.value() );
+
+                    if ( packet.value().to == "gui" && packet.value().event == "module_error" )
+                    {
+                        std::string module_path = endpoint_iter->first;
+
+                        if ( module_storage.get_state(module_path) == Module::ModuleStateEnum::EXEC )
+                        {
+                            auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
+                            endpoint_iter->second = core_module_channel_core_side;
+                            module_storage.set_state(module_path, Module::ModuleStateEnum::UNLOAD);
+                            stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, unload_module) );
+                        }
+                        else
+                        {
+                            endpoint_storage.at("gui").SendData( { "gui", "core", "module_unloaded", {{"module_path", module_path}} } );
+                            endpoint_iter = endpoint_storage.erase(endpoint_iter);
+                        }
+                    }
                 }
             }
 
@@ -165,7 +181,17 @@ int main()
                 while (const auto& packet = core_module_channel_core_side.TryRead())
                 {
                     if ( packet.value().to == "gui" )
+                    {
                         endpoint_storage.at(packet.value().to).SendData( packet.value() );
+
+                        if ( packet.value().event == "module_error" )
+                        {
+                            auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
+                            endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
+                            module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
+                            stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
+                        }
+                    }
                 }
             }
         }
@@ -178,7 +204,6 @@ int main()
             {
                 auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
                 auto [mn, nm] = endpoint_storage.insert( {path, std::move(core_module_channel_core_side)} );
-                endpoint_storage.at("gui").SendData( { "gui", "core", "module_unloaded", {{"module_path", path}} } );
                 stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
             }
         }

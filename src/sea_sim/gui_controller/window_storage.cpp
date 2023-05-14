@@ -10,8 +10,7 @@ namespace gui
 
 	WindowStorage::WindowStorage(const Endpoint& channel_to_core) :
 		channel_to_core(channel_to_core),
-		font_x20_(nullptr),
-		font_x16_(nullptr)
+		font_x20_(nullptr)
 	{
 		for (int reset_array = 0; reset_array < sf::Keyboard::KeyCount; ++reset_array)
 		{
@@ -83,19 +82,11 @@ namespace gui
 					module_dialog_.remove_module(module_path);
                     render_engine_.remove_interface(module_path);
                 }
-                else if (packet_event == "notify")
+                else if (packet_event == "notify" || packet_event == "module_error")
                 {
 					windows_show_state_.exit_popup_new = false;
 					set_notification(packet_data["text"].get<std::string>());
                 }
-				else if (packet_event == "module_error")
-				{
-					// auto module_path = packet_data["module_path"].get<std::string>();
-					// module_dialog_.remove_module(module_path);
-
-					windows_show_state_.exit_popup_new = false;
-					set_notification(packet_data["text"].get<std::string>());
-				}
                 else if (packet_event == "shutdown")
                 {
                     window_close();
@@ -117,10 +108,13 @@ namespace gui
 			return;
 
 		ImGuiIO& io = ImGui::GetIO();
-		font_x20_ = io.Fonts->AddFontFromFileTTF("4-font.ttf", 20, NULL,
+		font_x20_ = io.Fonts->AddFontFromFileTTF(FONT_CYRILLIC_FILE_NAME_sea_sim_, 20, NULL,
 			io.Fonts->GetGlyphRangesCyrillic());
-		font_x16_ = io.Fonts->AddFontFromFileTTF("4-font.ttf", 16, NULL,
-			io.Fonts->GetGlyphRangesCyrillic());
+
+		static const ImWchar icons_ranges[] = { ICON_MIN_sea_sim_, ICON_MAX_sea_sim_, 0 };
+		ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+		
+		io.Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_sea_sim_, 20, &icons_config, icons_ranges);
 
 		if ( ImGui::SFML::UpdateFontTexture() == false )
 			return;
@@ -308,7 +302,9 @@ namespace gui
 
 	void WindowStorage::show_child_input()
 	{
-		if (ImGui::Begin(u8"Ввод данных"_C))
+		ImGuiWindowFlags_ flags = ImGuiWindowFlags_HorizontalScrollbar;
+
+		if (ImGui::Begin(u8"Ввод данных"_C, NULL, flags))
 		{
 			ImGui::Text(u8"%.0f FPS"_C, ImGui::GetIO().Framerate);
 			ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_texture_.getSize().x, render_texture_.getSize().y);
@@ -323,7 +319,9 @@ namespace gui
 	}
 	void WindowStorage::show_child_output()
 	{
-		if (ImGui::Begin(u8"Результаты"_C))
+		ImGuiWindowFlags_ flags = ImGuiWindowFlags_HorizontalScrollbar;
+
+		if (ImGui::Begin(u8"Результаты"_C, NULL, flags))
 		{
 			render_engine_.render_outputs();
 
@@ -409,7 +407,7 @@ namespace gui
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu(u8"Плагины"_C))
+			if (ImGui::BeginMenu(u8"Модули"_C))
 			{
 				if (ImGui::MenuItem(u8"Добавить"_C))
 				{

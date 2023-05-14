@@ -8,6 +8,7 @@
 #include <optional>
 
 #include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/Fonts.h>
 #include <sea_sim/gears/channel_packet.h>
 
 

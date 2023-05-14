@@ -233,7 +233,7 @@ public:
 
 private:
   mutable ::gears::fdx::detail::ChannelStoragePtr<T> channel_;
-  const Line line_;
+  Line line_;
 };
 
 /**
