@@ -124,7 +124,6 @@ int main()
                         else if (event == "unload_module")
                         {
                             module_storage.set_state(module_path, Module::ModuleStateEnum::UNLOAD);
-                            endpoint_storage.at("gui").SendData( { "gui", "core", "module_unloaded", {{"module_path", module_path}} } );
                             stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, unload_module) );
                         }
                         else
@@ -154,7 +153,7 @@ int main()
                         if ( module_storage.get_state(module_path) == Module::ModuleStateEnum::EXEC )
                         {
                             auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
-                            std::memcpy(&endpoint_storage.at(module_path), &core_module_channel_core_side, sizeof(Endpoint));
+                            endpoint_iter->second = core_module_channel_core_side;
                             module_storage.set_state(module_path, Module::ModuleStateEnum::UNLOAD);
                             stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, module_path, unload_module) );
                         }
@@ -188,9 +187,9 @@ int main()
                         if ( packet.value().event == "module_error" )
                         {
                             auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
+                            endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
                             module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
                             stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
-                            endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
                         }
                     }
                 }

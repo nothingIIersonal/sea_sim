@@ -2,7 +2,7 @@
 #define MODULE_CONTROLLER
 
 
-#define __MC_DEBUG
+// #define __MC_DEBUG
 
 
 #include <vector>
@@ -212,19 +212,27 @@ public:
 
 ModuleStorage module_storage;
 
+
+void send_fail(const Endpoint& module_endpoint, const char *module_path, const std::string& message)
+{
+    module_endpoint.SendData( {"gui", "core", "module_error", {{"text", message}}} );
+    module_endpoint.SendData( {"core", module_path, "close_channel", {  }} );
+}
+
+
 static const int load_module(const char *module_path, Endpoint module_endpoint)
 {
     void *handle = dlopen(module_path, RTLD_GLOBAL | RTLD_LAZY);
     if ( check_error(handle != nullptr, "Unable to open module", 0, DLERROR) )
     {
-        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось загрузить модуль '" + std::string(module_path) + "'."}}} );
+        send_fail(module_endpoint, module_path, "Не удалось загрузить модуль '" + std::string(module_path) + "'.");
         return -1;
     }
 
     int (* init)( Interconnect && ) = (int (*)( Interconnect && ))dlsym(handle, "sea_module_init");
     if ( check_error((* init) != nullptr, "Unable to get init function", 0, DLERROR) )
     {
-        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить init-функцию модуля '" + std::string(module_path) + "'."}}} );
+        send_fail(module_endpoint, module_path, "Не удалось получить init-функцию модуля '" + std::string(module_path) + "'.");
         check_error(dlclose(handle), "Unable to close module", -1, DLERROR);
         return -1;
     }
@@ -245,6 +253,7 @@ static const int load_module(const char *module_path, Endpoint module_endpoint)
 #endif // __MC_DEBUG
 
     module_storage.set_state(module_path, Module::ModuleStateEnum::IDLE);
+    module_endpoint.SendData( {"core", module_path, "close_channel", {  }} );
 
     return 0;
 }
@@ -263,7 +272,7 @@ static const int exec_module(const char *module_path, Endpoint module_endpoint)
     int (* exec)( Interconnect && ) = (int (*)( Interconnect && ))dlsym(handle, "sea_module_exec");
     if ( check_error((* exec) != nullptr, "Unable to get exec function", 0, DLERROR) )
     {
-        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить exec-функцию модуля '" + std::string(module_path) + "'."}}} );
+        send_fail(module_endpoint, module_path, "Не удалось получить exec-функцию модуля '" + std::string(module_path) + "'.");
         return -1;
     }
 
@@ -281,6 +290,7 @@ static const int exec_module(const char *module_path, Endpoint module_endpoint)
 #endif // __MC_DEBUG
 
     module_storage.set_state(module_path, Module::ModuleStateEnum::IDLE);
+    module_endpoint.SendData( {"core", module_path, "close_channel", {  }} );
 
     return 0;
 }
@@ -299,7 +309,7 @@ static const int unload_module(const char *module_path, Endpoint module_endpoint
     int (* exit)( Interconnect && ) = (int (*)( Interconnect && ))dlsym(handle, "sea_module_exit");
     if ( check_error((* exit) != nullptr, "Unable to get exit function", 0, DLERROR) )
     {
-        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить exit-функцию модуля '" + std::string(module_path) + "'."}}} );
+        send_fail(module_endpoint, module_path, "Не удалось получить exit-функцию модуля '" + std::string(module_path) + "'.");
         module_storage.erase(module_path);
         check_error(dlclose(handle), "Unable to close module", -1, DLERROR);
         return -1;
@@ -320,12 +330,14 @@ static const int unload_module(const char *module_path, Endpoint module_endpoint
 
     if ( check_error(dlclose(handle), "Unable to close module", -1, DLERROR) )
     {
-        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось закрыть модуль '" + std::string(module_path) + "'."}}} );
+        send_fail(module_endpoint, module_path, "Не удалось закрыть модуль '" + std::string(module_path) + "'.");
         module_storage.erase(module_path);
         return -1;
     }
 
+    module_endpoint.SendData( { "gui", "core", "module_unloaded", {{"module_path", module_path}} } );
     module_storage.erase(module_path);
+    module_endpoint.SendData( {"core", module_path, "close_channel", {  }} );
 
     return 0;
 }
@@ -344,7 +356,7 @@ static const int run_hot_function(const char *module_path, Endpoint module_endpo
     int (* hotf)( Interconnect && ) = (int (*)( Interconnect && ))dlsym(handle, "sea_module_hotf");
     if ( check_error((* hotf) != nullptr, "Unable to get hot function", 0, DLERROR) )
     {
-        module_endpoint.SendData( {"gui", "core", "module_error", {{"text", "Не удалось получить hot-функцию модуля '" + std::string(module_path) + "'."}}} );
+        send_fail(module_endpoint, module_path, "Не удалось получить hot-функцию модуля '" + std::string(module_path) + "'.");
         return -1;
     }
 
@@ -362,6 +374,7 @@ static const int run_hot_function(const char *module_path, Endpoint module_endpo
 #endif // __MC_DEBUG
 
     module_storage.set_state(module_path, Module::ModuleStateEnum::IDLE);
+    module_endpoint.SendData( {"core", module_path, "close_channel", {  }} );
 
     return 0;
 }
