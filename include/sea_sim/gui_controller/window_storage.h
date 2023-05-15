@@ -1,4 +1,6 @@
 #pragma once
+#include <queue>
+
 #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/gui_controller/RenderEngine.h>
 #include <sea_sim/gui_controller/FileDialog.h>
@@ -88,6 +90,7 @@ namespace gui
             bool notification_popup = false;
             bool notification_popup_new = false;
             std::string notification_text = u8""_C;
+			std::queue<std::string> notification_queue = {};
 
 			bool show_file_dialog = false;
 			bool show_module_dialog = false;

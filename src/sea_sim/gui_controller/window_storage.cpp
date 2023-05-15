@@ -286,9 +286,17 @@ namespace gui
 			if (ImGui::Button(u8"Принять"_C, ImVec2(120, 0)) || key_hit(sf::Keyboard::Enter) ||
 				windows_show_state_.notification_popup_new == false)
 			{
-				windows_show_state_.notification_popup_new = false;
-				windows_show_state_.notification_popup = false;
-				ImGui::CloseCurrentPopup();
+				if (windows_show_state_.notification_queue.empty())
+				{
+					windows_show_state_.notification_popup_new = false;
+					windows_show_state_.notification_popup = false;
+					ImGui::CloseCurrentPopup();
+				}
+				else
+				{
+					windows_show_state_.notification_text = windows_show_state_.notification_queue.front();
+					windows_show_state_.notification_queue.pop();
+				}
 			}
 
 			ImGui::EndPopup();
@@ -296,8 +304,14 @@ namespace gui
 	}
 	void WindowStorage::set_notification(std::string text)
 	{
-		windows_show_state_.notification_popup_new = true;
-		windows_show_state_.notification_text = text;
+		if (windows_show_state_.notification_popup     == true ||
+			windows_show_state_.notification_popup_new == true)
+			windows_show_state_.notification_queue.push(text);
+		else
+		{
+			windows_show_state_.notification_popup_new = true;
+			windows_show_state_.notification_text = text;
+		}
 	}
 
 	void WindowStorage::show_child_input()
