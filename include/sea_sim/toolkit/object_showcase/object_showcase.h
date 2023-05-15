@@ -4,7 +4,6 @@
 
 #include <string>
 #include <vector>
-#include <sea_sim/object_showcase/toolkit.h>
 
 
 /*
@@ -16,7 +15,7 @@ private:
     std::string identifier;
 
 public:
-    Object(std::string identifier) noexcept : identifier(identifier) {}
+    Object(const std::string& identifier) noexcept : identifier(identifier) {}
     const std::string get_identifier() noexcept { return this->identifier; }
 };
 
@@ -27,12 +26,12 @@ public:
 class Ship : public Object
 {
 private:
-    Coord2i coords;
+    int64_t x, y;
     std::vector<std::string> staff;
 
 public:
     Ship() noexcept = default;
-    Ship(std::string identifier, int64_t x, int64_t y, std::vector<std::string> staff) noexcept : Object(identifier), coords({x, y}), staff(staff) {};
+    Ship(const std::string& identifier, int64_t x, int64_t y, const std::vector<std::string>& staff) noexcept : Object(identifier), x(x), y(y), staff(staff) {};
     ~Ship() noexcept = default;
 
     std::vector<std::string> get_staff() { return this->staff; };

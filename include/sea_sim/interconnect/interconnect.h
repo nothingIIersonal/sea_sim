@@ -9,7 +9,7 @@
 
 
 #include <sea_sim/gears/channel_packet.h>
-#include <sea_sim/object_showcase/object_showcase.h>
+#include <sea_sim/toolkit/object_showcase/object_showcase.h>
 #include <shared_mutex>
 
 

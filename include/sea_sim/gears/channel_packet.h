@@ -2,7 +2,7 @@
 
 
 #include <string>
-#include <sea_sim/json/json.hpp>
+#include <sea_sim/gears/json/json.hpp>
 #include <sea_sim/gears/channels.hpp>
 
 
