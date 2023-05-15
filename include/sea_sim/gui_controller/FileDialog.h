@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <algorithm>
+#include <optional>
 
 #include <sea_sim/gui_controller/functions.h>
 #include <sea_sim/gui_controller/Fonts.h>

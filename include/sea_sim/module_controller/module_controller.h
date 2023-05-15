@@ -23,7 +23,7 @@
 #define RTLD_LOCAL    0x00000
 #define RTLD_NODELETE 0x01000
 
-static void * dlopen(const char *fl, int m)
+void * dlopen(const char *fl, int m)
 {
     if ( !fl )
         return (void *)(GetModuleHandle( 0 ));
@@ -33,7 +33,7 @@ static void * dlopen(const char *fl, int m)
         return (void *)(LoadLibrary( fl ));
 }
 
-static const int dlclose(void *hdll)
+const int dlclose(void *hdll)
 {
     if ( !FreeLibrary((HMODULE)(hdll)) )
         return -1;
@@ -41,7 +41,7 @@ static const int dlclose(void *hdll)
         return 0;
 }
 
-static void * dlsym(void *hdll, const char *s)
+void * dlsym(void *hdll, const char *s)
 {
     return (void *)(GetProcAddress((HMODULE)(hdll), s));
 }
@@ -52,7 +52,7 @@ static void * dlsym(void *hdll, const char *s)
 #include <dlfcn.h>
 #include <unistd.h>
 
-static const size_t strnlen_t(const char *str, size_t maxlen)
+const size_t strnlen_t(const char *str, size_t maxlen)
 {
     size_t i;
     for (i = 0; i < maxlen && str[i]; ++i);
@@ -71,7 +71,7 @@ static const size_t strnlen_t(const char *str, size_t maxlen)
 
 #ifdef __MC_DEBUG
 
-static void print_error(const char *message, const size_t type)
+void print_error(const char *message, const size_t type)
 {
 #ifdef WIN32
         fprintf(stderr, "%s\n", message);
@@ -87,7 +87,7 @@ static void print_error(const char *message, const size_t type)
 
 #endif // __MC_DEBUG
 
-static const int check_error(int code, const char *message, int fail_code, size_t type)
+const int check_error(int code, const char *message, int fail_code, size_t type)
 {
     if ( code == fail_code )
     {
@@ -119,10 +119,10 @@ private:
 
     friend int main();
 
-    friend static const int load_module(const char *, Endpoint);
-    friend static const int exec_module(const char *, Endpoint);
-    friend static const int unload_module(const char *, Endpoint);
-    friend static const int run_hot_function(const char *, Endpoint);
+    friend const int load_module(const char *, Endpoint);
+    friend const int exec_module(const char *, Endpoint);
+    friend const int unload_module(const char *, Endpoint);
+    friend const int run_hot_function(const char *, Endpoint);
 
     friend class ModuleStorage;
 
@@ -220,7 +220,7 @@ void send_fail(const Endpoint& module_endpoint, const char *module_path, const s
 }
 
 
-static const int load_module(const char *module_path, Endpoint module_endpoint)
+const int load_module(const char *module_path, Endpoint module_endpoint)
 {
     void *handle = dlopen(module_path, RTLD_GLOBAL | RTLD_LAZY);
     if ( check_error(handle != nullptr, "Unable to open module", 0, DLERROR) )
@@ -258,7 +258,7 @@ static const int load_module(const char *module_path, Endpoint module_endpoint)
     return 0;
 }
 
-static const int exec_module(const char *module_path, Endpoint module_endpoint)
+const int exec_module(const char *module_path, Endpoint module_endpoint)
 {
     void *handle = module_storage.get_handle(module_path);
     if ( !handle )
@@ -295,7 +295,7 @@ static const int exec_module(const char *module_path, Endpoint module_endpoint)
     return 0;
 }
 
-static const int unload_module(const char *module_path, Endpoint module_endpoint)
+const int unload_module(const char *module_path, Endpoint module_endpoint)
 {
     void *handle = module_storage.get_handle(module_path);
     if ( !handle )
@@ -342,7 +342,7 @@ static const int unload_module(const char *module_path, Endpoint module_endpoint
     return 0;
 }
 
-static const int run_hot_function(const char *module_path, Endpoint module_endpoint) 
+const int run_hot_function(const char *module_path, Endpoint module_endpoint) 
 {
     void *handle = module_storage.get_handle(module_path);
     if ( !handle )

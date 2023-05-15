@@ -100,7 +100,7 @@ namespace gui
 					ImVec2 cursorScreenPos = ImGui::GetCursorScreenPos();
 					float width = ImGui::CalcTextSize(order_entry.c_str()).x;
 
-					ImGui::Text(order_entry.c_str());
+					ImGui::Text("%s", order_entry.c_str());
 
 					if (entry)
 					{
