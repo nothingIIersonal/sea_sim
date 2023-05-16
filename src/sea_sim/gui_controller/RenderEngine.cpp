@@ -1,8 +1,16 @@
 ﻿#include <sea_sim/gui_controller/RenderEngine.h>
+#include <sea_sim/gui_controller/window_storage.h>
 
 
 namespace gui
 {
+	RenderEngine::RenderEngine(WindowStorage* parent)
+		: parent_ptr_(parent) {}
+	RenderEngine::~RenderEngine()
+	{
+		parent_ptr_ = nullptr;
+	}
+
 	void RenderEngine::update_input_interface(std::string& module, nlohmann::json& data)
 	{
 		if (!module_pages.contains(module))
@@ -115,6 +123,14 @@ namespace gui
 			return;
 
 		module_pages[selected_module].render_output_interface();
+	}
+
+	void RenderEngine::set_notification(const std::string& text)
+	{
+		if (parent_ptr_ == nullptr)
+			return;
+
+		parent_ptr_->set_notification(text);
 	}
 
 } // namespace gui

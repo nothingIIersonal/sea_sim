@@ -3,20 +3,22 @@
 
 #include <iostream>
 
-
+extern bool keyHit[];
 namespace gui
 {
 	using namespace utils;
 
 	WindowStorage::WindowStorage(const Endpoint& channel_to_core) :
 		channel_to_core(channel_to_core),
-		font_x20_(nullptr)
+		font_x20_(nullptr),
+		render_engine_(this),
+		file_dialog_(this)
 	{
 		for (int reset_array = 0; reset_array < sf::Keyboard::KeyCount; ++reset_array)
 		{
 			keyHit[reset_array] = false;
 		}
-
+		
 		render_texture_.create(500, 500);
 	}
 
@@ -47,8 +49,7 @@ namespace gui
 				screen_size_ = window_.getSize();
 				break; }
 			case sf::Event::KeyReleased:
-				if (event.key.code >= 0 && event.key.code < sf::Keyboard::KeyCount)
-					keyHit[event.key.code] = false;
+				keyHit[event.key.code] = false;
 				break;
 			default:
 				break;
@@ -177,30 +178,6 @@ namespace gui
 	{
 		return sf::Mouse::getPosition(window_).y;
 	}
-	int WindowStorage::mouse_down(const sf::Mouse::Button& B)
-	{
-		return sf::Mouse::isButtonPressed(B);
-	}
-	int WindowStorage::key_down(const sf::Keyboard::Key& B)
-	{
-		return sf::Keyboard::isKeyPressed(B);
-	}
-	int WindowStorage::key_hit(const sf::Keyboard::Key& key)
-	{
-		if (!keyHit[key]) {
-			if (sf::Keyboard::isKeyPressed(key)) {
-				keyHit[key] = true;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	int WindowStorage::block()
-	{
-		ImGui::SameLine();
-		return 1;
-	}
 
 	// --- Windows
 
@@ -303,7 +280,7 @@ namespace gui
 			ImGui::EndPopup();
 		}
 	}
-	void WindowStorage::set_notification(std::string text)
+	void WindowStorage::set_notification(const std::string& text)
 	{
 		if (windows_show_state_.notification_popup     == true ||
 			windows_show_state_.notification_popup_new == true)

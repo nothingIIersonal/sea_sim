@@ -38,17 +38,12 @@ namespace gui
 
 		int mouse_X();                        // Get X coord of Mouse
 		int mouse_Y();                        // Get Y coord of Mouse
-		int mouse_down(const sf::Mouse::Button& B);
-		int key_down(const sf::Keyboard::Key& B);
-		int key_hit(const sf::Keyboard::Key& key);
-
-		int block();                          // ImGUI::Sameline();
 
 		// Windows
 		void show_main();
 		void show_exit_popup();
         void show_notification_popup();
-        void set_notification(std::string text);
+        void set_notification(const std::string& text);
 
 		void show_child_input();
 		void show_child_output();
@@ -79,8 +74,6 @@ namespace gui
 
 		Endpoint channel_to_core;
 
-		bool keyHit[sf::Keyboard::KeyCount];
-
 		struct WindowsShowState
 		{
 			bool show_main = true;
@@ -98,11 +91,6 @@ namespace gui
 			bool reset_docking_layout = true;
 			ImVec2 render_size = { 500, 500 };
 		} windows_show_state_;
-
-		struct FieldsData
-		{
-			std::string selected_module = "";
-		} fields_data_;
 
 		bool shutdown_flag_ = false;
 	};

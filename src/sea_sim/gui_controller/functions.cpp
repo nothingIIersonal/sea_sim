@@ -1,15 +1,11 @@
-﻿#include <imgui.h>
-#include <imgui-SFML.h>
-#include <imgui_stdlib.h>
-
-#include <SFML/Graphics.hpp>
-#include <cmath>
+﻿#include <iostream>
 
 #include <sea_sim/gui_controller/functions.h>
 
-
 namespace gui::utils
 {
+	// --- Math
+
 	float min(float a, float b) { return (a > b) ? b : a; }
 	float max(float a, float b) { return (a > b) ? a : b; }
 
@@ -29,6 +25,8 @@ namespace gui::utils
 	{
 		return start + (rand() % amount) / double(amount) * (end - start);
 	}
+
+	// --- ImGui
 
 	char const* operator"" _C(const char8_t* str, std::size_t)
 	{
@@ -50,6 +48,45 @@ namespace gui::utils
 	bool operator!=(const ImVec2& left, const ImVec2& right)
 	{
 		return left.x != right.x || left.y != right.y;
+	}
+
+	bool block()
+	{
+		ImGui::SameLine();
+		return true;
+	}
+	void SelectableColor(ImU32 color)
+	{
+		ImVec2 p_min = ImGui::GetItemRectMin();
+		ImVec2 p_max = ImGui::GetItemRectMax();
+		ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color);
+	}
+	float get_button_width(std::string text, ImGuiStyle& style)
+	{
+		return ImGui::CalcTextSize(text.c_str()).x + style.FramePadding.x * 2 + style.ItemSpacing.x;
+	}
+
+	// --- SFML
+
+	bool keyHit[sf::Keyboard::KeyCount] = { 0 };
+
+	int mouse_down(const sf::Mouse::Button& B)
+	{
+		return sf::Mouse::isButtonPressed(B);
+	}
+	int key_down(const sf::Keyboard::Key& B)
+	{
+		return sf::Keyboard::isKeyPressed(B);
+	}
+	int key_hit(const sf::Keyboard::Key& key)
+	{
+		if (!keyHit[key]) {
+			if (sf::Keyboard::isKeyPressed(key)) {
+				keyHit[key] = true;
+				return true;
+			}
+		}
+		return false;
 	}
 
 } // namespace gui::utils

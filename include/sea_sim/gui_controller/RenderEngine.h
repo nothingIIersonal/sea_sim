@@ -14,9 +14,14 @@
 
 namespace gui
 {
+	class WindowStorage;
+
 	class RenderEngine
 	{
 	public:
+		RenderEngine(WindowStorage* parent);
+		~RenderEngine();
+
 		void update_input_interface(std::string& module, nlohmann::json& data);
 		void update_output_interface(std::string& module, nlohmann::json& data);
 		void remove_interface(std::string& module);
@@ -26,8 +31,12 @@ namespace gui
 		std::optional<std::string> render_modules_combo();
 		std::optional<channel_packet> render_inputs();
 		void render_outputs();
+
+		void set_notification(const std::string& text);
 	
 	private:
+		WindowStorage* parent_ptr_;
+
 		std::string selected_module = "";
 		std::map<std::string, ModulePageStorage> module_pages;
 

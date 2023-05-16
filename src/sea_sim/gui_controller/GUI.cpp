@@ -29,10 +29,11 @@ namespace gui
 			window_storage.ImGui_update();    // Update GUI
 			
 			// --- Draw GUI Windows
-			
-			window_storage.show_main();       // Main window
-			window_storage.show_exit_popup(); // Exit PopUp
+
 			window_storage.show_notification_popup();
+			window_storage.show_exit_popup(); // Exit PopUp
+
+			window_storage.show_main();       // Main window
 			
 			window_storage.show_child_input();
 			window_storage.show_child_output();
