@@ -280,7 +280,7 @@ int Interconnect::object_ship_set(const std::string& identifier, int64_t x, int6
 {
     std::unique_lock lock(Interconnect::ship_storage_mutex);
 
-    Interconnect::ship_storage.insert( {identifier, {identifier, x, y, staff}} );
+    Interconnect::ship_storage.insert_or_assign(identifier, Ship{identifier, x, y, staff} );
 
     return 0;
 }
@@ -306,6 +306,26 @@ std::optional<Ship> Interconnect::object_ship_get_next()
         return std::nullopt;
 
     return (this->ship_storage_it++)->second;
+}
+
+std::optional<int64_t> Interconnect::object_ship_get_x(const std::string& identifier)
+{
+    std::shared_lock lock(Interconnect::ship_storage_mutex);
+
+    if ( Interconnect::ship_storage.contains(identifier) )
+        return Interconnect::ship_storage.at(identifier).get_x();
+
+    return std::nullopt;
+}
+
+std::optional<int64_t> Interconnect::object_ship_get_y(const std::string& identifier)
+{
+    std::shared_lock lock(Interconnect::ship_storage_mutex);
+
+    if ( Interconnect::ship_storage.contains(identifier) )
+        return Interconnect::ship_storage.at(identifier).get_y();
+
+    return std::nullopt;
 }
 
 std::optional<std::vector<std::string>> Interconnect::object_ship_get_staff(const std::string& identifier)
