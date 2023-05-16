@@ -69,7 +69,7 @@ namespace gui
 		ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color);
 	}
 
-	bool FileInfo::update_from_name(fs::path current_path)
+	bool FileInfo::update_from_name(fs::path& current_path)
 	{
 		fs::path path_buf = absolute_path;
 
@@ -478,7 +478,7 @@ namespace gui
 		return std::nullopt;
 	}
 
-	bool directory_content_sorter_name(FileInfo const& lhs, FileInfo const& rhs)
+	bool directory_content_sorter_name(const FileInfo& lhs, const FileInfo& rhs)
 	{
 		if (static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(lhs.file_type) <
 			static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(rhs.file_type))
@@ -489,7 +489,7 @@ namespace gui
 			return true;
 		return false;
 	}
-	bool directory_content_sorter_ext(FileInfo const& lhs, FileInfo const& rhs)
+	bool directory_content_sorter_ext(const FileInfo& lhs, const FileInfo& rhs)
 	{
 		if (static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(lhs.file_type) <
 			static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(rhs.file_type))

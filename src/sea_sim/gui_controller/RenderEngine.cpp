@@ -3,18 +3,18 @@
 
 namespace gui
 {
-	void RenderEngine::update_input_interface(std::string module, nlohmann::json data)
+	void RenderEngine::update_input_interface(std::string& module, nlohmann::json& data)
 	{
 		if (!module_pages.contains(module))
 			selected_module = module;
 
 		module_pages[module].set_input_interface(data);
 	}
-	void RenderEngine::update_output_interface(std::string module, nlohmann::json data)
+	void RenderEngine::update_output_interface(std::string& module, nlohmann::json& data)
 	{
 		module_pages[module].set_output_interface(data);
 	}
-	void RenderEngine::remove_interface(std::string module)
+	void RenderEngine::remove_interface(std::string& module)
     {
 		if (module_pages.contains(module))
         {

@@ -17,9 +17,9 @@ namespace gui
 	class RenderEngine
 	{
 	public:
-		void update_input_interface(std::string module, nlohmann::json data);
-		void update_output_interface(std::string module, nlohmann::json data);
-		void remove_interface(std::string module);
+		void update_input_interface(std::string& module, nlohmann::json& data);
+		void update_output_interface(std::string& module, nlohmann::json& data);
+		void remove_interface(std::string& module);
 
 		void render_scene(sf::RenderTexture& texture);
 

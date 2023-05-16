@@ -42,7 +42,7 @@ namespace gui
 
 		bool isDir();
 		bool isFile();
-		bool update_from_name(fs::path current_path);
+		bool update_from_name(fs::path& current_path);
 
 		void clear();
 
@@ -105,8 +105,8 @@ namespace gui
 		FileInfo selected_file;
 	};
 
-	bool directory_content_sorter_name(FileInfo const& lhs, FileInfo const& rhs);
-	bool directory_content_sorter_ext(FileInfo const& lhs, FileInfo const& rhs);
+	bool directory_content_sorter_name(const FileInfo& lhs, const FileInfo& rhs);
+	bool directory_content_sorter_ext(const FileInfo& lhs, const FileInfo& rhs);
 
 	std::string get_FileTypeName(FileInfo::FileTypeEnum type);
 	std::string get_SortingType(FileDialog::SortingTypeEnum type);
