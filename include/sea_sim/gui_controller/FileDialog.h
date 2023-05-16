@@ -11,6 +11,8 @@
 
 #include <sea_sim/gui_controller/functions.h>
 #include <sea_sim/gui_controller/Fonts.h>
+#include <sea_sim/gears/channel_packet.h>
+
 
 
 #ifdef WIN32
@@ -66,7 +68,7 @@ namespace gui
 	public:
 		FileDialog(fs::path starting_path = "");
 
-		void open(fs::path starting_path = "");
+		void open(const fs::path& starting_path = "");
 		void close();
 		std::optional<std::vector<std::string>> render_dialog();
 		std::optional<std::vector<std::string>> try_take_files();
@@ -104,9 +106,6 @@ namespace gui
 		std::vector<FileInfo> current_directory_content;
 		FileInfo selected_file;
 	};
-
-	bool directory_content_sorter_name(const FileInfo& lhs, const FileInfo& rhs);
-	bool directory_content_sorter_ext(const FileInfo& lhs, const FileInfo& rhs);
 
 	std::string get_FileTypeName(FileInfo::FileTypeEnum type);
 	std::string get_SortingType(FileDialog::SortingTypeEnum type);

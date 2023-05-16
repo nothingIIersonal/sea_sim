@@ -30,6 +30,7 @@ namespace gui
 	void WindowStorage::poll_events()
 	{
 		sf::Event event;
+
 		while (window_.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
@@ -505,7 +506,7 @@ namespace gui
         if (off > 0.0f)
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
     }
-    float WindowStorage::get_button_width(std::string text, ImGuiStyle& style)
+    float WindowStorage::get_button_width(const std::string& text, ImGuiStyle& style)
     {
         return ImGui::CalcTextSize(text.c_str()).x + style.FramePadding.x * 2 + style.ItemSpacing.x;
     }

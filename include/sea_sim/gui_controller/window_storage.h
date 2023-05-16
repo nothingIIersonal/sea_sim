@@ -60,7 +60,7 @@ namespace gui
 		void show_module_dialog();
 
 		void ImGui_reset_docking_layout(ImGuiID id);
-		float get_button_width(std::string text, ImGuiStyle& style);
+		float get_button_width(const std::string& text, ImGuiStyle& style);
         void align_for_width(float width, float alignment = 0.5f);
 
 		void send_to_core(std::string event, nlohmann::json data = {});

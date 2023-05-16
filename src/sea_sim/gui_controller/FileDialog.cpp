@@ -118,7 +118,7 @@ namespace gui
 		is_open_ = false;
 	}
 
-	void FileDialog::open(fs::path starting_path)
+	void FileDialog::open(const fs::path& starting_path)
 	{
 		if (starting_path.empty())
 			current_path = fs::current_path();
@@ -253,7 +253,8 @@ namespace gui
 
 				for (auto& entry : current_directory_content)
 				{
-					if (selected_file_extension != ".*" && entry.isFile() && entry.ext != selected_file_extension)
+					if (selected_file_extension != ".*" && entry.isFile() && entry.ext != selected_file_extension ||
+						entry.name_optimized.empty() || entry.name_optimized.size() > 255)
 						continue;
 
 					draw_list->ChannelsSplit(2);
@@ -387,17 +388,25 @@ namespace gui
 	void FileDialog::update_directory_content()
 	{
 		current_directory_content.clear();
-		for (const auto& entry : fs::directory_iterator(current_path))
+
+		try
 		{
-			fs::perms perm = fs::status(entry.path()).permissions();
-			if ((perm & fs::perms::others_read) == fs::perms::none)
-				continue;
+			for (const auto& entry : fs::directory_iterator(current_path))
+			{
+				fs::perms perm = fs::status(entry.path()).permissions();
+				if ((perm & fs::perms::others_read) == fs::perms::none)
+					continue;
 
-			FileInfo::FileTypeEnum file_type =
-				(entry.is_directory()) ? FileInfo::FileTypeEnum::DIRECTORY :
-				(entry.is_regular_file()) ? FileInfo::FileTypeEnum::FILE : FileInfo::FileTypeEnum::INVALID;
+				FileInfo::FileTypeEnum file_type =
+					(entry.is_directory()) ? FileInfo::FileTypeEnum::DIRECTORY :
+					(entry.is_regular_file()) ? FileInfo::FileTypeEnum::FILE : FileInfo::FileTypeEnum::INVALID;
 
-			current_directory_content.push_back({ entry.path(), file_type });
+				current_directory_content.push_back({ entry.path(), file_type });
+			}
+		}
+		catch (const std::exception&) // err) // <--- Catch "Access denied" from File System
+		{
+			// std::cout << err.what() << std::endl;
 		}
 	}
 
@@ -407,16 +416,24 @@ namespace gui
 
 		selected_sorting_type = type;
 
+		auto directory_content_sorter_name = [](const FileInfo& lhs, const FileInfo& rhs) {
+			return std::tie(lhs.file_type, lhs.name) <
+			       std::tie(rhs.file_type, rhs.name); };
+
+		auto directory_content_sorter_ext = [](const FileInfo& lhs, const FileInfo& rhs) {
+			return std::tie(lhs.file_type, lhs.ext, lhs.name) <
+				   std::tie(rhs.file_type, rhs.ext, rhs.name); };
+
 		switch (selected_sorting_type)
 		{
 		case gui::FileDialog::SortingTypeEnum::byFileName:
-			std::sort(current_directory_content.begin(), current_directory_content.end(), &directory_content_sorter_name);
+			std::sort(current_directory_content.begin(), current_directory_content.end(), directory_content_sorter_name);
 			break;
 		case gui::FileDialog::SortingTypeEnum::byExtension:
-			std::sort(current_directory_content.begin(), current_directory_content.end(), &directory_content_sorter_ext);
+			std::sort(current_directory_content.begin(), current_directory_content.end(), directory_content_sorter_ext);
 			break;
 		default:
-			std::sort(current_directory_content.begin(), current_directory_content.end(), &directory_content_sorter_name);
+			std::sort(current_directory_content.begin(), current_directory_content.end(), directory_content_sorter_name);
 			break;
 		}
 	}
@@ -476,31 +493,6 @@ namespace gui
 			}
 		}
 		return std::nullopt;
-	}
-
-	bool directory_content_sorter_name(const FileInfo& lhs, const FileInfo& rhs)
-	{
-		if (static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(lhs.file_type) <
-			static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(rhs.file_type))
-		{
-			return true;
-		}
-		else if (lhs.name < rhs.name)
-			return true;
-		return false;
-	}
-	bool directory_content_sorter_ext(const FileInfo& lhs, const FileInfo& rhs)
-	{
-		if (static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(lhs.file_type) <
-			static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(rhs.file_type))
-		{
-			return true;
-		}
-		else if (lhs.ext < rhs.ext)
-			return true;
-		else if (lhs.name < rhs.name)
-			return true;
-		return false;
 	}
 
 	std::string get_FileTypeName(FileInfo::FileTypeEnum type)
