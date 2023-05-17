@@ -8,10 +8,10 @@
 #define ICON_MIN_sea_sim_ 0xf00c
 #define ICON_MAX_sea_sim_ 0xf07c
 
-using namespace gui::utils;
+using namespace gui::utils::literals;
 
 #define ICON_sea_sim__ARROW_CIRCLE_O_DOWN u8"\uf01a"_C
-#define ICON_sea_sim__ARROW_CIRCLE_O_UP u8"\uf01b"
+#define ICON_sea_sim__ARROW_CIRCLE_O_UP u8"\uf01b"_C
 #define ICON_sea_sim__ARROW_DOWN u8"\uf063"_C
 #define ICON_sea_sim__ARROW_LEFT u8"\uf060"_C
 #define ICON_sea_sim__ARROW_RIGHT u8"\uf061"_C

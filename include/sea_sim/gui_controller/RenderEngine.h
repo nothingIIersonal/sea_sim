@@ -10,6 +10,7 @@
 #include <sea_sim/gui_controller/functions.h>
 #include <sea_sim/gui_controller/ModulePageStorage.h>
 #include <sea_sim/gui_controller/Fonts.h>
+#include <sea_sim/gui_controller/GraphicsStorage.h>
 
 
 namespace gui

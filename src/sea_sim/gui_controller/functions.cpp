@@ -28,9 +28,12 @@ namespace gui::utils
 
 	// --- ImGui
 
-	char const* operator"" _C(const char8_t* str, std::size_t)
+	inline namespace literals
 	{
-		return reinterpret_cast<const char*>(str);
+		char const* operator"" _C(const char8_t* str, std::size_t)
+		{
+			return reinterpret_cast<const char*>(str);
+		}
 	}
 
 	ImVec2 operator+(const ImVec2& left, const ImVec2& right)
