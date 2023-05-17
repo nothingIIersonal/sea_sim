@@ -94,14 +94,10 @@ namespace gui
 		}
 		catch (const std::filesystem::filesystem_error& err)
 		{
-			std::cout << "Code: " << err.code().message() << " | " << err.what() << std::endl;
-
-			using namespace std::string_literals;
-
 			switch (err.code().value())
 			{
 			case 5:
-				set_notification(err.code().message() + ": \""s + err.path1().string() + "\""s);
+				set_notification(u8"Отказано в доступе к: \""_C + err.path1().string() + u8"\""_C);
 				break;
 			default:
 				set_notification(err.what());
@@ -442,14 +438,10 @@ namespace gui
 		}
 		catch (const std::filesystem::filesystem_error& err)
 		{
-			std::cout << "Code: " << err.code().message() << " | " << err.what() << std::endl;
-
-			using namespace std::string_literals;
-
 			switch (err.code().value())
 			{
 			case 5:
-				set_notification(err.code().message() + ": \""s + err.path1().string() + "\""s);
+				set_notification(u8"Отказано в доступе к: \""_C + err.path1().string() + u8"\""_C);
 				break;
 			default:
 				set_notification(err.what());
