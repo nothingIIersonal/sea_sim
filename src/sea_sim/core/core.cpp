@@ -38,6 +38,8 @@ void print_packet(const std::optional<channel_value_type> &val)
 
 int main()
 {
+    setlocale(LC_ALL, "Rus");
+
     auto endpoint_storage = std::map< std::string, Endpoint >();
 
     auto [core_gui_channel_core_side, core_gui_channel_gui_side] = fdx::MakeChannel<channel_value_type>();

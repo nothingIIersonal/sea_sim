@@ -3,7 +3,9 @@
 
 #include <iostream>
 
+
 extern bool keyHit[];
+
 namespace gui
 {
 	using namespace utils;
@@ -89,6 +91,10 @@ namespace gui
 					windows_show_state_.exit_popup_new = false;
 					set_notification(packet_data["text"].get<std::string>());
                 }
+				else if (packet_event == "update_texture")
+				{
+					render_engine_.update_texture();
+				}
                 else if (packet_event == "shutdown")
                 {
                     window_close();

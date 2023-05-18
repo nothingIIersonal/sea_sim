@@ -6,10 +6,13 @@
 
 namespace gui
 {
+	class RenderEngine;
+
 	class GraphicsStorage
 	{
 	public:
-		// GraphicsStorage();
+		GraphicsStorage(RenderEngine* parent_ptr_);
+		~GraphicsStorage();
 
 		// void insert();
 		// void erase();
@@ -18,8 +21,7 @@ namespace gui
 		// void render_graphics();
 
 	private:
-		// std::map<std::string, bool> elements;
+		RenderEngine* parent_ptr_;
 
 	};
 } // namespace gui
-

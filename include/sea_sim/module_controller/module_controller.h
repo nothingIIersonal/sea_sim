@@ -222,7 +222,7 @@ void send_fail(const Endpoint& module_endpoint, const char *module_path, const s
 
 const int load_module(const char *module_path, Endpoint module_endpoint)
 {
-    void *handle = dlopen(module_path, RTLD_GLOBAL | RTLD_LAZY);
+    void *handle = dlopen(module_path, RTLD_LOCAL | RTLD_LAZY);
     if ( check_error(handle != nullptr, "Unable to open module", 0, DLERROR) )
     {
         send_fail(module_endpoint, module_path, "Не удалось загрузить модуль '" + std::string(module_path) + "'.");

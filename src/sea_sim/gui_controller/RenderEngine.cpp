@@ -5,7 +5,7 @@
 namespace gui
 {
 	RenderEngine::RenderEngine(WindowStorage* parent)
-		: parent_ptr_(parent) {}
+		: parent_ptr_(parent), graphics_storage_(this) {}
 	RenderEngine::~RenderEngine()
 	{
 		parent_ptr_ = nullptr;
@@ -34,6 +34,11 @@ namespace gui
                 selected_module = module_pages.begin()->first;
         }
     }
+
+	void RenderEngine::update_texture()
+	{
+
+	}
 
 	void RenderEngine::render_scene(sf::RenderTexture& texture)
 	{

@@ -27,6 +27,8 @@ namespace gui
 		void update_output_interface(std::string& module, nlohmann::json& data);
 		void remove_interface(std::string& module);
 
+		void update_texture();
+
 		void render_scene(sf::RenderTexture& texture);
 
 		std::optional<std::string> render_modules_combo();
@@ -37,6 +39,8 @@ namespace gui
 	
 	private:
 		WindowStorage* parent_ptr_;
+
+		GraphicsStorage graphics_storage_;
 
 		std::string selected_module = "";
 		std::map<std::string, ModulePageStorage> module_pages;

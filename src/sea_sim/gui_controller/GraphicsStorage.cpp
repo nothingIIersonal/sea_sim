@@ -2,5 +2,11 @@
 
 namespace gui
 {
+	GraphicsStorage::GraphicsStorage(RenderEngine* parent_ptr)
+		: parent_ptr_(parent_ptr) {}
+	GraphicsStorage::~GraphicsStorage()
+	{
+		parent_ptr_ = nullptr;
+	}
 
 }
