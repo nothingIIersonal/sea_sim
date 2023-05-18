@@ -214,9 +214,7 @@ int main()
 
         auto timer_stop = std::chrono::steady_clock::now();
         const std::chrono::duration<double, std::milli> timer_elapsed = std::chrono::duration<double, std::milli>(1000. / 60.) - (timer_start - timer_stop);
-#ifndef __CORE_DEBUG
         std::this_thread::sleep_for(timer_elapsed);
-#endif // __CORE_DEBUG
     }
 
 
