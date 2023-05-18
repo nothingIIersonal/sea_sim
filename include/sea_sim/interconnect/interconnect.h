@@ -80,6 +80,8 @@ public:
     int object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff);
     std::optional<Ship> object_ship_get(const std::string& identifier);
     std::optional<Ship> object_ship_get_next();
+    std::optional<int64_t> object_ship_get_x(const std::string& identifier);
+    std::optional<int64_t> object_ship_get_y(const std::string& identifier);
     std::optional<std::vector<std::string>> object_ship_get_staff(const std::string& identifier);
     void object_ship_iterator_reset();
 
