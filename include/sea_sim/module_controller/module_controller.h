@@ -143,6 +143,7 @@ class ModuleStorage
 private:
     mutable std::shared_mutex mtx;
     std::map<std::string, Module> modules;
+    std::vector<std::string> modules_order;
 
 protected:
     ModuleStorage(const ModuleStorage&) = delete;
@@ -161,12 +162,14 @@ public:
     void insert(const std::string& path, Module&& module)
     {
         std::unique_lock lock(ModuleStorage::mtx);
+        this->modules_order.push_back(path);
         this->modules.emplace( std::make_pair(path, std::move(module)) );
     }
 
     void erase(const std::string& path)
     {
         std::unique_lock lock(ModuleStorage::mtx);
+        std::remove(this->modules_order.begin(), this->modules_order.end(), path);
         this->modules.erase(path);
     }
 
@@ -192,15 +195,7 @@ public:
     std::vector<std::string> get_paths()
     {
         std::shared_lock lock(ModuleStorage::mtx);
-
-        std::vector<std::string> paths;
-
-        for (auto it = this->modules.begin(); it != this->modules.end(); ++it)
-        {
-            paths.push_back(it->first);
-        }
-
-        return paths;
+        return this->modules_order;
     }
 
     Module::ModuleStateEnum get_state(const std::string& path)
@@ -209,6 +204,7 @@ public:
         return this->modules.contains(path) ? this->modules.at(path).state : Module::ModuleStateEnum::ERR;
     }
 };
+
 
 ModuleStorage module_storage;
 
