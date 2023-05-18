@@ -8,3 +8,6 @@
 .vs
 out
 CMakePresets.json
+
+# all debug data
+.debug

@@ -35,6 +35,8 @@ public:
     ~Ship() noexcept = default;
 
     std::vector<std::string> get_staff() { return this->staff; };
+    int64_t get_x() { return this->x; }
+    int64_t get_y() { return this->y; }
 };
 
 

@@ -5,12 +5,15 @@
 
 int sea_module_init(Interconnect &&ic)
 {
-    ic.wgti.set_module_title("Super-module");
-    ic.wgti.add_text("Text #1 in the World!");
+    ic.wgti.set_module_title("Модуль 1");
+    ic.wgti.add_text("Пример текста в Input-зоне");
+    ic.wgti.add_text("Параметр:"); ic.wgti.sameline();
     ic.wgti.add_inputint("some_par");
     ic.wgti.add_text("Ваше имя:"); ic.wgti.sameline();
     ic.wgti.add_inputtext("name_par", "Имя");
     ic.wgti.add_button("btn_res", "Agree");
+
+    ic.object_ship_set("линкор_2", -100, 500, {"Кувшинов", "Лаптев"});
 
     ic.wgti.send();
 
@@ -19,15 +22,15 @@ int sea_module_init(Interconnect &&ic)
 
 int sea_module_exec(Interconnect &&ic)
 {
-    ic.wgto.add_text("Output text #1 in the World!");
+    ic.wgto.add_text("Пример текста в Output-зоне");
 
     auto par_1 = ic.get_field_int("some_par");
     auto par_name = ic.get_field_string("name_par");
 
     if ( par_1 )
     {
-        ic.wgto.add_text("Get field: " + std::to_string(par_1.value()));
-        ic.wgto.add_text("Get field * 2: " + std::to_string(par_1.value() * 2));
+        ic.wgto.add_text("Полученное значение поля: " + std::to_string(par_1.value()));
+        ic.wgto.add_text("Полученное значение поля * 2: " + std::to_string(par_1.value() * 2));
     }
 
     if ( par_name )
