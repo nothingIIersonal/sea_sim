@@ -289,11 +289,8 @@ std::optional<Ship> Interconnect::object_ship_get(const std::string& identifier)
 {
     std::shared_lock lock(Interconnect::ship_storage_mutex);
 
-    for (auto it = Interconnect::ship_storage.begin(); it != Interconnect::ship_storage.end();)
-    {
-        if ( it->second.get_identifier() == identifier )
-            return it->second;
-    }
+    if ( Interconnect::ship_storage.contains(identifier) )
+        return Interconnect::ship_storage.at(identifier);
 
     return std::nullopt;
 }
@@ -330,6 +327,8 @@ std::optional<int64_t> Interconnect::object_ship_get_y(const std::string& identi
 
 std::optional<std::vector<std::string>> Interconnect::object_ship_get_staff(const std::string& identifier)
 {
+    std::shared_lock lock(Interconnect::ship_storage_mutex);
+
     if ( Interconnect::ship_storage.contains(identifier) )
         return Interconnect::ship_storage.at(identifier).get_staff();
 

@@ -3,50 +3,17 @@
 #include <sea_sim/interconnect/interconnect.h>
 #include <cmath>
 
-int sea_module_init(Interconnect &&ic)
-{
-    ic.wgti.set_module_title("Модуль 3");
-
-    ic.object_ship_set("destroyer", 0, 0, {"Иванов", "Петров", "Сидоров"});
-    ic.object_ship_set("линкор_1", 0, 100, {"Малахов", "Капитанов"});
-    ic.object_ship_set("hovercraft", 100, 100, {"Алексеев", "Кузнецов"});
-    ic.object_ship_set("cruiser", 100, 0, {"Пиратов", "Петренко", "Резнов"});
-    ic.object_ship_set("суворов_0", 50, 50, {"Суворов"});
-
-    ic.wgti.send();
-
-    return 0;
-}
-
+/*
+* LOCAL DATA
+*/
 std::optional<std::string> ship_g = std::nullopt;
 std::optional<std::vector<std::string>> staff_g = std::nullopt;
 bool staff_clicked = false;
 
-int sea_module_exec(Interconnect &&ic)
-{
-    auto tr = ic.get_trigger();
-
-    if ( tr == "" )
-        return -1;
-
-    if (tr == "btn_ship_data_get")
-    {
-        ship_g = ic.get_field_string("ddl_ships");
-
-        if ( !ship_g )
-        {
-            staff_g = std::nullopt;
-            return 0;
-        }
-
-        staff_g = ic.object_ship_get_staff(ship_g.value());
-    }
-
-    staff_clicked = true;
-
-    return 0;
-}
-
+/*
+* LOCAL FUNCTIONS
+*/
+////
 std::vector<std::string> get_ship_names(Interconnect &ic)
 { 
     std::vector<std::string> ship_names;
@@ -64,6 +31,7 @@ void ship_choice(Interconnect &ic)
 
     ic.wgti.add_text("Доступные судна:"); ic.wgti.sameline();
     ic.wgti.add_dropdownlist("ddl_ships", ship_names, true);
+    ic.wgti.add_button("btn_ship_data_get", "Выбрать");
 }
 
 void move(Interconnect &ic)
@@ -80,14 +48,8 @@ void move(Interconnect &ic)
     }
 }
 
-int sea_module_hotf(Interconnect &&ic)
+void out_info(Interconnect &ic)
 {
-    ship_choice(ic);
-    ic.wgti.add_button("btn_ship_data_get", "Выбрать");
-    ic.wgti.send();
-
-    move(ic);
-
     if ( staff_g )
     {
         ic.wgto.add_text("Персонал:");
@@ -115,12 +77,77 @@ int sea_module_hotf(Interconnect &&ic)
             ic.wgto.add_text("y: " + std::to_string(ship_y.value()));
         }
     }
+}
 
+void set_initial_ships(Interconnect &ic)
+{
+    ic.object_ship_set("destroyer", 0, 0, {"Иванов", "Петров", "Сидоров"});
+    ic.object_ship_set("линкор_1", 0, 100, {"Малахов", "Капитанов"});
+    ic.object_ship_set("hovercraft", 100, 100, {"Алексеев", "Кузнецов"});
+    ic.object_ship_set("cruiser", 100, 0, {"Пиратов", "Петренко", "Резнов"});
+    ic.object_ship_set("суворов_0", 50, 50, {"Суворов"});
+}
+////
+
+/*
+* INIT FUNCTION
+*/
+int sea_module_init(Interconnect &&ic)
+{
+    ic.wgti.set_module_title("Модуль 3");
+    set_initial_ships(ic);
+    ic.wgti.send();
+
+    return 0;
+}
+
+/*
+* EXEC FUNCTION
+*/
+int sea_module_exec(Interconnect &&ic)
+{
+    auto tr = ic.get_trigger();
+
+    if ( tr == "" )
+        return -1;
+
+    if (tr == "btn_ship_data_get")
+    {
+        ship_g = ic.get_field_string("ddl_ships");
+
+        if ( !ship_g )
+        {
+            staff_g = std::nullopt;
+            return 0;
+        }
+
+        staff_g = ic.object_ship_get_staff(ship_g.value());
+    }
+
+    staff_clicked = true;
+
+    return 0;
+}
+
+/*
+* HOT FUNCTION
+*/
+int sea_module_hotf(Interconnect &&ic)
+{
+    ship_choice(ic);
+    ic.wgti.send();
+
+    move(ic);
+
+    out_info(ic);
     ic.wgto.send();
 
     return 0;
 }
 
+/*
+* EXIT FUNCTION
+*/
 int sea_module_exit(Interconnect &&ic)
 {
     return 0;
