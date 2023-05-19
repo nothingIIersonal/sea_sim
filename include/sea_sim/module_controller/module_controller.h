@@ -169,7 +169,9 @@ public:
     void erase(const std::string& path)
     {
         std::unique_lock lock(ModuleStorage::mtx);
-        std::remove(this->modules_order.begin(), this->modules_order.end(), path);
+        auto erase_path_it = std::find(this->modules_order.begin(), this->modules_order.end(), path);
+        if (erase_path_it != this->modules_order.end())
+            this->modules_order.erase(erase_path_it);
         this->modules.erase(path);
     }
 
