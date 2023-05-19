@@ -47,20 +47,11 @@ void * dlsym(void *hdll, const char *s)
 }
 
 
-#else
+#else // UNIX
 
 #include <dlfcn.h>
-#include <unistd.h>
 
-const size_t strnlen_t(const char *str, size_t maxlen)
-{
-    size_t i;
-    for (i = 0; i < maxlen && str[i]; ++i);
-
-    return i;
-}
-
-#endif // WIN32
+#endif
 
 
 #include <string.h>
