@@ -1,7 +1,7 @@
 #include <iostream>
+#include <cmath>
 
 #include <sea_sim/interconnect/interconnect.h>
-#include <cmath>
 
 /*
 * LOCAL DATA

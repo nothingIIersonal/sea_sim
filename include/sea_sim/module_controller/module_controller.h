@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include <shared_mutex>
-#include <sea_sim/interconnect/interconnect.h>
+#include <sea_sim/interconnect/interconnect_share.h>
 
 
 #ifdef WIN32
@@ -240,9 +240,9 @@ const int load_module(const char *module_path, Endpoint module_endpoint)
     printf("Init function address: 0x%p\n", init);
 
     printf("Call init function...\n");
-    int init_res = (* init)( Interconnect(module_endpoint, module_path) );
+    int init_res = (* init)( Interconnect(module_endpoint, module_path, SHARE_OBJECTS_PTRS) );
 #else
-    (* init)( Interconnect(module_endpoint, module_path) );
+    (* init)( Interconnect(module_endpoint, module_path, SHARE_OBJECTS_PTRS) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Init function done with code %d\n", init_res);
@@ -277,9 +277,9 @@ const int exec_module(const char *module_path, Endpoint module_endpoint)
     printf("Exec function address: 0x%p\n", exec);
 
     printf("Call exec function...\n");
-    int exec_res = (* exec)( Interconnect(module_endpoint, module_path) );
+    int exec_res = (* exec)( Interconnect(module_endpoint, module_path, SHARE_OBJECTS_PTRS) );
 #else
-    (* exec)( Interconnect(module_endpoint, module_path) );
+    (* exec)( Interconnect(module_endpoint, module_path, SHARE_OBJECTS_PTRS) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Exec function done with code %d\n", exec_res);
@@ -316,9 +316,9 @@ const int unload_module(const char *module_path, Endpoint module_endpoint)
     printf("Exit function address: 0x%p\n", exit);
 
     printf("Call exit function...\n");
-    int exit_res = (* exit)( Interconnect(module_endpoint, module_path) );
+    int exit_res = (* exit)( Interconnect(module_endpoint, module_path, SHARE_OBJECTS_PTRS) );
 #else
-    (* exit)( Interconnect(module_endpoint, module_path) );
+    (* exit)( Interconnect(module_endpoint, module_path, SHARE_OBJECTS_PTRS) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Exit function done with code %d\n", exit_res);
@@ -361,9 +361,9 @@ const int run_hot_function(const char *module_path, Endpoint module_endpoint)
     printf("Hot function address: 0x%p\n", hotf);
 
     printf("Call hot function...\n");
-    int hotf_res = (* hotf)( Interconnect(module_endpoint, module_path) );
+    int hotf_res = (* hotf)( Interconnect(module_endpoint, module_path, SHARE_OBJECTS_PTRS) );
 #else
-    (* hotf)( Interconnect(module_endpoint, module_path) );
+    (* hotf)( Interconnect(module_endpoint, module_path, SHARE_OBJECTS_PTRS) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Hot function done with code %d\n", hotf_res);
