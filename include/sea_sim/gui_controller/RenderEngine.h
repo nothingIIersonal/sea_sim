@@ -37,15 +37,19 @@ namespace gui
 		std::optional<channel_packet> render_inputs();
 		void render_outputs();
 
-		const sf::RenderTexture& get_texture();
-		const sf::Vector2u& get_texture_size();
+		sf::RenderTexture& get_texture(bool get_writing_texture = false);
+		sf::Vector2u get_texture_size(bool get_writing_texture = false);
 
 		void set_notification(const std::string& text);
 	
 	private:
 		WindowStorage* parent_ptr_;
 
-		sf::RenderTexture render_texture_;
+		struct GraphicBuffer
+		{
+			sf::RenderTexture render_texture_[2];
+			bool writing_buffer = 0;
+		} graphic_buffer_;
 
 		GraphicsStorage graphics_storage_;
 

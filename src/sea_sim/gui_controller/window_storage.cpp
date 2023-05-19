@@ -21,7 +21,10 @@ namespace gui
 			keyHit[reset_array] = false;
 		}
 		
-		render_texture_.create(500, 500);
+		render_engine_.create_texture(500u, 500u);
+
+		sf::Vector2u scene_size = render_engine_.get_texture_size(true);
+		send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 	}
 
 	void WindowStorage::build_window()
@@ -93,7 +96,7 @@ namespace gui
                 }
 				else if (packet_event == "update_texture")
 				{
-					render_engine_.update_texture();
+					render_engine_.swap_texture();
 				}
                 else if (packet_event == "shutdown")
                 {
@@ -302,60 +305,57 @@ namespace gui
 	{
 		ImGuiWindowFlags_ flags = ImGuiWindowFlags_HorizontalScrollbar;
 
-		if (ImGui::Begin(u8"Ввод данных"_C, NULL, flags))
-		{
-			ImGui::Text(u8"%.0f FPS"_C, ImGui::GetIO().Framerate);
-			ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_engine_.get_texture_size().x, render_engine_.get_texture_size().y);
+		ImGui::Begin(u8"Ввод данных"_C, NULL, flags);
 
-			ImGui::Separator();
+		ImGui::Text(u8"%.0f FPS"_C, ImGui::GetIO().Framerate);
+		ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_engine_.get_texture_size().x, render_engine_.get_texture_size().y);
 
-			if (auto packet = render_engine_.render_inputs())
-				send_to_core(packet.value());
+		ImGui::Separator();
 
-			ImGui::End();
-		}
+		if (auto packet = render_engine_.render_inputs())
+			send_to_core(packet.value());
+
+		ImGui::End();
 	}
 	void WindowStorage::show_child_output()
 	{
 		ImGuiWindowFlags_ flags = ImGuiWindowFlags_HorizontalScrollbar;
 
-		if (ImGui::Begin(u8"Результаты"_C, NULL, flags))
-		{
-			render_engine_.render_outputs();
+		ImGui::Begin(u8"Результаты"_C, NULL, flags);
+		
+		render_engine_.render_outputs();
 
-			ImGui::End();
-		}
+		ImGui::End();
 	}
 	void WindowStorage::show_child_view()
 	{
 		ImGuiWindowFlags view_window_flags =
 			ImGuiWindowFlags_NoCollapse;
 
-		if (ImGui::Begin(u8"Обзор"_C, NULL, view_window_flags))
+		ImGui::Begin(u8"Обзор"_C, NULL, view_window_flags);
+		ImVec2 view_area =
+			ImGui::GetWindowContentRegionMax() -
+			ImGui::GetWindowContentRegionMin();
+
+		if (view_area != windows_show_state_.render_size)
 		{
-			ImVec2 view_area = 
-				ImGui::GetWindowContentRegionMax() - 
-				ImGui::GetWindowContentRegionMin();
+			windows_show_state_.render_size = view_area;
 
-			if (view_area != windows_show_state_.render_size)
-			{
-				windows_show_state_.render_size = view_area;
+			view_area.x = max(1, view_area.x - 2);
+			view_area.y = max(1, view_area.y - 2);
 
-				view_area.x = max(1, view_area.x - 2);
-				view_area.y = max(1, view_area.y - 2);
+			render_engine_.create_texture(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
 
-				render_engine_.create_texture(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
+			sf::Vector2u scene_size = render_engine_.get_texture_size(true);
 
-				sf::Vector2u scene_size = render_engine_.get_texture_size();
-				//send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
-			}
-			
-			render_engine_.render_scene();
-
-			ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
-
-			ImGui::End();
+			send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 		}
+
+		render_engine_.render_scene();
+
+		ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
+
+		ImGui::End();
 	}
 
 	void WindowStorage::show_main_menu_bar()

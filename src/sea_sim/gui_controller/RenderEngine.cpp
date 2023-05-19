@@ -13,7 +13,7 @@ namespace gui
 
 	void RenderEngine::create_texture(unsigned int x, unsigned int y)
 	{
-		render_texture_.create(x, y);
+		get_texture(true).create(x, y);
 	}
 
 	void RenderEngine::update_input_interface(std::string& module, nlohmann::json& data)
@@ -49,7 +49,7 @@ namespace gui
 	{
 		using namespace gui::utils;
 
-		sf::Vector2u scene_size = render_texture_.getSize();
+		sf::Vector2u scene_size = get_texture(true).getSize();
 
 		sf::Vector2f rect_size{
 			max(0.f, static_cast<float>(scene_size.x) - 50.f),
@@ -61,9 +61,9 @@ namespace gui
 
 		// render
 
-		render_texture_.clear();
-		render_texture_.draw(rectangle);
-		render_texture_.display();
+		get_texture(true).clear();
+		get_texture(true).draw(rectangle);
+		get_texture(true).display();
 
 		return;
 	}
@@ -135,14 +135,14 @@ namespace gui
 		module_pages[selected_module].render_output_interface();
 	}
 
-	const sf::RenderTexture& RenderEngine::get_texture()
+	sf::RenderTexture& RenderEngine::get_texture(bool get_writing_texture)
 	{
-		return render_texture_;
+		return graphic_buffer_.render_texture_[get_writing_texture == graphic_buffer_.writing_buffer];
 	}
 
-	const sf::Vector2u& RenderEngine::get_texture_size()
+	sf::Vector2u RenderEngine::get_texture_size(bool get_writing_texture)
 	{
-		return render_texture_.getSize();
+		return get_texture(get_writing_texture).getSize();
 	}
 
 	void RenderEngine::set_notification(const std::string& text)

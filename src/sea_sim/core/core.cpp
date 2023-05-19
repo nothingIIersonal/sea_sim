@@ -90,6 +90,11 @@ int main()
                             shutdown_type = SHUTDOWN_TYPE_ENUM::SHUTDOWN;
                             break;
                         }
+                        else if (event != "load_module" && event != "exec_module" && event != "unload_module")
+                        {
+                            continue;
+                        }
+
 
                         const auto& data = packet.value().data;
                         const auto module_path = data["module_path"].get<std::string>();
