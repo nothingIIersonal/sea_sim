@@ -13,14 +13,14 @@
 #include <shared_mutex>
 
 
-typedef struct shared_ic_objects
+typedef struct shared_ic_objects_t
 {
     std::map<std::string, Ship>& ship_storage;
     std::shared_mutex& ship_storage_mutex;
 
     std::map<std::string, Isle>& isle_storage;
     std::shared_mutex& isle_storage_mutex;
-} shared_ic_objects;
+} shared_ic_objects_t;
 
 
 class Interconnect
@@ -75,7 +75,7 @@ protected:
     void operator=(const Interconnect&) = delete;
 
 public:
-    explicit Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects& shared_ic_objects);
+    explicit Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects_t);
     ~Interconnect() noexcept = default;
 
     WGTI wgti;

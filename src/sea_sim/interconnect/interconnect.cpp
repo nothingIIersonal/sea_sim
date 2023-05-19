@@ -4,7 +4,7 @@
 #define container_of(ptr, type, member) ((type *)((size_t)(ptr) - ((size_t)&(((type *)0)->member))))
 
 
-Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects& shared_ic_objects) 
+Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects) 
                     : module_endpoint(module_endpoint), module_name(module_name),
                       ship_storage(shared_ic_objects.ship_storage), ship_storage_mutex(shared_ic_objects.ship_storage_mutex),
                       isle_storage(shared_ic_objects.isle_storage), isle_storage_mutex(shared_ic_objects.isle_storage_mutex)

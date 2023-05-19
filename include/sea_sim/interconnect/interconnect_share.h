@@ -16,13 +16,7 @@ std::map<std::string, Isle> isle_storage       = {};
 std::shared_mutex           isle_storage_mutex = {};
 
 
-// auto ship_storage_ptr       = std::make_shared<std::map<std::string, Ship>>(ship_storage);
-// auto ship_storage_mutex_ptr = std::make_shared<std::shared_mutex>(ship_storage_mutex);
-// auto isle_storage_ptr       = std::make_shared<std::map<std::string, Isle>>(isle_storage);
-// auto isle_storage_mutex_ptr = std::make_shared<std::shared_mutex>(isle_storage_mutex);
-
-
-#define SHARED_IC_OBJECTS shared_ic_objects{ ship_storage, ship_storage_mutex, isle_storage, isle_storage_mutex }
+auto shared_ic_objects = shared_ic_objects_t{ ship_storage, ship_storage_mutex, isle_storage, isle_storage_mutex };
 
 
 #endif
