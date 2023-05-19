@@ -67,7 +67,6 @@ namespace gui
 
 		ImFont* font_x20_;
 
-		sf::RenderTexture render_texture_;
 		RenderEngine render_engine_;
 		FileDialog file_dialog_;
 		ModuleDialog module_dialog_;

@@ -11,6 +11,11 @@ namespace gui
 		parent_ptr_ = nullptr;
 	}
 
+	void RenderEngine::create_texture(unsigned int x, unsigned int y)
+	{
+		render_texture_.create(x, y);
+	}
+
 	void RenderEngine::update_input_interface(std::string& module, nlohmann::json& data)
 	{
 		if (!module_pages.contains(module))
@@ -35,16 +40,16 @@ namespace gui
         }
     }
 
-	void RenderEngine::update_texture()
+	void RenderEngine::swap_texture()
 	{
 
 	}
 
-	void RenderEngine::render_scene(sf::RenderTexture& texture)
+	void RenderEngine::render_scene()
 	{
 		using namespace gui::utils;
 
-		sf::Vector2u scene_size = texture.getSize();
+		sf::Vector2u scene_size = render_texture_.getSize();
 
 		sf::Vector2f rect_size{
 			max(0.f, static_cast<float>(scene_size.x) - 50.f),
@@ -56,9 +61,9 @@ namespace gui
 
 		// render
 
-		texture.clear();
-		texture.draw(rectangle);
-		texture.display();
+		render_texture_.clear();
+		render_texture_.draw(rectangle);
+		render_texture_.display();
 
 		return;
 	}
@@ -128,6 +133,16 @@ namespace gui
 			return;
 
 		module_pages[selected_module].render_output_interface();
+	}
+
+	const sf::RenderTexture& RenderEngine::get_texture()
+	{
+		return render_texture_;
+	}
+
+	const sf::Vector2u& RenderEngine::get_texture_size()
+	{
+		return render_texture_.getSize();
 	}
 
 	void RenderEngine::set_notification(const std::string& text)

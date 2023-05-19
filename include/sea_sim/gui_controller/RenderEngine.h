@@ -23,22 +23,29 @@ namespace gui
 		RenderEngine(WindowStorage* parent);
 		~RenderEngine();
 
+		void create_texture(unsigned int x, unsigned int y);
+
 		void update_input_interface(std::string& module, nlohmann::json& data);
 		void update_output_interface(std::string& module, nlohmann::json& data);
 		void remove_interface(std::string& module);
 
-		void update_texture();
+		void swap_texture();
 
-		void render_scene(sf::RenderTexture& texture);
+		void render_scene();
 
 		std::optional<std::string> render_modules_combo();
 		std::optional<channel_packet> render_inputs();
 		void render_outputs();
 
+		const sf::RenderTexture& get_texture();
+		const sf::Vector2u& get_texture_size();
+
 		void set_notification(const std::string& text);
 	
 	private:
 		WindowStorage* parent_ptr_;
+
+		sf::RenderTexture render_texture_;
 
 		GraphicsStorage graphics_storage_;
 

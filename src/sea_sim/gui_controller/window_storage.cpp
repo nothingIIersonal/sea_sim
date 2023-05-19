@@ -305,7 +305,7 @@ namespace gui
 		if (ImGui::Begin(u8"Ввод данных"_C, NULL, flags))
 		{
 			ImGui::Text(u8"%.0f FPS"_C, ImGui::GetIO().Framerate);
-			ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_texture_.getSize().x, render_texture_.getSize().y);
+			ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_engine_.get_texture_size().x, render_engine_.get_texture_size().y);
 
 			ImGui::Separator();
 
@@ -344,15 +344,15 @@ namespace gui
 				view_area.x = max(1, view_area.x - 2);
 				view_area.y = max(1, view_area.y - 2);
 
-				render_texture_.create(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
+				render_engine_.create_texture(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
 
-				sf::Vector2u scene_size = render_texture_.getSize();
+				sf::Vector2u scene_size = render_engine_.get_texture_size();
 				//send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 			}
 			
-			render_engine_.render_scene(render_texture_);
+			render_engine_.render_scene();
 
-			ImGui::Image(render_texture_, sf::Color::White, sf::Color(70, 70, 70));
+			ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
 
 			ImGui::End();
 		}
