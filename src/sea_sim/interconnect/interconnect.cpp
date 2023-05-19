@@ -4,7 +4,10 @@
 #define container_of(ptr, type, member) ((type *)((size_t)(ptr) - ((size_t)&(((type *)0)->member))))
 
 
-Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name) : module_endpoint(module_endpoint), module_name(module_name)
+Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects) 
+                    : module_endpoint(module_endpoint), module_name(module_name),
+                      ship_storage(shared_ic_objects.ship_storage), ship_storage_mutex(shared_ic_objects.ship_storage_mutex),
+                      isle_storage(shared_ic_objects.isle_storage), isle_storage_mutex(shared_ic_objects.isle_storage_mutex)
 {
     if (const auto &packet = this->module_endpoint.TryRead())
     {
@@ -269,37 +272,30 @@ std::optional<std::string> Interconnect::get_field_string(const std::string& fie
     return std::nullopt;
 }
 
-
-std::map<std::string, Ship> Interconnect::ship_storage = {};
-std::shared_mutex Interconnect::ship_storage_mutex = {};
-std::map<std::string, Isle> Interconnect::isle_storage = {};
-std::shared_mutex Interconnect::isle_storage_mutex = {};
-
-
 int Interconnect::object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff)
 {
-    std::unique_lock lock(Interconnect::ship_storage_mutex);
+    std::unique_lock lock(this->ship_storage_mutex);
 
-    Interconnect::ship_storage.insert_or_assign(identifier, Ship{identifier, x, y, staff} );
+    this->ship_storage.insert_or_assign(identifier, Ship{identifier, x, y, staff} );
 
     return 0;
 }
 
 std::optional<Ship> Interconnect::object_ship_get(const std::string& identifier)
 {
-    std::shared_lock lock(Interconnect::ship_storage_mutex);
+    std::shared_lock lock(this->ship_storage_mutex);
 
-    if ( Interconnect::ship_storage.contains(identifier) )
-        return Interconnect::ship_storage.at(identifier);
+    if ( this->ship_storage.contains(identifier) )
+        return this->ship_storage.at(identifier);
 
     return std::nullopt;
 }
 
 std::optional<Ship> Interconnect::object_ship_get_next()
 {
-    std::shared_lock lock(Interconnect::ship_storage_mutex);
+    std::shared_lock lock(this->ship_storage_mutex);
 
-    if ( this->ship_storage_it == Interconnect::ship_storage.end() )
+    if ( this->ship_storage_it == this->ship_storage.end() )
         return std::nullopt;
 
     return (this->ship_storage_it++)->second;
@@ -307,35 +303,35 @@ std::optional<Ship> Interconnect::object_ship_get_next()
 
 std::optional<int64_t> Interconnect::object_ship_get_x(const std::string& identifier)
 {
-    std::shared_lock lock(Interconnect::ship_storage_mutex);
+    std::shared_lock lock(this->ship_storage_mutex);
 
-    if ( Interconnect::ship_storage.contains(identifier) )
-        return Interconnect::ship_storage.at(identifier).get_x();
+    if ( this->ship_storage.contains(identifier) )
+        return this->ship_storage.at(identifier).get_x();
 
     return std::nullopt;
 }
 
 std::optional<int64_t> Interconnect::object_ship_get_y(const std::string& identifier)
 {
-    std::shared_lock lock(Interconnect::ship_storage_mutex);
+    std::shared_lock lock(this->ship_storage_mutex);
 
-    if ( Interconnect::ship_storage.contains(identifier) )
-        return Interconnect::ship_storage.at(identifier).get_y();
+    if ( this->ship_storage.contains(identifier) )
+        return this->ship_storage.at(identifier).get_y();
 
     return std::nullopt;
 }
 
 std::optional<std::vector<std::string>> Interconnect::object_ship_get_staff(const std::string& identifier)
 {
-    std::shared_lock lock(Interconnect::ship_storage_mutex);
+    std::shared_lock lock(this->ship_storage_mutex);
 
-    if ( Interconnect::ship_storage.contains(identifier) )
-        return Interconnect::ship_storage.at(identifier).get_staff();
+    if ( this->ship_storage.contains(identifier) )
+        return this->ship_storage.at(identifier).get_staff();
 
     return std::nullopt;
 }
 
 void Interconnect::object_ship_iterator_reset()
 {
-    this->ship_storage_it = Interconnect::ship_storage.begin();
+    this->ship_storage_it = this->ship_storage.begin();
 }

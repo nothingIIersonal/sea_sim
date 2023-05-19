@@ -13,6 +13,16 @@
 #include <shared_mutex>
 
 
+typedef struct shared_ic_objects_t
+{
+    std::map<std::string, Ship>& ship_storage;
+    std::shared_mutex& ship_storage_mutex;
+
+    std::map<std::string, Isle>& isle_storage;
+    std::shared_mutex& isle_storage_mutex;
+} shared_ic_objects_t;
+
+
 class Interconnect
 {
 private:
@@ -21,13 +31,13 @@ private:
     nlohmann::json ui_fields;
     std::string ui_trigger;
 
-    static std::map<std::string, Ship> ship_storage;
+    std::map<std::string, Ship>& ship_storage;
     std::map<std::string, Ship> ::iterator ship_storage_it;
-    static std::shared_mutex ship_storage_mutex;
+    std::shared_mutex& ship_storage_mutex;
 
-    static std::map<std::string, Isle> isle_storage;
+    std::map<std::string, Isle>& isle_storage;
     std::map<std::string, Isle> ::iterator isle_storage_it;
-    static std::shared_mutex isle_storage_mutex;
+    std::shared_mutex& isle_storage_mutex;
 
     class WGTI
     {
@@ -65,7 +75,7 @@ protected:
     void operator=(const Interconnect&) = delete;
 
 public:
-    Interconnect(const Endpoint& module_endpoint, const std::string& module_name);
+    explicit Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects_t);
     ~Interconnect() noexcept = default;
 
     WGTI wgti;
