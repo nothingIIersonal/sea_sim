@@ -9,4 +9,4 @@ namespace gui
 		parent_ptr_ = nullptr;
 	}
 
-}
+} // namespace gui

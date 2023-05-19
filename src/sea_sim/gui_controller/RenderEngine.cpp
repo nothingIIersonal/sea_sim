@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+
 namespace gui
 {
 	RenderEngine::RenderEngine(WindowStorage* parent)
@@ -41,13 +42,44 @@ namespace gui
         }
     }
 
+	void RenderEngine::draw_from_json(nlohmann::json& data)
+	{
+		for (auto& primitive : data)
+		{
+			auto type = primitive["type"].get<std::string>();
+			auto& settings = primitive["settings"];
+
+			if (type == "line")
+			{
+
+			}
+		}
+	}
+
 	void RenderEngine::swap_texture()
 	{
+		get_texture(true).display();
+
 		graphic_buffer_.writing_buffer = !graphic_buffer_.writing_buffer;
 
 		if (get_texture_size(true) != get_texture_size(false))
 			create_texture(get_texture_size(false).x, get_texture_size(false).y);
+
+		get_texture(true).clear();
+
+		sf::Vector2u scene_size = get_texture(true).getSize();
+
+		sf::Vector2f rect_size{
+			max(0.f, static_cast<float>(scene_size.x) - 50.f),
+			max(0.f, static_cast<float>(scene_size.y) - 50.f) };
+
+		sf::RectangleShape rectangle(rect_size);
+		rectangle.setFillColor(sf::Color::Cyan);
+		rectangle.setPosition(25, 25);
+
+		get_texture(true).draw(rectangle);
 	}
+
 
 	void RenderEngine::render_scene()
 	{
@@ -143,7 +175,6 @@ namespace gui
 	{
 		return graphic_buffer_.render_texture_[get_writing_texture == graphic_buffer_.writing_buffer];
 	}
-
 	sf::Vector2u RenderEngine::get_texture_size(bool get_writing_texture)
 	{
 		return get_texture(get_writing_texture).getSize();

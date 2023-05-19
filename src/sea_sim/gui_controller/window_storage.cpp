@@ -95,6 +95,10 @@ namespace gui
 					windows_show_state_.exit_popup_new = false;
 					set_notification(packet_data["text"].get<std::string>());
                 }
+				else if (packet_event == "draw")
+				{
+					render_engine_.draw_from_json(packet_data);
+				}
 				else if (packet_event == "swap_texture")
 				{
 					render_engine_.swap_texture();
@@ -330,13 +334,10 @@ namespace gui
 	}
 	void WindowStorage::show_child_view()
 	{
-		ImGuiWindowFlags view_window_flags =
-			ImGuiWindowFlags_NoCollapse;
+		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse);
 
-		ImGui::Begin(u8"Обзор"_C, NULL, view_window_flags);
-		ImVec2 view_area =
-			ImGui::GetWindowContentRegionMax() -
-			ImGui::GetWindowContentRegionMin();
+		ImVec2 view_area = ImGui::GetWindowContentRegionMax() -
+			               ImGui::GetWindowContentRegionMin();
 
 		if (view_area != windows_show_state_.render_size)
 		{
@@ -352,7 +353,7 @@ namespace gui
 			send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 		}
 
-		render_engine_.render_scene();
+		// render_engine_.render_scene();
 
 		ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
 

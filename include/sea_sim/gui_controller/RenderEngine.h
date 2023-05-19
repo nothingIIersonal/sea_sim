@@ -29,7 +29,10 @@ namespace gui
 		void update_output_interface(std::string& module, nlohmann::json& data);
 		void remove_interface(std::string& module);
 
+		void draw_from_json(nlohmann::json& data);
+
 		void swap_texture();
+
 
 		void render_scene();
 
