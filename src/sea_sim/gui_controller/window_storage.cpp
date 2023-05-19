@@ -22,8 +22,9 @@ namespace gui
 		}
 		
 		render_engine_.create_texture(500u, 500u);
+		render_engine_.swap_texture();
 
-		sf::Vector2u scene_size = render_engine_.get_texture_size(true);
+		sf::Vector2u scene_size = render_engine_.get_texture_size();
 		send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 	}
 
@@ -94,7 +95,7 @@ namespace gui
 					windows_show_state_.exit_popup_new = false;
 					set_notification(packet_data["text"].get<std::string>());
                 }
-				else if (packet_event == "update_texture")
+				else if (packet_event == "swap_texture")
 				{
 					render_engine_.swap_texture();
 				}
@@ -346,7 +347,7 @@ namespace gui
 
 			render_engine_.create_texture(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
 
-			sf::Vector2u scene_size = render_engine_.get_texture_size(true);
+			sf::Vector2u scene_size = render_engine_.get_texture_size();
 
 			send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 		}

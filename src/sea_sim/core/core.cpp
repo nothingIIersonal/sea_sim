@@ -203,6 +203,8 @@ int main()
             }
         }
 
+        endpoint_storage.at("gui").SendData({ "gui", "core", "swap_texture", {} });
+
         if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_0 && endpoint_storage.size() == 1 )
         {
             shutdown_type = SHUTDOWN_TYPE_ENUM::STAGE_1;

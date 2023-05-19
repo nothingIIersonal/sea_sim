@@ -38,7 +38,7 @@ namespace gui
 		void render_outputs();
 
 		sf::RenderTexture& get_texture(bool get_writing_texture = false);
-		sf::Vector2u get_texture_size(bool get_writing_texture = false);
+		sf::Vector2u get_texture_size(bool get_writing_texture = true);
 
 		void set_notification(const std::string& text);
 	

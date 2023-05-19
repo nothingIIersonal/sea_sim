@@ -1,6 +1,7 @@
 ﻿#include <sea_sim/gui_controller/RenderEngine.h>
 #include <sea_sim/gui_controller/window_storage.h>
 
+#include <iostream>
 
 namespace gui
 {
@@ -42,7 +43,10 @@ namespace gui
 
 	void RenderEngine::swap_texture()
 	{
+		graphic_buffer_.writing_buffer = !graphic_buffer_.writing_buffer;
 
+		if (get_texture_size(true) != get_texture_size(false))
+			create_texture(get_texture_size(false).x, get_texture_size(false).y);
 	}
 
 	void RenderEngine::render_scene()
