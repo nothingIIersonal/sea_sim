@@ -114,7 +114,7 @@ namespace gui
 	}
 
 
-	ModulePageStorage::WidgetElement::WidgetElement(nlohmann::json widget, nlohmann::json stored_value)
+	ModulePageStorage::WidgetElement::WidgetElement(nlohmann::json& widget, nlohmann::json stored_value)
 	{
 		auto type = widget["type"].get<std::string>();
 		widget_info_ = widget["widget"];

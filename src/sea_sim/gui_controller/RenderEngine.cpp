@@ -1,20 +1,35 @@
 ﻿#include <sea_sim/gui_controller/RenderEngine.h>
+#include <sea_sim/gui_controller/window_storage.h>
+
+#include <iostream>
 
 
 namespace gui
 {
-	void RenderEngine::update_input_interface(std::string module, nlohmann::json data)
+	RenderEngine::RenderEngine(WindowStorage* parent)
+		: parent_ptr_(parent), graphics_storage_(this) {}
+	RenderEngine::~RenderEngine()
+	{
+		parent_ptr_ = nullptr;
+	}
+
+	void RenderEngine::create_texture(unsigned int x, unsigned int y)
+	{
+		get_texture(true).create(x, y);
+	}
+
+	void RenderEngine::update_input_interface(std::string& module, nlohmann::json& data)
 	{
 		if (!module_pages.contains(module))
 			selected_module = module;
 
 		module_pages[module].set_input_interface(data);
 	}
-	void RenderEngine::update_output_interface(std::string module, nlohmann::json data)
+	void RenderEngine::update_output_interface(std::string& module, nlohmann::json& data)
 	{
 		module_pages[module].set_output_interface(data);
 	}
-	void RenderEngine::remove_interface(std::string module)
+	void RenderEngine::remove_interface(std::string& module)
     {
 		if (module_pages.contains(module))
         {
@@ -27,11 +42,50 @@ namespace gui
         }
     }
 
-	void RenderEngine::render_scene(sf::RenderTexture& texture)
+	void RenderEngine::draw_from_json(nlohmann::json& data)
+	{
+		for (auto& primitive : data)
+		{
+			auto type = primitive["type"].get<std::string>();
+			auto& settings = primitive["settings"];
+
+			if (type == "line")
+			{
+
+			}
+		}
+	}
+
+	void RenderEngine::swap_texture()
+	{
+		sf::Vector2u scene_size = get_texture(true).getSize();
+
+		sf::Vector2f rect_size{
+			max(0.f, static_cast<float>(scene_size.x) - 50.f),
+			max(0.f, static_cast<float>(scene_size.y) - 50.f) };
+
+		sf::RectangleShape rectangle(rect_size);
+		rectangle.setFillColor(sf::Color::Cyan);
+		rectangle.setPosition(25, 25);
+
+		get_texture(true).draw(rectangle);
+
+		get_texture(true).display();
+
+		graphic_buffer_.writing_buffer = !graphic_buffer_.writing_buffer;
+
+		if (get_texture_size(true) != get_texture_size(false))
+			create_texture(get_texture_size(false).x, get_texture_size(false).y);
+
+		get_texture(true).clear();
+	}
+
+
+	void RenderEngine::render_scene()
 	{
 		using namespace gui::utils;
 
-		sf::Vector2u scene_size = texture.getSize();
+		sf::Vector2u scene_size = get_texture(true).getSize();
 
 		sf::Vector2f rect_size{
 			max(0.f, static_cast<float>(scene_size.x) - 50.f),
@@ -43,9 +97,9 @@ namespace gui
 
 		// render
 
-		texture.clear();
-		texture.draw(rectangle);
-		texture.display();
+		get_texture(true).clear();
+		get_texture(true).draw(rectangle);
+		get_texture(true).display();
 
 		return;
 	}
@@ -115,6 +169,23 @@ namespace gui
 			return;
 
 		module_pages[selected_module].render_output_interface();
+	}
+
+	sf::RenderTexture& RenderEngine::get_texture(bool get_writing_texture)
+	{
+		return graphic_buffer_.render_texture_[get_writing_texture == graphic_buffer_.writing_buffer];
+	}
+	sf::Vector2u RenderEngine::get_texture_size(bool get_writing_texture)
+	{
+		return get_texture(get_writing_texture).getSize();
+	}
+
+	void RenderEngine::set_notification(const std::string& text)
+	{
+		if (parent_ptr_ == nullptr)
+			return;
+
+		parent_ptr_->set_notification(text);
 	}
 
 } // namespace gui
