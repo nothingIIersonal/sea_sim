@@ -194,7 +194,7 @@ int main()
 
         for ( const auto& path : module_storage.get_paths() )
         {
-            if ( module_storage.contains_order(path) )
+            if ( module_storage.contains(path) )
             {
                 if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
                 {
