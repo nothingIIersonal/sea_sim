@@ -72,9 +72,9 @@ namespace gui
 
 						if (ImGui::Button((ICON_sea_sim__ARROW_UP "##" + std::to_string(gl_id)).c_str()))
 						{
-							std::swap<std::string>(modules_order_.at(gl_id), modules_order_.at(static_cast<size_t>(gl_id - 1)));
-
 							buf.push_back({ "core", "gui", "move_module_up", {{"module_path", *order_entry}} });
+
+							std::swap<std::string>(modules_order_.at(gl_id), modules_order_.at(static_cast<size_t>(gl_id - 1)));
 						}
 
 						if (gl_id == 0)
@@ -89,9 +89,9 @@ namespace gui
 
 						if (ImGui::Button((ICON_sea_sim__ARROW_DOWN + std::string("##") + std::to_string(gl_id)).c_str()))
 						{
-							std::swap<std::string>(modules_order_.at(gl_id), modules_order_.at(static_cast<size_t>(gl_id + 1)));
-
 							buf.push_back({ "core", "gui", "move_module_down", {{"module_path", *order_entry}} });
+
+							std::swap<std::string>(modules_order_.at(gl_id), modules_order_.at(static_cast<size_t>(gl_id + 1)));
 						}
 
 						if (gl_id == modules_map_.size() - 1)

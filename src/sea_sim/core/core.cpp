@@ -90,6 +90,10 @@ int main()
                             shutdown_type = SHUTDOWN_TYPE_ENUM::SHUTDOWN;
                             break;
                         }
+                        else if (event == "view_area_resized")
+                        {
+                            continue;
+                        }
 
                         const auto& data = packet.value().data;
                         const auto module_path = data["module_path"].get<std::string>();
