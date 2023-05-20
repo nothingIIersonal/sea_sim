@@ -14,12 +14,6 @@ namespace gui
 		GraphicsStorage(RenderEngine* parent_ptr_);
 		~GraphicsStorage();
 
-		// void insert();
-		// void erase();
-		// void clear();
-
-		// void render_graphics();
-
 	private:
 		RenderEngine* parent_ptr_;
 

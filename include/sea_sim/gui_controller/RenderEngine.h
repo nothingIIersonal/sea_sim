@@ -23,7 +23,7 @@ namespace gui
 		RenderEngine(WindowStorage* parent);
 		~RenderEngine();
 
-		void create_texture(unsigned int x, unsigned int y);
+		void create_texture(const sf::Vector2u& size);
 
 		void update_input_interface(std::string& module, nlohmann::json& data);
 		void update_output_interface(std::string& module, nlohmann::json& data);
@@ -41,7 +41,7 @@ namespace gui
 		void render_outputs();
 
 		sf::RenderTexture& get_texture(bool get_writing_texture = false);
-		sf::Vector2u get_texture_size(bool get_writing_texture = true);
+		sf::Vector2u get_texture_size(bool current_texture = false);
 
 		void set_notification(const std::string& text);
 	
@@ -52,6 +52,8 @@ namespace gui
 		{
 			sf::RenderTexture render_texture_[2];
 			bool writing_buffer = 0;
+
+			sf::Vector2u size_to_set = {};
 		} graphic_buffer_;
 
 		GraphicsStorage graphics_storage_;

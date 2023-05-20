@@ -21,7 +21,7 @@ namespace gui
 			keyHit[reset_array] = false;
 		}
 		
-		render_engine_.create_texture(500u, 500u);
+		render_engine_.create_texture({ 500u, 500u });
 		render_engine_.swap_texture();
 
 		sf::Vector2u scene_size = render_engine_.get_texture_size();
@@ -346,7 +346,7 @@ namespace gui
 			view_area.x = max(1, view_area.x - 2);
 			view_area.y = max(1, view_area.y - 2);
 
-			render_engine_.create_texture(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
+			render_engine_.create_texture(view_area);
 
 			sf::Vector2u scene_size = render_engine_.get_texture_size();
 

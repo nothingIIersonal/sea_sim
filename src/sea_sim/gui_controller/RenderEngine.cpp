@@ -13,9 +13,9 @@ namespace gui
 		parent_ptr_ = nullptr;
 	}
 
-	void RenderEngine::create_texture(unsigned int x, unsigned int y)
+	void RenderEngine::create_texture(const sf::Vector2u& size)
 	{
-		get_texture(true).create(x, y);
+		graphic_buffer_.size_to_set = size;
 	}
 
 	void RenderEngine::update_input_interface(std::string& module, nlohmann::json& data)
@@ -74,10 +74,10 @@ namespace gui
 
 		graphic_buffer_.writing_buffer = !graphic_buffer_.writing_buffer;
 
-		if (get_texture_size(true) != get_texture_size(false))
-			create_texture(get_texture_size(false).x, get_texture_size(false).y);
-
 		get_texture(true).clear();
+
+		if (get_texture_size(true) != graphic_buffer_.size_to_set)
+			get_texture(true).create(graphic_buffer_.size_to_set.x, graphic_buffer_.size_to_set.y);
 	}
 
 
@@ -175,9 +175,9 @@ namespace gui
 	{
 		return graphic_buffer_.render_texture_[get_writing_texture == graphic_buffer_.writing_buffer];
 	}
-	sf::Vector2u RenderEngine::get_texture_size(bool get_writing_texture)
+	sf::Vector2u RenderEngine::get_texture_size(bool current_texture)
 	{
-		return get_texture(get_writing_texture).getSize();
+		return (current_texture) ? get_texture(true).getSize() : sf::Vector2u(graphic_buffer_.size_to_set);
 	}
 
 	void RenderEngine::set_notification(const std::string& text)
