@@ -90,14 +90,26 @@ int main()
                             shutdown_type = SHUTDOWN_TYPE_ENUM::SHUTDOWN;
                             break;
                         }
-                        else if (event != "load_module" && event != "exec_module" && event != "unload_module")
-                        {
-                            continue;
-                        }
-
 
                         const auto& data = packet.value().data;
                         const auto module_path = data["module_path"].get<std::string>();
+
+                        if (event == "move_module_down")
+                        {
+                            module_storage.move(module_path, ModuleStorage::ModuleOrderMoveEnum::RIGHT);
+                            continue;
+                        }
+                        else if (event == "move_module_up")
+                        {
+                            module_storage.move(module_path, ModuleStorage::ModuleOrderMoveEnum::LEFT);
+                            continue;
+                        }
+                        else if (event == "remove_module_from_order")
+                        {
+                            if ( !module_storage.contains(module_path) && module_storage.contains_order(module_path) )
+                                module_storage.erase_order(module_path);
+                            continue;
+                        }
 
                         if ( endpoint_storage.contains(module_path) )
                         {
@@ -178,25 +190,28 @@ int main()
 
         for ( const auto& path : module_storage.get_paths() )
         {
-            if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
+            if ( module_storage.contains_order(path) )
             {
-                auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
-
-                module_storage.set_state(path, Module::ModuleStateEnum::HOT);
-                run_hot_function(path.c_str(), core_module_channel_module_side);
-
-                while (const auto& packet = core_module_channel_core_side.TryRead())
+                if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
                 {
-                    if ( packet.value().to == "gui" )
-                    {
-                        endpoint_storage.at(packet.value().to).SendData( packet.value() );
+                    auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
 
-                        if ( packet.value().event == "module_error" )
+                    module_storage.set_state(path, Module::ModuleStateEnum::HOT);
+                    run_hot_function(path.c_str(), core_module_channel_module_side);
+
+                    while (const auto& packet = core_module_channel_core_side.TryRead())
+                    {
+                        if ( packet.value().to == "gui" )
                         {
-                            auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
-                            endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
-                            module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
-                            stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
+                            endpoint_storage.at(packet.value().to).SendData( packet.value() );
+
+                            if ( packet.value().event == "module_error" )
+                            {
+                                auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
+                                endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
+                                module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
+                                stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
+                            }
                         }
                     }
                 }

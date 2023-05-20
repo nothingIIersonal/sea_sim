@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include <shared_mutex>
-#include <sea_sim/interconnect/interconnect.h>
+#include <sea_sim/interconnect/interconnect_share.h>
 
 
 #ifdef WIN32
@@ -47,20 +47,11 @@ void * dlsym(void *hdll, const char *s)
 }
 
 
-#else
+#else // UNIX
 
 #include <dlfcn.h>
-#include <unistd.h>
 
-const size_t strnlen_t(const char *str, size_t maxlen)
-{
-    size_t i;
-    for (i = 0; i < maxlen && str[i]; ++i);
-
-    return i;
-}
-
-#endif // WIN32
+#endif
 
 
 #include <string.h>
@@ -143,12 +134,19 @@ class ModuleStorage
 private:
     mutable std::shared_mutex mtx;
     std::map<std::string, Module> modules;
+    std::vector<std::string> modules_order;
 
 protected:
     ModuleStorage(const ModuleStorage&) = delete;
     void operator=(const ModuleStorage&) = delete;
 
 public:
+    enum class ModuleOrderMoveEnum
+    {
+        RIGHT = 0,
+        LEFT
+    };
+
     ModuleStorage() noexcept = default;
     ~ModuleStorage() noexcept = default;
 
@@ -161,6 +159,7 @@ public:
     void insert(const std::string& path, Module&& module)
     {
         std::unique_lock lock(ModuleStorage::mtx);
+        this->modules_order.push_back(path);
         this->modules.emplace( std::make_pair(path, std::move(module)) );
     }
 
@@ -170,10 +169,24 @@ public:
         this->modules.erase(path);
     }
 
+    void erase_order(const std::string& path)
+    {
+        std::unique_lock lock(ModuleStorage::mtx);
+        auto erase_path_it = std::find(this->modules_order.begin(), this->modules_order.end(), path);
+        if (erase_path_it != this->modules_order.end())
+            this->modules_order.erase(erase_path_it);
+    }
+
     bool contains(const std::string& path)
     {
         std::shared_lock lock(ModuleStorage::mtx);
         return this->modules.contains(path);
+    }
+
+    bool contains_order(const std::string& path)
+    {
+        std::shared_lock lock(ModuleStorage::mtx);
+        return std::find(this->modules_order.begin(), this->modules_order.end(), path) != this->modules_order.end();
     }
 
     void set_state(const std::string& path, const Module::ModuleStateEnum& state)
@@ -192,15 +205,7 @@ public:
     std::vector<std::string> get_paths()
     {
         std::shared_lock lock(ModuleStorage::mtx);
-
-        std::vector<std::string> paths;
-
-        for (auto it = this->modules.begin(); it != this->modules.end(); ++it)
-        {
-            paths.push_back(it->first);
-        }
-
-        return paths;
+        return this->modules_order;
     }
 
     Module::ModuleStateEnum get_state(const std::string& path)
@@ -208,7 +213,23 @@ public:
         std::shared_lock lock(ModuleStorage::mtx);
         return this->modules.contains(path) ? this->modules.at(path).state : Module::ModuleStateEnum::ERR;
     }
+
+    void move(std::string path, ModuleOrderMoveEnum to)
+    {
+        std::unique_lock lock(ModuleStorage::mtx);
+
+        auto it = std::find(modules_order.begin(), modules_order.end(), path);
+
+        if (   it == (modules_order.end() - 1) && to == ModuleOrderMoveEnum::RIGHT
+            || it == modules_order.begin() && to == ModuleOrderMoveEnum::LEFT)
+        {
+            return;
+        }
+
+        to == ModuleOrderMoveEnum::RIGHT ? std::iter_swap(it, it + 1) : std::iter_swap(it, it - 1);
+    }
 };
+
 
 ModuleStorage module_storage;
 
@@ -244,9 +265,9 @@ const int load_module(const char *module_path, Endpoint module_endpoint)
     printf("Init function address: 0x%p\n", init);
 
     printf("Call init function...\n");
-    int init_res = (* init)( Interconnect(module_endpoint, module_path) );
+    int init_res = (* init)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
 #else
-    (* init)( Interconnect(module_endpoint, module_path) );
+    (* init)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Init function done with code %d\n", init_res);
@@ -281,9 +302,9 @@ const int exec_module(const char *module_path, Endpoint module_endpoint)
     printf("Exec function address: 0x%p\n", exec);
 
     printf("Call exec function...\n");
-    int exec_res = (* exec)( Interconnect(module_endpoint, module_path) );
+    int exec_res = (* exec)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
 #else
-    (* exec)( Interconnect(module_endpoint, module_path) );
+    (* exec)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Exec function done with code %d\n", exec_res);
@@ -320,9 +341,9 @@ const int unload_module(const char *module_path, Endpoint module_endpoint)
     printf("Exit function address: 0x%p\n", exit);
 
     printf("Call exit function...\n");
-    int exit_res = (* exit)( Interconnect(module_endpoint, module_path) );
+    int exit_res = (* exit)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
 #else
-    (* exit)( Interconnect(module_endpoint, module_path) );
+    (* exit)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Exit function done with code %d\n", exit_res);
@@ -365,9 +386,9 @@ const int run_hot_function(const char *module_path, Endpoint module_endpoint)
     printf("Hot function address: 0x%p\n", hotf);
 
     printf("Call hot function...\n");
-    int hotf_res = (* hotf)( Interconnect(module_endpoint, module_path) );
+    int hotf_res = (* hotf)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
 #else
-    (* hotf)( Interconnect(module_endpoint, module_path) );
+    (* hotf)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Hot function done with code %d\n", hotf_res);
