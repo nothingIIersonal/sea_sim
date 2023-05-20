@@ -58,15 +58,6 @@ namespace gui
 
 	void RenderEngine::swap_texture()
 	{
-		get_texture(true).display();
-
-		graphic_buffer_.writing_buffer = !graphic_buffer_.writing_buffer;
-
-		if (get_texture_size(true) != get_texture_size(false))
-			create_texture(get_texture_size(false).x, get_texture_size(false).y);
-
-		get_texture(true).clear();
-
 		sf::Vector2u scene_size = get_texture(true).getSize();
 
 		sf::Vector2f rect_size{
@@ -78,6 +69,15 @@ namespace gui
 		rectangle.setPosition(25, 25);
 
 		get_texture(true).draw(rectangle);
+
+		get_texture(true).display();
+
+		graphic_buffer_.writing_buffer = !graphic_buffer_.writing_buffer;
+
+		if (get_texture_size(true) != get_texture_size(false))
+			create_texture(get_texture_size(false).x, get_texture_size(false).y);
+
+		get_texture(true).clear();
 	}
 
 

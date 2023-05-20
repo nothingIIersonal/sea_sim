@@ -24,7 +24,7 @@ namespace gui
 			if (window_storage.window_has_focus())
 				window_storage.set_fps_limit(60); // WORK
 			else
-				window_storage.set_fps_limit(5);   // IDLE
+				window_storage.set_fps_limit(5);  // IDLE
 		
 			window_storage.ImGui_update();    // Update GUI
 			
