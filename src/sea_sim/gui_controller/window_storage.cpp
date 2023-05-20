@@ -4,20 +4,28 @@
 #include <iostream>
 
 
+extern bool keyHit[];
+
 namespace gui
 {
 	using namespace utils;
 
 	WindowStorage::WindowStorage(const Endpoint& channel_to_core) :
 		channel_to_core(channel_to_core),
-		font_x20_(nullptr)
+		font_x20_(nullptr),
+		render_engine_(this),
+		file_dialog_(this)
 	{
 		for (int reset_array = 0; reset_array < sf::Keyboard::KeyCount; ++reset_array)
 		{
 			keyHit[reset_array] = false;
 		}
+		
+		render_engine_.create_texture(500u, 500u);
+		render_engine_.swap_texture();
 
-		render_texture_.create(500, 500);
+		sf::Vector2u scene_size = render_engine_.get_texture_size();
+		send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 	}
 
 	void WindowStorage::build_window()
@@ -30,6 +38,7 @@ namespace gui
 	void WindowStorage::poll_events()
 	{
 		sf::Event event;
+
 		while (window_.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
@@ -46,8 +55,7 @@ namespace gui
 				screen_size_ = window_.getSize();
 				break; }
 			case sf::Event::KeyReleased:
-				if (event.key.code >= 0 && event.key.code < sf::Keyboard::KeyCount)
-					keyHit[event.key.code] = false;
+				keyHit[event.key.code] = false;
 				break;
 			default:
 				break;
@@ -87,6 +95,14 @@ namespace gui
 					windows_show_state_.exit_popup_new = false;
 					set_notification(packet_data["text"].get<std::string>());
                 }
+				else if (packet_event == "draw")
+				{
+					render_engine_.draw_from_json(packet_data);
+				}
+				else if (packet_event == "swap_texture")
+				{
+					render_engine_.swap_texture();
+				}
                 else if (packet_event == "shutdown")
                 {
                     window_close();
@@ -175,30 +191,6 @@ namespace gui
 	int WindowStorage::mouse_Y()
 	{
 		return sf::Mouse::getPosition(window_).y;
-	}
-	int WindowStorage::mouse_down(const sf::Mouse::Button& B)
-	{
-		return sf::Mouse::isButtonPressed(B);
-	}
-	int WindowStorage::key_down(const sf::Keyboard::Key& B)
-	{
-		return sf::Keyboard::isKeyPressed(B);
-	}
-	int WindowStorage::key_hit(const sf::Keyboard::Key& key)
-	{
-		if (!keyHit[key]) {
-			if (sf::Keyboard::isKeyPressed(key)) {
-				keyHit[key] = true;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	int WindowStorage::block()
-	{
-		ImGui::SameLine();
-		return 1;
 	}
 
 	// --- Windows
@@ -302,7 +294,7 @@ namespace gui
 			ImGui::EndPopup();
 		}
 	}
-	void WindowStorage::set_notification(std::string text)
+	void WindowStorage::set_notification(const std::string& text)
 	{
 		if (windows_show_state_.notification_popup     == true ||
 			windows_show_state_.notification_popup_new == true)
@@ -318,60 +310,54 @@ namespace gui
 	{
 		ImGuiWindowFlags_ flags = ImGuiWindowFlags_HorizontalScrollbar;
 
-		if (ImGui::Begin(u8"Ввод данных"_C, NULL, flags))
-		{
-			ImGui::Text(u8"%.0f FPS"_C, ImGui::GetIO().Framerate);
-			ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_texture_.getSize().x, render_texture_.getSize().y);
+		ImGui::Begin(u8"Ввод данных"_C, NULL, flags);
 
-			ImGui::Separator();
+		ImGui::Text(u8"%.0f FPS"_C, ImGui::GetIO().Framerate);
+		ImGui::Text(u8"Область отрисовки: %ix%i пкс"_C, render_engine_.get_texture_size().x, render_engine_.get_texture_size().y);
 
-			if (auto packet = render_engine_.render_inputs())
-				send_to_core(packet.value());
+		ImGui::Separator();
 
-			ImGui::End();
-		}
+		if (auto packet = render_engine_.render_inputs())
+			send_to_core(packet.value());
+
+		ImGui::End();
 	}
 	void WindowStorage::show_child_output()
 	{
 		ImGuiWindowFlags_ flags = ImGuiWindowFlags_HorizontalScrollbar;
 
-		if (ImGui::Begin(u8"Результаты"_C, NULL, flags))
-		{
-			render_engine_.render_outputs();
+		ImGui::Begin(u8"Результаты"_C, NULL, flags);
+		
+		render_engine_.render_outputs();
 
-			ImGui::End();
-		}
+		ImGui::End();
 	}
 	void WindowStorage::show_child_view()
 	{
-		ImGuiWindowFlags view_window_flags =
-			ImGuiWindowFlags_NoCollapse;
+		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse);
 
-		if (ImGui::Begin(u8"Обзор"_C, NULL, view_window_flags))
+		ImVec2 view_area = ImGui::GetWindowContentRegionMax() -
+			               ImGui::GetWindowContentRegionMin();
+
+		if (view_area != windows_show_state_.render_size)
 		{
-			ImVec2 view_area = 
-				ImGui::GetWindowContentRegionMax() - 
-				ImGui::GetWindowContentRegionMin();
+			windows_show_state_.render_size = view_area;
 
-			if (view_area != windows_show_state_.render_size)
-			{
-				windows_show_state_.render_size = view_area;
+			view_area.x = max(1, view_area.x - 2);
+			view_area.y = max(1, view_area.y - 2);
 
-				view_area.x = max(1, view_area.x - 2);
-				view_area.y = max(1, view_area.y - 2);
+			render_engine_.create_texture(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
 
-				render_texture_.create(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
+			sf::Vector2u scene_size = render_engine_.get_texture_size();
 
-				sf::Vector2u scene_size = render_texture_.getSize();
-				//send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
-			}
-			
-			render_engine_.render_scene(render_texture_);
-
-			ImGui::Image(render_texture_, sf::Color::White, sf::Color(70, 70, 70));
-
-			ImGui::End();
+			send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 		}
+
+		// render_engine_.render_scene();
+
+		ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
+
+		ImGui::End();
 	}
 
 	void WindowStorage::show_main_menu_bar()
@@ -505,7 +491,7 @@ namespace gui
         if (off > 0.0f)
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
     }
-    float WindowStorage::get_button_width(std::string text, ImGuiStyle& style)
+    float WindowStorage::get_button_width(const std::string& text, ImGuiStyle& style)
     {
         return ImGui::CalcTextSize(text.c_str()).x + style.FramePadding.x * 2 + style.ItemSpacing.x;
     }

@@ -38,6 +38,8 @@ void print_packet(const std::optional<channel_value_type> &val)
 
 int main()
 {
+    setlocale(LC_ALL, "Rus");
+
     auto endpoint_storage = std::map< std::string, Endpoint >();
 
     auto [core_gui_channel_core_side, core_gui_channel_gui_side] = fdx::MakeChannel<channel_value_type>();
@@ -87,6 +89,10 @@ int main()
                         {
                             shutdown_type = SHUTDOWN_TYPE_ENUM::SHUTDOWN;
                             break;
+                        }
+                        else if (event == "view_area_resized")
+                        {
+                            continue;
                         }
 
                         const auto& data = packet.value().data;
@@ -213,7 +219,7 @@ int main()
             }
         }
 
-        endpoint_storage.at("gui").SendData( {"gui", "core", "update_texture", {{ }}} );
+        endpoint_storage.at("gui").SendData( {"gui", "core", "swap_texture", {}} );
 
         if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_0 && endpoint_storage.size() == 1 )
         {

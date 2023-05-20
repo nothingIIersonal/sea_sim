@@ -38,17 +38,12 @@ namespace gui
 
 		int mouse_X();                        // Get X coord of Mouse
 		int mouse_Y();                        // Get Y coord of Mouse
-		int mouse_down(const sf::Mouse::Button& B);
-		int key_down(const sf::Keyboard::Key& B);
-		int key_hit(const sf::Keyboard::Key& key);
-
-		int block();                          // ImGUI::Sameline();
 
 		// Windows
 		void show_main();
 		void show_exit_popup();
         void show_notification_popup();
-        void set_notification(std::string text);
+        void set_notification(const std::string& text);
 
 		void show_child_input();
 		void show_child_output();
@@ -60,7 +55,7 @@ namespace gui
 		void show_module_dialog();
 
 		void ImGui_reset_docking_layout(ImGuiID id);
-		float get_button_width(std::string text, ImGuiStyle& style);
+		float get_button_width(const std::string& text, ImGuiStyle& style);
         void align_for_width(float width, float alignment = 0.5f);
 
 		void send_to_core(std::string event, nlohmann::json data = {});
@@ -72,14 +67,11 @@ namespace gui
 
 		ImFont* font_x20_;
 
-		sf::RenderTexture render_texture_;
 		RenderEngine render_engine_;
 		FileDialog file_dialog_;
 		ModuleDialog module_dialog_;
 
 		Endpoint channel_to_core;
-
-		bool keyHit[sf::Keyboard::KeyCount];
 
 		struct WindowsShowState
 		{
@@ -98,11 +90,6 @@ namespace gui
 			bool reset_docking_layout = true;
 			ImVec2 render_size = { 500, 500 };
 		} windows_show_state_;
-
-		struct FieldsData
-		{
-			std::string selected_module = "";
-		} fields_data_;
 
 		bool shutdown_flag_ = false;
 	};

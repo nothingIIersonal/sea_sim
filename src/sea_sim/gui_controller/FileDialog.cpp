@@ -1,5 +1,7 @@
-﻿#include <sea_sim/gui_controller/FileDialog.h>
-#include <iostream>
+﻿#include <iostream>
+
+#include <sea_sim/gui_controller/FileDialog.h>
+#include <sea_sim/gui_controller/window_storage.h>
 
 
 namespace gui
@@ -7,7 +9,8 @@ namespace gui
 	namespace fs = ::std::filesystem;
 	using namespace utils;
 
-	FileInfo::FileInfo()
+	FileInfo::FileInfo(FileDialog* parent)
+		: parent_ptr_(parent)
 	{
 		file_type = FileTypeEnum::INVALID;
 
@@ -16,7 +19,8 @@ namespace gui
 		name_optimized = "";
 		ext = "";
 	}
-	FileInfo::FileInfo(fs::path absolute_path_in, FileTypeEnum file_type_in)
+	FileInfo::FileInfo(FileDialog* parent, fs::path absolute_path_in, FileTypeEnum file_type_in)
+		: parent_ptr_(parent)
 	{
 		file_type = file_type_in;
 
@@ -49,6 +53,14 @@ namespace gui
 		ext = "";
 	}
 
+	void FileInfo::set_notification(const std::string& text)
+	{
+		if (parent_ptr_ == nullptr)
+			return;
+
+		parent_ptr_->set_notification(text);
+	}
+
 	std::string FileInfo::get_short_name()
 	{
 		switch (file_type)
@@ -62,31 +74,38 @@ namespace gui
 		}
 	}
 
-	void SelectableColor(ImU32 color)
-	{
-		ImVec2 p_min = ImGui::GetItemRectMin();
-		ImVec2 p_max = ImGui::GetItemRectMax();
-		ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color);
-	}
-
-	bool FileInfo::update_from_name(fs::path current_path)
+	bool FileInfo::update_from_name(fs::path& current_path)
 	{
 		fs::path path_buf = absolute_path;
+		try
+		{
+			path_buf = path_buf.parent_path();
 
-		path_buf = path_buf.parent_path();
+			if (path_buf.is_relative())
+				path_buf = current_path.append(path_buf.string());
 
-		if (path_buf.is_relative())
-			path_buf = current_path.append(path_buf.string());
+			path_buf.append(std::u8string(name.begin(), name.end()));
 
-		path_buf.append(std::u8string(name.begin(), name.end()));
-		
 
-		if (fs::exists(path_buf))
-			absolute_path = path_buf;
-		else
-			return 0;
+			if (!fs::exists(path_buf))
+				return 0;
 
-		absolute_path = fs::canonical(absolute_path);
+			path_buf = fs::canonical(path_buf);
+		}
+		catch (const std::filesystem::filesystem_error& err)
+		{
+			switch (err.code().value())
+			{
+			case 5:
+				set_notification(u8"Отказано в доступе к: \""_C + err.path1().string() + u8"\""_C);
+				break;
+			default:
+				set_notification(err.what());
+				break;
+			}
+		}
+
+		absolute_path = path_buf;
 
 		if (fs::is_directory(absolute_path))
 		{
@@ -110,15 +129,20 @@ namespace gui
 	}
 
 
-
-	FileDialog::FileDialog(std::filesystem::path starting_path)
+	FileDialog::FileDialog(WindowStorage* parent, const fs::path& starting_path)
+		: parent_ptr_(parent),
+		  selected_file(this)
 	{
 		drives_ = get_drives();
 		open(starting_path);
 		is_open_ = false;
 	}
+	FileDialog::~FileDialog()
+	{
+		parent_ptr_ = nullptr;
+	}
 
-	void FileDialog::open(fs::path starting_path)
+	void FileDialog::open(const fs::path& starting_path)
 	{
 		if (starting_path.empty())
 			current_path = fs::current_path();
@@ -253,7 +277,8 @@ namespace gui
 
 				for (auto& entry : current_directory_content)
 				{
-					if (selected_file_extension != ".*" && entry.isFile() && entry.ext != selected_file_extension)
+					if (selected_file_extension != ".*" && entry.isFile() && entry.ext != selected_file_extension ||
+						entry.name_optimized.empty() || entry.name_optimized.size() > 255)
 						continue;
 
 					draw_list->ChannelsSplit(2);
@@ -299,8 +324,8 @@ namespace gui
 			// File path
 			ImGui::PushItemWidth(
 				ImGui::GetContentRegionAvail().x // All space
-				- get_button_width(u8"Îòêðûòü"_C, style)
-				- get_button_width(u8"Îòìåíà"_C, style)
+				- get_button_width(u8"Открыть"_C, style)
+				- get_button_width(u8"Отмена"_C, style)
 				- 101 - style.ItemSpacing.x // Combo list with extensions
 				- style.ScrollbarSize // Allign with scrollbar
 			);
@@ -310,7 +335,7 @@ namespace gui
 
 			ImGui::SameLine();
 
-			if (ImGui::Button(u8"Îòêðûòü"_C))
+			if (ImGui::Button(u8"Открыть"_C) && !selected_file.absolute_path.empty() && !current_directory_content.empty())
 			{
 				if (selected_file.update_from_name(current_path))
 				{
@@ -331,7 +356,7 @@ namespace gui
 
 			ImGui::SameLine();
 
-			if (ImGui::Button(u8"Îòìåíà"_C))
+			if (ImGui::Button(u8"Отмена"_C))
 			{
 				close();
 			}
@@ -372,6 +397,14 @@ namespace gui
 		return return_files();
 	}
 
+	void FileDialog::set_notification(const std::string& text)
+	{
+		if (parent_ptr_ == nullptr)
+			return;
+
+		parent_ptr_->set_notification(text);
+	}
+
 	bool FileDialog::is_open()
 	{
 		return is_open_;
@@ -387,17 +420,33 @@ namespace gui
 	void FileDialog::update_directory_content()
 	{
 		current_directory_content.clear();
-		for (const auto& entry : fs::directory_iterator(current_path))
+
+		try
 		{
-			fs::perms perm = fs::status(entry.path()).permissions();
-			if ((perm & fs::perms::others_read) == fs::perms::none)
-				continue;
+			for (const auto& entry : fs::directory_iterator(current_path))
+			{
+				fs::perms perm = fs::status(entry.path()).permissions();
+				if ((perm & fs::perms::others_read) == fs::perms::none)
+					continue;
 
-			FileInfo::FileTypeEnum file_type =
-				(entry.is_directory()) ? FileInfo::FileTypeEnum::DIRECTORY :
-				(entry.is_regular_file()) ? FileInfo::FileTypeEnum::FILE : FileInfo::FileTypeEnum::INVALID;
+				FileInfo::FileTypeEnum file_type =
+					(entry.is_directory()) ? FileInfo::FileTypeEnum::DIRECTORY :
+					(entry.is_regular_file()) ? FileInfo::FileTypeEnum::FILE : FileInfo::FileTypeEnum::INVALID;
 
-			current_directory_content.push_back({ entry.path(), file_type });
+				current_directory_content.push_back({ this, entry.path(), file_type });
+			}
+		}
+		catch (const std::filesystem::filesystem_error& err)
+		{
+			switch (err.code().value())
+			{
+			case 5:
+				set_notification(u8"Отказано в доступе к: \""_C + err.path1().string() + u8"\""_C);
+				break;
+			default:
+				set_notification(err.what());
+				break;
+			}
 		}
 	}
 
@@ -407,16 +456,24 @@ namespace gui
 
 		selected_sorting_type = type;
 
+		auto directory_content_sorter_name = [](const FileInfo& lhs, const FileInfo& rhs) {
+			return std::tie(lhs.file_type, lhs.name) <
+			       std::tie(rhs.file_type, rhs.name); };
+
+		auto directory_content_sorter_ext = [](const FileInfo& lhs, const FileInfo& rhs) {
+			return std::tie(lhs.file_type, lhs.ext, lhs.name) <
+				   std::tie(rhs.file_type, rhs.ext, rhs.name); };
+
 		switch (selected_sorting_type)
 		{
 		case gui::FileDialog::SortingTypeEnum::byFileName:
-			std::sort(current_directory_content.begin(), current_directory_content.end(), &directory_content_sorter_name);
+			std::sort(current_directory_content.begin(), current_directory_content.end(), directory_content_sorter_name);
 			break;
 		case gui::FileDialog::SortingTypeEnum::byExtension:
-			std::sort(current_directory_content.begin(), current_directory_content.end(), &directory_content_sorter_ext);
+			std::sort(current_directory_content.begin(), current_directory_content.end(), directory_content_sorter_ext);
 			break;
 		default:
-			std::sort(current_directory_content.begin(), current_directory_content.end(), &directory_content_sorter_name);
+			std::sort(current_directory_content.begin(), current_directory_content.end(), directory_content_sorter_name);
 			break;
 		}
 	}
@@ -462,7 +519,7 @@ namespace gui
 
 	std::optional<std::vector<std::string>> FileDialog::return_files()
 	{
-		if (selected_file.update_from_name(current_path))
+		if (!current_directory_content.empty() && !selected_file.absolute_path.empty() && selected_file.update_from_name(current_path))
 		{
 			if (selected_file.isDir())
 			{
@@ -476,31 +533,6 @@ namespace gui
 			}
 		}
 		return std::nullopt;
-	}
-
-	bool directory_content_sorter_name(FileInfo const& lhs, FileInfo const& rhs)
-	{
-		if (static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(lhs.file_type) <
-			static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(rhs.file_type))
-		{
-			return true;
-		}
-		else if (lhs.name < rhs.name)
-			return true;
-		return false;
-	}
-	bool directory_content_sorter_ext(FileInfo const& lhs, FileInfo const& rhs)
-	{
-		if (static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(lhs.file_type) <
-			static_cast<std::underlying_type_t<FileInfo::FileTypeEnum>>(rhs.file_type))
-		{
-			return true;
-		}
-		else if (lhs.ext < rhs.ext)
-			return true;
-		else if (lhs.name < rhs.name)
-			return true;
-		return false;
 	}
 
 	std::string get_FileTypeName(FileInfo::FileTypeEnum type)
@@ -521,10 +553,6 @@ namespace gui
 		case FileDialog::SortingTypeEnum::byFileName:  return u8"по имени"_C;
 		default:								       return "ERR";
 		}
-	}
-	float get_button_width(std::string text, ImGuiStyle& style)
-	{
-		return ImGui::CalcTextSize(text.c_str()).x + style.FramePadding.x * 2 + style.ItemSpacing.x;
 	}
 
 	std::vector<std::string> split_string_to_vector(const std::string& text, char delimiter)

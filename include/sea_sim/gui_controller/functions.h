@@ -1,9 +1,16 @@
 #pragma once
+#include <imgui.h>
+#include <imgui-SFML.h>
+#include <imgui_stdlib.h>
 
-struct ImVec2;
+#include <SFML/Graphics.hpp>
+#include <cmath>
+
 
 namespace gui::utils
 {
+	// --- Math
+
 	float min(float a, float b);
 	float max(float a, float b);
 
@@ -15,10 +22,27 @@ namespace gui::utils
 
 	double randf(double start, double end, int amount); // returns random float inside (start / end) with the number of values specified in amount
 
-	char const* operator"" _C(const char8_t* str, std::size_t);
+	// --- ImGui
+
+	inline namespace literals
+	{
+		char const* operator"" _C(const char8_t* str, std::size_t);
+	}
 
 	ImVec2 operator+(const ImVec2& left, const ImVec2& right);
 	ImVec2 operator-(const ImVec2& left, const ImVec2& right);
 	bool operator==(const ImVec2& left, const ImVec2& right);
 	bool operator!=(const ImVec2& left, const ImVec2& right);
+
+	bool block();                           // ImGUI::Sameline(); && return true;
+	void SelectableColor(ImU32 color);
+	float get_button_width(std::string text, ImGuiStyle& style);
+
+	// --- SFML
+
+	extern bool keyHit[];
+	int mouse_down(const sf::Mouse::Button& B);
+	int key_down(const sf::Keyboard::Key& B);
+	int key_hit(const sf::Keyboard::Key& key);
+
 } // namespace gui::utils

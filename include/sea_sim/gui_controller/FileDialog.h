@@ -11,6 +11,8 @@
 
 #include <sea_sim/gui_controller/functions.h>
 #include <sea_sim/gui_controller/Fonts.h>
+#include <sea_sim/gears/channel_packet.h>
+
 
 
 #ifdef WIN32
@@ -27,6 +29,9 @@ namespace gui
 {
 	namespace fs = ::std::filesystem;
 
+	class WindowStorage;
+	class FileDialog;
+
 	class FileInfo
 	{
 	public:
@@ -37,14 +42,16 @@ namespace gui
 			INVALID
 		};
 
-		FileInfo();
-		FileInfo(fs::path absolute_path_in, FileTypeEnum file_type_in);
+		FileInfo(FileDialog* parent);
+		FileInfo(FileDialog* parent, fs::path absolute_path_in, FileTypeEnum file_type_in);
 
 		bool isDir();
 		bool isFile();
-		bool update_from_name(fs::path current_path);
+		bool update_from_name(fs::path& current_path);
 
 		void clear();
+
+		void set_notification(const std::string& text);
 
 		FileTypeEnum file_type;
 
@@ -57,19 +64,21 @@ namespace gui
 	private:
 		std::string get_short_name();
 
-		void SelectableColor(ImU32 color);
-		
+		FileDialog* parent_ptr_;
 	};
 
 	class FileDialog
 	{
 	public:
-		FileDialog(fs::path starting_path = "");
+		FileDialog(WindowStorage* parent, const fs::path& starting_path = "");
+		~FileDialog();
 
-		void open(fs::path starting_path = "");
+		void open(const fs::path& starting_path = "");
 		void close();
 		std::optional<std::vector<std::string>> render_dialog();
 		std::optional<std::vector<std::string>> try_take_files();
+
+		void set_notification(const std::string& text);
 
 		bool is_open();
 
@@ -91,6 +100,9 @@ namespace gui
 
 		void new_path_update();
 
+
+		WindowStorage* parent_ptr_;
+
 		std::optional<std::vector<std::string>> return_files();
 
 		bool is_open_ = false;
@@ -105,13 +117,8 @@ namespace gui
 		FileInfo selected_file;
 	};
 
-	bool directory_content_sorter_name(FileInfo const& lhs, FileInfo const& rhs);
-	bool directory_content_sorter_ext(FileInfo const& lhs, FileInfo const& rhs);
-
 	std::string get_FileTypeName(FileInfo::FileTypeEnum type);
 	std::string get_SortingType(FileDialog::SortingTypeEnum type);
-
-	float get_button_width(std::string text, ImGuiStyle& style);
 
 	std::vector<std::string> split_string_to_vector(const std::string& text, char delimiter);
 	std::vector<std::string> get_drives();

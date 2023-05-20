@@ -33,7 +33,7 @@ namespace gui
 		class WidgetElement
 		{
 		public:
-			WidgetElement(nlohmann::json widget, nlohmann::json stored_value = {});
+			WidgetElement(nlohmann::json& widget, nlohmann::json stored_value = {});
 
 			std::optional<std::string> render_widget(std::string ident);
 
