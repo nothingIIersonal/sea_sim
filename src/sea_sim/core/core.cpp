@@ -92,6 +92,23 @@ int main()
                         const auto& data = packet.value().data;
                         const auto module_path = data["module_path"].get<std::string>();
 
+                        if (event == "move_module_down")
+                        {
+                            module_storage.move(module_path, ModuleStorage::ModuleOrderMoveEnum::RIGHT);
+                            continue;
+                        }
+                        else if (event == "move_module_up")
+                        {
+                            module_storage.move(module_path, ModuleStorage::ModuleOrderMoveEnum::LEFT);
+                            continue;
+                        }
+                        else if (event == "remove_module_from_order")
+                        {
+                            if ( !module_storage.contains(module_path) && module_storage.contains_order(module_path) )
+                                module_storage.erase_order(module_path);
+                            continue;
+                        }
+
                         if ( endpoint_storage.contains(module_path) )
                         {
                             endpoint_storage.at("gui").SendData( {"gui", "core", "notify", {{"text", "Подождите завершения предыдущего действия с модулем '" + module_path + "', прежде чем начинать новое."}}} );
@@ -195,6 +212,8 @@ int main()
                 }
             }
         }
+
+        endpoint_storage.at("gui").SendData( {"gui", "core", "update_texture", {{ }}} );
 
         if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_0 && endpoint_storage.size() == 1 )
         {

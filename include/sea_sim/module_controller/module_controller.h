@@ -141,6 +141,12 @@ protected:
     void operator=(const ModuleStorage&) = delete;
 
 public:
+    enum class ModuleOrderMoveEnum
+    {
+        RIGHT = 0,
+        LEFT
+    };
+
     ModuleStorage() noexcept = default;
     ~ModuleStorage() noexcept = default;
 
@@ -160,16 +166,27 @@ public:
     void erase(const std::string& path)
     {
         std::unique_lock lock(ModuleStorage::mtx);
+        this->modules.erase(path);
+    }
+
+    void erase_order(const std::string& path)
+    {
+        std::unique_lock lock(ModuleStorage::mtx);
         auto erase_path_it = std::find(this->modules_order.begin(), this->modules_order.end(), path);
         if (erase_path_it != this->modules_order.end())
             this->modules_order.erase(erase_path_it);
-        this->modules.erase(path);
     }
 
     bool contains(const std::string& path)
     {
         std::shared_lock lock(ModuleStorage::mtx);
         return this->modules.contains(path);
+    }
+
+    bool contains_order(const std::string& path)
+    {
+        std::shared_lock lock(ModuleStorage::mtx);
+        return std::find(this->modules_order.begin(), this->modules_order.end(), path) != this->modules_order.end();
     }
 
     void set_state(const std::string& path, const Module::ModuleStateEnum& state)
@@ -195,6 +212,21 @@ public:
     {
         std::shared_lock lock(ModuleStorage::mtx);
         return this->modules.contains(path) ? this->modules.at(path).state : Module::ModuleStateEnum::ERR;
+    }
+
+    void move(std::string path, ModuleOrderMoveEnum to)
+    {
+        std::unique_lock lock(ModuleStorage::mtx);
+
+        auto it = std::find(modules_order.begin(), modules_order.end(), path);
+
+        if (   it == (modules_order.end() - 1) && to == ModuleOrderMoveEnum::RIGHT
+            || it == modules_order.begin() && to == ModuleOrderMoveEnum::LEFT)
+        {
+            return;
+        }
+
+        to == ModuleOrderMoveEnum::RIGHT ? std::iter_swap(it, it + 1) : std::iter_swap(it, it - 1);
     }
 };
 
