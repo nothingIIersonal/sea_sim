@@ -194,35 +194,32 @@ int main()
 
         for ( const auto& path : module_storage.get_paths() )
         {
-            if ( module_storage.contains(path) )
+            if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
             {
-                if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
+                auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
+
+                module_storage.set_state(path, Module::ModuleStateEnum::HOT);
+                run_hot_function(path.c_str(), core_module_channel_module_side);
+
+                while (const auto& packet = core_module_channel_core_side.TryRead())
                 {
-                    auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
-
-                    module_storage.set_state(path, Module::ModuleStateEnum::HOT);
-                    run_hot_function(path.c_str(), core_module_channel_module_side);
-
-                    while (const auto& packet = core_module_channel_core_side.TryRead())
+                    if ( packet.value().to == "gui" )
                     {
-                        if ( packet.value().to == "gui" )
-                        {
-                            endpoint_storage.at(packet.value().to).SendData( packet.value() );
+                        endpoint_storage.at(packet.value().to).SendData( packet.value() );
 
-                            if ( packet.value().event == "module_error" )
-                            {
-                                auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
-                                endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
-                                module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
-                                stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
-                            }
+                        if ( packet.value().event == "module_error" )
+                        {
+                            auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
+                            endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
+                            module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
+                            stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
                         }
                     }
                 }
             }
         }
 
-        endpoint_storage.at("gui").SendData({ "gui", "core", "swap_texture", {} });
+        endpoint_storage.at("gui").SendData( {"gui", "core", "swap_texture", {}} );
 
         if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_0 && endpoint_storage.size() == 1 )
         {
