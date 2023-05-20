@@ -14,6 +14,7 @@ int sea_module_init(Interconnect &&ic)
     ic.wgti.add_button("btn_res", "Agree");
 
     ic.object_ship_set("линкор_2", -100, 500, {"Кувшинов", "Лаптев"});
+    ic.object_ship_set("суворов_0", 50, 50, {"Суворов", "Кузьменко"});
 
     ic.wgti.send();
 
