@@ -1,7 +1,4 @@
 #pragma once
-
-
-#include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/gui_controller/window_storage.h>
 
 

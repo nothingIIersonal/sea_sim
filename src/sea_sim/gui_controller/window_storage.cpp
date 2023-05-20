@@ -1,5 +1,4 @@
 ﻿#include <sea_sim/gui_controller/window_storage.h>
-#include <sea_sim/gui_controller/functions.h>
 
 #include <iostream>
 
@@ -352,8 +351,6 @@ namespace gui
 
 			send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 		}
-
-		// render_engine_.render_scene();
 
 		ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
 

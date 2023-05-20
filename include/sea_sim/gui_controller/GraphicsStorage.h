@@ -1,4 +1,6 @@
 #pragma once
+#include <sea_sim/gui_controller/functions.h>
+
 #include <map>
 #include <vector>
 #include <string>
@@ -13,6 +15,8 @@ namespace gui
 	public:
 		GraphicsStorage(RenderEngine* parent_ptr_);
 		~GraphicsStorage();
+
+		void drawline();
 
 	private:
 		RenderEngine* parent_ptr_;

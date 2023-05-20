@@ -1,12 +1,4 @@
 #pragma once
-#include <imgui.h>
-#include <imgui-SFML.h>
-#include <imgui_stdlib.h>
-#include <imgui_internal.h>
-
-#include <SFML/Graphics.hpp>
-#include <optional>
-
 #include <sea_sim/gui_controller/functions.h>
 #include <sea_sim/gui_controller/Fonts.h>
 #include <sea_sim/gears/channel_packet.h>

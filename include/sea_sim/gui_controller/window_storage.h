@@ -1,11 +1,12 @@
 #pragma once
 #include <queue>
 
-#include <sea_sim/gears/channel_packet.h>
+#include <sea_sim/gui_controller/functions.h>
 #include <sea_sim/gui_controller/RenderEngine.h>
 #include <sea_sim/gui_controller/FileDialog.h>
 #include <sea_sim/gui_controller/ModuleDialog.h>
 #include <sea_sim/gui_controller/Fonts.h>
+#include <sea_sim/gears/channel_packet.h>
 
 
 namespace gui

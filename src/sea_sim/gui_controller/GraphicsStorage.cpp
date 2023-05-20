@@ -9,4 +9,9 @@ namespace gui
 		parent_ptr_ = nullptr;
 	}
 
+	void GraphicsStorage::drawline()
+	{
+
+	}
+
 } // namespace gui

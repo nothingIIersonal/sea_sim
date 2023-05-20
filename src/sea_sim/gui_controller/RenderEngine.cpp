@@ -80,30 +80,6 @@ namespace gui
 			get_texture(true).create(graphic_buffer_.size_to_set.x, graphic_buffer_.size_to_set.y);
 	}
 
-
-	void RenderEngine::render_scene()
-	{
-		using namespace gui::utils;
-
-		sf::Vector2u scene_size = get_texture(true).getSize();
-
-		sf::Vector2f rect_size{
-			max(0.f, static_cast<float>(scene_size.x) - 50.f),
-			max(0.f, static_cast<float>(scene_size.y) - 50.f) };
-
-		sf::RectangleShape rectangle(rect_size);
-		rectangle.setFillColor(sf::Color::Cyan);
-		rectangle.setPosition(25, 25);
-
-		// render
-
-		get_texture(true).clear();
-		get_texture(true).draw(rectangle);
-		get_texture(true).display();
-
-		return;
-	}
-
 	std::optional<std::string> RenderEngine::render_modules_combo()
 	{
 		using namespace utils;

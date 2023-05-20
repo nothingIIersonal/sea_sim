@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <imgui_stdlib.h>
+#include <imgui_internal.h>
 
 #include <SFML/Graphics.hpp>
 #include <cmath>
