@@ -24,7 +24,7 @@ namespace gui
 		render_engine_.swap_texture();
 
 		sf::Vector2u scene_size = render_engine_.get_texture_size();
-		send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
+		send_to_core("view_area_resized", { { "view_area", scene_size} });
 	}
 
 	void WindowStorage::build_window()
@@ -333,7 +333,7 @@ namespace gui
 	}
 	void WindowStorage::show_child_view()
 	{
-		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse);
+		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
 		ImVec2 view_area = ImGui::GetWindowContentRegionMax() -
 			               ImGui::GetWindowContentRegionMin();
@@ -348,11 +348,9 @@ namespace gui
 			render_engine_.create_texture(view_area);
 
 			sf::Vector2u scene_size = render_engine_.get_texture_size();
-
-			send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 		}
 
-		ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
+		ImGui::Image(render_engine_.get_texture(), ImVec2(render_engine_.get_texture_size()), sf::Color::White, sf::Color(70, 70, 70));
 
 		ImGui::End();
 	}

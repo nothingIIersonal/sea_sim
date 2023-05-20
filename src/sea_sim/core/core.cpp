@@ -40,6 +40,7 @@ int main()
 {
     setlocale(LC_ALL, "Rus");
 
+    sf::Vector2u view_area;
 
     auto endpoint_storage = std::map< std::string, Endpoint >();
 
@@ -93,6 +94,7 @@ int main()
                         }
                         else if (event == "view_area_resized")
                         {
+                            packet.value().data["view_area"].get_to<sf::Vector2u>(view_area);
                             continue;
                         }
 
@@ -220,7 +222,32 @@ int main()
             }
         }
 
-        endpoint_storage.at("gui").SendData( {"gui", "core", "swap_texture", {}} );
+        nlohmann::json line_1 =
+        {
+            {
+                {"type", "line"},
+                {"settings", {
+                    {"a", sf::Vector2f{26.f, 26.f}},
+                    {"b", sf::Vector2f{view_area.x - 26.f, view_area.y - 26.f}}}
+                }
+            }
+        };
+
+        nlohmann::json line_2 =
+        {
+            {
+                {"type", "line"},
+                {"settings", {
+                    {"a", sf::Vector2f{view_area.x - 26.f, 26.f}},
+                    {"b", sf::Vector2f{26.f, view_area.y - 26.f}}}
+                }
+            }
+        };
+
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", line_1});
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", line_2});
+        
+        endpoint_storage.at("gui").SendData({ "gui", "core", "swap_texture", {} });
 
         if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_0 && endpoint_storage.size() == 1 )
         {

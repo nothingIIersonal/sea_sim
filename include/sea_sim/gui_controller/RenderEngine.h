@@ -54,3 +54,17 @@ namespace gui
 
 	};
 } // namespace gui
+
+namespace nlohmann {
+	template <>
+	struct adl_serializer<sf::Vector2f> {
+		static void to_json(nlohmann::json&, const sf::Vector2f&);
+		static void from_json(const nlohmann::json&, sf::Vector2f&);
+	};
+
+	template <>
+	struct adl_serializer<sf::Vector2u> {
+		static void to_json(nlohmann::json&, const sf::Vector2u&);
+		static void from_json(const nlohmann::json&, sf::Vector2u&);
+	};
+} // namespace nlohmann
