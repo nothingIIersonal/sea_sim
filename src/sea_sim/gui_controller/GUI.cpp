@@ -25,7 +25,7 @@ namespace gui
 			window_storage.poll_events();     // Process OS and Core calls
 			
 			if (window_storage.window_has_focus())
-				window_storage.set_fps_limit(60); // WORK
+				window_storage.set_fps_limit(120); // WORK
 			else
 				window_storage.set_fps_limit(5);  // IDLE
 			

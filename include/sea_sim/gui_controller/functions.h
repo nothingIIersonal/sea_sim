@@ -10,6 +10,7 @@
 
 #ifndef PI
 #define PI 3.14159265f
+#define PI2 1.57079632f
 #endif
 
 namespace gui::utils

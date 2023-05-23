@@ -285,17 +285,20 @@ int main()
                 }
             }
         }; 
-        
-        sf::Vector2f rotator = { 100 * cosf(angle), 100 * sinf(angle) };
+
+        sf::Vector2f rotator_a = { 100 * cosf(angle      ), 100 * sinf(angle      ) };
+        sf::Vector2f rotator_b = { 10  * cosf(angle + PI2), 10  * sinf(angle + PI2) };
+        sf::Vector2f rotator_c = { 10  * cosf(angle - PI2), 10  * sinf(angle - PI2) };
         angle += 0.05f;
 
-        nlohmann::json line_3 =
+        nlohmann::json triangle_1 =
         {
             {
-                {"type", "line"},
+                {"type", "triangle"},
                 {"settings", {
-                    {"a", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f}},
-                    {"b", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f} + rotator}}
+                    {"a", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f} + rotator_a},
+                    {"b", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f} + rotator_b},
+                    {"c", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f} + rotator_c}}
                 }
             }
         };
@@ -311,7 +314,7 @@ int main()
 
         endpoint_storage.at("gui").SendData({ "gui", "core", "draw", fill_color_2    });
 
-        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", line_3          });
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", triangle_1      });
         
         endpoint_storage.at("gui").SendData({ "gui", "core", "swap_texture", {}      });
 

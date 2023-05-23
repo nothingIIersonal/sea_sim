@@ -22,6 +22,7 @@ namespace gui
 
 		void drawline(sf::Vector2f a, sf::Vector2f b, unsigned int width = 1);
 		void drawcircle(sf::Vector2f pos, float radius, float border_width = 1);
+		void drawtriangle(sf::Vector2f a, sf::Vector2f b, sf::Vector2f c, float border_width = 1);
 
 	private:
 		RenderEngine* parent_ptr_;

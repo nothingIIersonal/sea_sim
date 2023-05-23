@@ -30,7 +30,6 @@ namespace gui
 	void WindowStorage::build_window()
 	{
 		window_.create(sf::VideoMode(1920, 1080), "Sea Interface");
-		window_.setFramerateLimit(60);
 
 		screen_size_ = window_.getSize();
 	}

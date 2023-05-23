@@ -15,6 +15,7 @@ namespace gui
 		parent_ptr_ = nullptr;
 	}
 
+
 	void GraphicsStorage::setFillColor(sf::Color color)
 	{
 		fill_color_ = color;
@@ -53,10 +54,26 @@ namespace gui
 		
 		circle.setFillColor(sf::Color(fill_color_.r, fill_color_.g, fill_color_.b));
 
-		circle.setOutlineColor(sf::Color::White);
+		circle.setOutlineColor(outline_color_);
 		circle.setOutlineThickness(border_width);
 
 		parent_ptr_->get_texture(true).draw(circle);
+	}
+
+	void GraphicsStorage::drawtriangle(sf::Vector2f a, sf::Vector2f b, sf::Vector2f c, float border_width)
+	{
+		sf::ConvexShape convex;
+
+		convex.setPointCount(3);
+
+		convex.setPoint(0, a);
+		convex.setPoint(1, b);
+		convex.setPoint(2, c);
+
+		convex.setFillColor(fill_color_);
+		convex.setOutlineColor(outline_color_);
+
+		parent_ptr_->get_texture(true).draw(convex);
 	}
 
 } // namespace gui
