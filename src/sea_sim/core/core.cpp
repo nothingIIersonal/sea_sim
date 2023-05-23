@@ -41,6 +41,7 @@ int main()
     setlocale(LC_ALL, "Rus");
 
     sf::Vector2u view_area;
+    float angle = 0;
 
     auto endpoint_storage = std::map< std::string, Endpoint >();
 
@@ -244,10 +245,76 @@ int main()
             }
         };
 
-        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", line_1});
-        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", line_2});
+        nlohmann::json fill_color_1 =
+        {
+            {
+                {"type", "setFillColor"},
+                {"settings", {
+                    {"color", sf::Color(200, 0, 0)}}
+                }
+            }
+        };
+
+        nlohmann::json outline_color_1 =
+        {
+            {
+                {"type", "setOutlineColor"},
+                {"settings", {
+                    {"color", sf::Color(0, 200, 0)}}
+                }
+            }
+        };
+
+        nlohmann::json circle_1 =
+        {
+            {
+                {"type", "circle"},
+                {"settings", {
+                    {"pos", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f}},
+                    {"radius", 100.f}}
+                }
+            }
+        };
+
+        nlohmann::json fill_color_2 =
+        {
+            {
+                {"type", "setFillColor"},
+                {"settings", {
+                    {"color", sf::Color(255, 255, 255)}}
+                }
+            }
+        }; 
         
-        endpoint_storage.at("gui").SendData({ "gui", "core", "swap_texture", {} });
+        sf::Vector2f rotator = { 100 * cosf(angle), 100 * sinf(angle) };
+        angle += 0.05f;
+
+        nlohmann::json line_3 =
+        {
+            {
+                {"type", "line"},
+                {"settings", {
+                    {"a", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f}},
+                    {"b", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f} + rotator}}
+                }
+            }
+        };
+
+
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", line_1          });
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", line_2          });
+
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", fill_color_1    });
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", outline_color_1 });
+
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", circle_1        });
+
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", fill_color_2    });
+
+        endpoint_storage.at("gui").SendData({ "gui", "core", "draw", line_3          });
+        
+        endpoint_storage.at("gui").SendData({ "gui", "core", "swap_texture", {}      });
+
 
         if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_0 && endpoint_storage.size() == 1 )
         {

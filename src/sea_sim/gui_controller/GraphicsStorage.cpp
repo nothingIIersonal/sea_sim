@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+
 namespace gui
 {
 	using namespace utils;
@@ -14,7 +15,17 @@ namespace gui
 		parent_ptr_ = nullptr;
 	}
 
-	void GraphicsStorage::drawline(sf::Vector2f a, sf::Vector2f b, int width)
+	void GraphicsStorage::setFillColor(sf::Color color)
+	{
+		fill_color_ = color;
+	}
+
+	void GraphicsStorage::setOutlineColor(sf::Color color)
+	{
+		outline_color_ = color;
+	}
+
+	void GraphicsStorage::drawline(sf::Vector2f a, sf::Vector2f b, unsigned int width)
 	{
 		float lens = pif(b.x - a.x, b.y - a.y);
 		float ang = atan2(b.y - a.y, b.x - a.x);
@@ -26,9 +37,26 @@ namespace gui
 		
 		line.setPosition(a);
 		line.setRotation(ang / PI * 180.f);
-		line.setFillColor(MainColor);
+		line.setFillColor(fill_color_);
 		
 		parent_ptr_->get_texture(true).draw(line);
+	}
+
+	void GraphicsStorage::drawcircle(sf::Vector2f pos, float radius, float border_width)
+	{
+		sf::CircleShape circle;
+
+		circle.setPosition(pos.x, pos.y);
+		circle.setRadius(radius);
+
+		circle.setOrigin(radius, radius);
+		
+		circle.setFillColor(sf::Color(fill_color_.r, fill_color_.g, fill_color_.b));
+
+		circle.setOutlineColor(sf::Color::White);
+		circle.setOutlineThickness(border_width);
+
+		parent_ptr_->get_texture(true).draw(circle);
 	}
 
 } // namespace gui

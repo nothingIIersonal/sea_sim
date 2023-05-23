@@ -56,6 +56,23 @@ namespace gui
 
 				graphics_storage_.drawline(a, b);
 			}
+			else if (type == "circle")
+			{
+				auto pos = settings["pos"].get<sf::Vector2f>();
+				auto radius = settings["radius"].get<float>();
+
+				graphics_storage_.drawcircle(pos, radius);
+			}
+			else if (type == "setFillColor")
+			{
+				auto color = settings["color"].get<sf::Color>();
+				graphics_storage_.setFillColor(color);
+			}
+			else if (type == "setOutlineColor")
+			{
+				auto color = settings["color"].get<sf::Color>();
+				graphics_storage_.setOutlineColor(color);
+			}
 		}
 	}
 
@@ -190,5 +207,15 @@ namespace nlohmann
 	{
 		j.at("x").get_to(obj.x);
 		j.at("y").get_to(obj.y);
+	}
+	void adl_serializer<sf::Color>::to_json(nlohmann::json& j, const sf::Color& obj)
+	{
+		j = nlohmann::json{ {"r", obj.r}, {"g", obj.g}, {"b", obj.b} };
+	}
+	void adl_serializer<sf::Color>::from_json(const nlohmann::json& j, sf::Color& obj)
+	{
+		j.at("r").get_to(obj.r);
+		j.at("g").get_to(obj.g);
+		j.at("b").get_to(obj.b);
 	}
 } // namespace nlohmann

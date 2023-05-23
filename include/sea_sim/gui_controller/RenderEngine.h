@@ -67,4 +67,10 @@ namespace nlohmann {
 		static void to_json(nlohmann::json&, const sf::Vector2u&);
 		static void from_json(const nlohmann::json&, sf::Vector2u&);
 	};
+
+	template <>
+	struct adl_serializer<sf::Color> {
+		static void to_json(nlohmann::json&, const sf::Color&);
+		static void from_json(const nlohmann::json&, sf::Color&);
+	};
 } // namespace nlohmann
