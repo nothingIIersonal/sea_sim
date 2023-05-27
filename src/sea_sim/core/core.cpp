@@ -40,7 +40,6 @@ int main()
 {
     setlocale(LC_ALL, "Rus");
 
-    sf::Vector2u view_area;
     float angle = 0;
 
     auto endpoint_storage = std::map< std::string, Endpoint >();
@@ -100,7 +99,7 @@ int main()
                         }
                         else if (event == "mouse_position_changed")
                         {
-                            packet.value().data["mousle_position"].get_to<geom::Vector2u>(environment.mouse_position);
+                            packet.value().data["mouse_position"].get_to<geom::Vector2u>(environment.mouse_position);
                             continue;
                         }
                         else if (event == "map_scale_changed")

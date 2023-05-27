@@ -26,7 +26,7 @@ namespace gui
 		outline_color_ = color;
 	}
 
-	void GraphicsStorage::drawline(sf::Vector2f a, sf::Vector2f b, unsigned int width)
+	void GraphicsStorage::drawline(sf::Vector2f a, sf::Vector2f b, float width)
 	{
 		float lens = pif(b.x - a.x, b.y - a.y);
 		float ang = atan2(b.y - a.y, b.x - a.x);
@@ -34,7 +34,7 @@ namespace gui
 		a.x += width / 2.f * sin(ang);
 		b.y -= width / 2.f * cos(ang);
 		
-		sf::RectangleShape line(sf::Vector2f(lens, static_cast<float>(width)));
+		sf::RectangleShape line(sf::Vector2f(lens, width));
 		
 		line.setPosition(a);
 		line.setRotation(ang / PI * 180.f);
@@ -43,7 +43,22 @@ namespace gui
 		parent_ptr_->get_texture(true).draw(line);
 	}
 
-	float x = 100, y = 10, angle = 0;
+	void GraphicsStorage::drawborderline(sf::Vector2f a, sf::Vector2f b, float width)
+	{
+		float lens = pif(b.x - a.x, b.y - a.y);
+		float ang = atan2(b.y - a.y, b.x - a.x);
+
+		a.x += width / 2.f * sin(ang);
+		b.y -= width / 2.f * cos(ang);
+
+		sf::RectangleShape line(sf::Vector2f(lens, width));
+
+		line.setPosition(a);
+		line.setRotation(ang / PI * 180.f);
+		line.setFillColor(outline_color_);
+
+		parent_ptr_->get_texture(true).draw(line);
+	}
 
 	void GraphicsStorage::drawcircle(sf::Vector2f pos, float radius, float border_width)
 	{
@@ -60,13 +75,6 @@ namespace gui
 		circle.setOutlineThickness(border_width);
 
 		parent_ptr_->get_texture(true).draw(circle);
-
-		x += 4 * cosf(angle);
-		y += 4 * sinf(angle);
-
-		angle += 0.05f;
-
-		drawship(Ship{ "a", geom::Vector2f{x, y} , 0 });
 	}
 
 	void GraphicsStorage::drawtriangle(sf::Vector2f a, sf::Vector2f b, sf::Vector2f c, float border_width)
@@ -83,13 +91,21 @@ namespace gui
 		convex.setOutlineColor(outline_color_);
 
 		parent_ptr_->get_texture(true).draw(convex);
+
+		drawborderline(a, b, border_width);
+		drawborderline(b, c, border_width);
+		drawborderline(c, a, border_width);
 	}
 
-	void GraphicsStorage::drawship(const Ship& ship)
+	void GraphicsStorage::drawship(Ship& ship)
 	{
-		sf::Vector2f rotator_a = sf::Vector2f{ 60 * cosf(angle      ), 60 * sinf(angle      ) } + sf::Vector2f{x, y};
-        sf::Vector2f rotator_b = sf::Vector2f{ 20 * cosf(angle + PI2), 20 * sinf(angle + PI2) } + sf::Vector2f{x, y};
-        sf::Vector2f rotator_c = sf::Vector2f{ 20 * cosf(angle - PI2), 20 * sinf(angle - PI2) } + sf::Vector2f{x, y};
+		auto angle = ship.get_angle();
+
+		sf::Vector2f position {ship.get_position().x, ship.get_position().y};
+
+		sf::Vector2f rotator_a = sf::Vector2f{ 60 * cosf(angle      ), 60 * sinf(angle      ) } + position;
+        sf::Vector2f rotator_b = sf::Vector2f{ 20 * cosf(angle + PI2), 20 * sinf(angle + PI2) } + position;
+        sf::Vector2f rotator_c = sf::Vector2f{ 20 * cosf(angle - PI2), 20 * sinf(angle - PI2) } + position;
 
 		sf::Vector2u view_area = parent_ptr_->get_texture(true).getSize();
 
