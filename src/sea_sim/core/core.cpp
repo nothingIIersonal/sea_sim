@@ -48,6 +48,8 @@ int main()
 
     endpoint_storage.insert( {"gui", std::move(core_gui_channel_core_side)} );
 
+    endpoint_storage.at("gui").SendData({ "gui", "core", "swap_texture", {} });
+
     StaticThreadPool stp(10);
 
 

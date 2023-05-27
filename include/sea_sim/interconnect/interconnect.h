@@ -18,7 +18,7 @@ typedef struct environment_t
 {
     geom::Vector2u view_area = {500u, 500u};
     geom::Vector2u mouse_position = {0u, 0u};
-    int8_t sim_speed = 8;
+    int8_t sim_speed = 0;
     int map_scale = 1;
 } environment_t;
 
