@@ -1,5 +1,4 @@
 ﻿#include <sea_sim/gui_controller/window_storage.h>
-#include <sea_sim/gui_controller/functions.h>
 
 #include <iostream>
 
@@ -21,17 +20,16 @@ namespace gui
 			keyHit[reset_array] = false;
 		}
 		
-		render_engine_.create_texture(500u, 500u);
+		render_engine_.create_texture({ 500u, 500u });
 		render_engine_.swap_texture();
 
 		sf::Vector2u scene_size = render_engine_.get_texture_size();
-		send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
+		send_to_core("view_area_resized", { { "view_area", scene_size} });
 	}
 
 	void WindowStorage::build_window()
 	{
 		window_.create(sf::VideoMode(1920, 1080), "Sea Interface");
-		window_.setFramerateLimit(60);
 
 		screen_size_ = window_.getSize();
 	}
@@ -334,7 +332,7 @@ namespace gui
 	}
 	void WindowStorage::show_child_view()
 	{
-		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse);
+		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
 		ImVec2 view_area = ImGui::GetWindowContentRegionMax() -
 			               ImGui::GetWindowContentRegionMin();
@@ -346,16 +344,12 @@ namespace gui
 			view_area.x = max(1, view_area.x - 2);
 			view_area.y = max(1, view_area.y - 2);
 
-			render_engine_.create_texture(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
+			render_engine_.create_texture(view_area);
 
 			sf::Vector2u scene_size = render_engine_.get_texture_size();
-
-			send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 		}
 
-		// render_engine_.render_scene();
-
-		ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
+		ImGui::Image(render_engine_.get_texture(), ImVec2(render_engine_.get_texture_size()), sf::Color::White, sf::Color(70, 70, 70));
 
 		ImGui::End();
 	}

@@ -13,9 +13,9 @@ namespace gui
 		parent_ptr_ = nullptr;
 	}
 
-	void RenderEngine::create_texture(unsigned int x, unsigned int y)
+	void RenderEngine::create_texture(const sf::Vector2u& size)
 	{
-		get_texture(true).create(x, y);
+		graphic_buffer_.size_to_set = size;
 	}
 
 	void RenderEngine::update_input_interface(std::string& module, nlohmann::json& data)
@@ -51,39 +51,58 @@ namespace gui
 
 			if (type == "line")
 			{
+				auto a = settings["a"].get<sf::Vector2f>();
+				auto b = settings["b"].get<sf::Vector2f>();
 
+				graphics_storage_.drawline(a, b);
+			}
+			else if (type == "circle")
+			{
+				auto pos = settings["pos"].get<sf::Vector2f>();
+				auto radius = settings["radius"].get<float>();
+
+				graphics_storage_.drawcircle(pos, radius);
+			}
+			else if (type == "triangle")
+			{
+				auto a = settings["a"].get<sf::Vector2f>();
+				auto b = settings["b"].get<sf::Vector2f>();
+				auto c = settings["c"].get<sf::Vector2f>();
+
+				graphics_storage_.drawtriangle(a, b, c);
+			}
+			else if (type == "ship")
+			{
+				auto ship = settings["ship"].get<Ship>();
+
+				graphics_storage_.drawship(ship);
+			}
+			else if (type == "setFillColor")
+			{
+				auto color = settings["color"].get<sf::Color>();
+				graphics_storage_.setFillColor(color);
+			}
+			else if (type == "setOutlineColor")
+			{
+				auto color = settings["color"].get<sf::Color>();
+				graphics_storage_.setOutlineColor(color);
 			}
 		}
 	}
 
 	void RenderEngine::swap_texture()
 	{
-		sf::Vector2u scene_size = get_texture(true).getSize();
-
-		sf::Vector2f rect_size{
-			max(0.f, static_cast<float>(scene_size.x) - 50.f),
-			max(0.f, static_cast<float>(scene_size.y) - 50.f) };
-
-		sf::RectangleShape rectangle(rect_size);
-		rectangle.setFillColor(sf::Color::Cyan);
-		rectangle.setPosition(25, 25);
-
-		get_texture(true).draw(rectangle);
-
 		get_texture(true).display();
 
 		graphic_buffer_.writing_buffer = !graphic_buffer_.writing_buffer;
 
-		if (get_texture_size(true) != get_texture_size(false))
-			create_texture(get_texture_size(false).x, get_texture_size(false).y);
-
 		get_texture(true).clear();
-	}
 
-
-	void RenderEngine::render_scene()
-	{
-		using namespace gui::utils;
+		if (get_texture_size(true) != graphic_buffer_.size_to_set)
+		{
+			get_texture(true).create(graphic_buffer_.size_to_set.x, graphic_buffer_.size_to_set.y);
+			parent_ptr_->send_to_core("view_area_resized", { { "view_area", graphic_buffer_.size_to_set} });
+		}
 
 		sf::Vector2u scene_size = get_texture(true).getSize();
 
@@ -92,16 +111,10 @@ namespace gui
 			max(0.f, static_cast<float>(scene_size.y) - 50.f) };
 
 		sf::RectangleShape rectangle(rect_size);
-		rectangle.setFillColor(sf::Color::Cyan);
+		rectangle.setFillColor(sf::Color(0, 50, 150));
 		rectangle.setPosition(25, 25);
 
-		// render
-
-		get_texture(true).clear();
 		get_texture(true).draw(rectangle);
-		get_texture(true).display();
-
-		return;
 	}
 
 	std::optional<std::string> RenderEngine::render_modules_combo()
@@ -175,9 +188,9 @@ namespace gui
 	{
 		return graphic_buffer_.render_texture_[get_writing_texture == graphic_buffer_.writing_buffer];
 	}
-	sf::Vector2u RenderEngine::get_texture_size(bool get_writing_texture)
+	sf::Vector2u RenderEngine::get_texture_size(bool current_texture)
 	{
-		return get_texture(get_writing_texture).getSize();
+		return (current_texture) ? get_texture(true).getSize() : sf::Vector2u(graphic_buffer_.size_to_set);
 	}
 
 	void RenderEngine::set_notification(const std::string& text)
@@ -187,5 +200,36 @@ namespace gui
 
 		parent_ptr_->set_notification(text);
 	}
-
 } // namespace gui
+
+namespace nlohmann
+{
+	void adl_serializer<sf::Vector2f>::to_json(nlohmann::json& j, const sf::Vector2f& obj)
+	{
+		j = nlohmann::json{ {"x", obj.x}, {"y", obj.y} };
+	}
+	void adl_serializer<sf::Vector2f>::from_json(const nlohmann::json& j, sf::Vector2f& obj)
+	{
+		j.at("x").get_to(obj.x);
+		j.at("y").get_to(obj.y);
+	}
+	void adl_serializer<sf::Vector2u>::to_json(nlohmann::json& j, const sf::Vector2u& obj)
+	{
+		j = nlohmann::json{ {"x", obj.x}, {"y", obj.y} };
+	}
+	void adl_serializer<sf::Vector2u>::from_json(const nlohmann::json& j, sf::Vector2u& obj)
+	{
+		j.at("x").get_to(obj.x);
+		j.at("y").get_to(obj.y);
+	}
+	void adl_serializer<sf::Color>::to_json(nlohmann::json& j, const sf::Color& obj)
+	{
+		j = nlohmann::json{ {"r", obj.r}, {"g", obj.g}, {"b", obj.b} };
+	}
+	void adl_serializer<sf::Color>::from_json(const nlohmann::json& j, sf::Color& obj)
+	{
+		j.at("r").get_to(obj.r);
+		j.at("g").get_to(obj.g);
+		j.at("b").get_to(obj.b);
+	}
+} // namespace nlohmann

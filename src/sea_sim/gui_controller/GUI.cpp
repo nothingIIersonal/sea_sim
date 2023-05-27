@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+
+extern bool ignore_input;
+
 namespace gui
 {
 	void launch_GUI(const Endpoint& channel_to_core)
@@ -22,10 +25,12 @@ namespace gui
 			window_storage.poll_events();     // Process OS and Core calls
 			
 			if (window_storage.window_has_focus())
-				window_storage.set_fps_limit(60); // WORK
+				window_storage.set_fps_limit(120); // WORK
 			else
 				window_storage.set_fps_limit(5);  // IDLE
-		
+			
+			ignore_input = !window_storage.window_has_focus();
+
 			window_storage.ImGui_update();    // Update GUI
 			
 			// --- Draw GUI Windows

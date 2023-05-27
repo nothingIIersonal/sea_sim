@@ -1,11 +1,13 @@
 #pragma once
+
 #include <queue>
 
-#include <sea_sim/gears/channel_packet.h>
+#include <sea_sim/gui_controller/functions.h>
 #include <sea_sim/gui_controller/RenderEngine.h>
 #include <sea_sim/gui_controller/FileDialog.h>
 #include <sea_sim/gui_controller/ModuleDialog.h>
 #include <sea_sim/gui_controller/Fonts.h>
+#include <sea_sim/gears/channel_packet.h>
 
 
 namespace gui
@@ -49,6 +51,9 @@ namespace gui
 		void show_child_output();
 		void show_child_view();
 
+		void send_to_core(std::string event, nlohmann::json data = {});
+		void send_to_core(channel_packet& packet);
+
 	private:
 		void show_main_menu_bar();
 		void show_file_dialog();
@@ -57,9 +62,6 @@ namespace gui
 		void ImGui_reset_docking_layout(ImGuiID id);
 		float get_button_width(const std::string& text, ImGuiStyle& style);
         void align_for_width(float width, float alignment = 0.5f);
-
-		void send_to_core(std::string event, nlohmann::json data = {});
-		void send_to_core(channel_packet& packet);
 
 		sf::RenderWindow window_;
 		sf::Vector2u screen_size_;
@@ -89,6 +91,7 @@ namespace gui
 
 			bool reset_docking_layout = true;
 			ImVec2 render_size = { 500, 500 };
+
 		} windows_show_state_;
 
 		bool shutdown_flag_ = false;
