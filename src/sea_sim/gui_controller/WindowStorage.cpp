@@ -1,4 +1,4 @@
-﻿#include <sea_sim/gui_controller/window_storage.h>
+﻿#include <sea_sim/gui_controller/WindowStorage.h>
 
 #include <iostream>
 

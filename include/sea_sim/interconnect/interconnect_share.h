@@ -18,6 +18,7 @@ std::shared_mutex           isle_storage_mutex = {};
 
 auto shared_ic_objects = shared_ic_objects_t{ ship_storage, ship_storage_mutex, isle_storage, isle_storage_mutex };
 
+
 auto environment = environment_t{};
 
 

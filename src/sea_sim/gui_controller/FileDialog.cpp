@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 
 #include <sea_sim/gui_controller/FileDialog.h>
-#include <sea_sim/gui_controller/window_storage.h>
+#include <sea_sim/gui_controller/WindowStorage.h>
 
 
 namespace gui

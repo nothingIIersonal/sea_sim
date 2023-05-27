@@ -44,9 +44,9 @@ add_subdirectory(modules)
 
 add_library(GUI STATIC
     src/sea_sim/gui_controller/GUI.cpp
-    src/sea_sim/gui_controller/functions.cpp
+    src/sea_sim/gui_controller/Functions.cpp
     src/sea_sim/gui_controller/RenderEngine.cpp
-    src/sea_sim/gui_controller/window_storage.cpp
+    src/sea_sim/gui_controller/WindowStorage.cpp
     src/sea_sim/gui_controller/FileDialog.cpp
     src/sea_sim/gui_controller/ModulePageStorage.cpp
     src/sea_sim/gui_controller/ModuleDialog.cpp

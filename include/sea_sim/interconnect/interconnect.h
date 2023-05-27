@@ -10,7 +10,17 @@
 
 #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/toolkit/object_showcase/object_showcase.h>
+#include <sea_sim/toolkit/graphics/color.hpp>
 #include <shared_mutex>
+
+
+typedef struct environment_t
+{
+    geom::Vector2u view_area = {500u, 500u};
+    geom::Vector2u mouse_position = {0u, 0u};
+    int8_t sim_speed = 8;
+    int map_scale = 1;
+} environment_t;
 
 
 typedef struct shared_ic_objects_t
@@ -20,15 +30,9 @@ typedef struct shared_ic_objects_t
 
     std::map<std::string, Isle>& isle_storage;
     std::shared_mutex& isle_storage_mutex;
+
+    environment_t environment;
 } shared_ic_objects_t;
-
-
-typedef struct environment_t
-{
-    geom::Vector2u view_area;
-    geom::Vector2u mouse_position;
-    int map_scale;
-} environment_t;
 
 
 class Interconnect
@@ -54,9 +58,26 @@ private:
     public:
         explicit Environment(const environment_t& environment);
 
-        const geom::Vector2u get_view_area();
-        const geom::Vector2u get_mouse_position();
-        const int get_map_scale();
+        geom::Vector2u get_view_area() const;
+        geom::Vector2u get_mouse_position() const;
+        int get_map_scale() const;
+    };
+
+    class Render
+    {
+    private:
+        nlohmann::json graphics_output;
+    public:
+        void send();
+
+		void set_fill_color(graphics::Color color);
+		void set_outline_color(graphics::Color color);
+
+		void draw_line(geom::Vector2f a, geom::Vector2f b, float width = 1.f);
+		void draw_circle(geom::Vector2f pos, float radius, float border_width = 1.f);
+		void draw_triangle(geom::Vector2f a, geom::Vector2f b, geom::Vector2f c, float border_width = 1.f);
+
+		void draw_ship(const Ship& ship);
     };
 
     class WGTI
@@ -110,9 +131,11 @@ protected:
     void operator=(const Interconnect&) = delete;
 
 public:
-    explicit Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects_t);
+    explicit Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects_t, const environment_t& environment);
     ~Interconnect() noexcept = default;
 
+    Environment environment;
+    Render render;
     WGTI wgti;
     WGTO wgto;
     Ships ships;

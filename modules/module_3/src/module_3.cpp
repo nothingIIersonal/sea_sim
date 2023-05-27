@@ -8,6 +8,7 @@
 */
 std::optional<std::string> selected_ship_g = std::nullopt;
 bool btn_choice_clicked_g = false;
+float speed_g = 4.f;
 
 /*
 * LOCAL FUNCTIONS
@@ -39,8 +40,20 @@ void move(Interconnect &ic)
         auto ship_identifier = ship.get_identifier();
         auto ship_position = ship.get_position();
         auto ship_angle = ship.get_angle();
+        auto va = ic.environment.get_view_area();
 
-        ic.ships.set_position(ship_identifier, ship_position + geom::Vector2f{std::rand() % 20 - 10.f, std::rand() % 20 - 10.f});
+        if ( ship_identifier == "суворов_0" )
+        {
+            if ( ship_position.x < 0 || ship_position.x > va.x )
+                speed_g *= -1;
+            ic.ships.set_position( ship_identifier, ship_position + geom::Vector2f{speed_g, 0.f} );
+        }
+        else
+        {
+            ic.ships.set_position(ship_identifier, ship_position + geom::Vector2f{ (std::rand() - 3) % 20 - 10.f, (std::rand() - 3) % 20 - 10.f});
+        }
+
+        ic.render.draw_ship(ship);
     }
 }
 
@@ -72,11 +85,13 @@ void out_info(Interconnect &ic)
 
 void set_initial_ships(Interconnect &ic)
 {
-    ic.ships.create("destroyer", {0.f, 0.f}, 0.f);
-    ic.ships.create("линкор_1", {0.f, 100.f}, 0.f);
-    ic.ships.create("hovercraft", {100.f, 100.f}, 0.f);
-    ic.ships.create("cruiser", {100.f, 0.f}, 0.f);
-    ic.ships.create("суворов_0", {50.f, 50.f}, 0.f);
+    auto va = ic.environment.get_view_area();
+
+    ic.ships.create("destroyer",  geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
+    ic.ships.create("линкор_1",   geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
+    ic.ships.create("hovercraft", geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
+    ic.ships.create("cruiser",    geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
+    ic.ships.create("суворов_0",  geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
 }
 ////
 
@@ -124,6 +139,7 @@ int sea_module_hotf(Interconnect &&ic)
     ic.wgti.send();
 
     move(ic);
+    ic.render.send();
 
     out_info(ic);
     ic.wgto.send();

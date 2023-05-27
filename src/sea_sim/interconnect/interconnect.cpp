@@ -4,10 +4,11 @@
 #define container_of(ptr, type, member) ((type *)((size_t)(ptr) - ((size_t)&(((type *)0)->member))))
 
 
-Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects) 
+Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects, const environment_t& environment) 
                     : module_endpoint(module_endpoint), module_name(module_name),
                       ship_storage(shared_ic_objects.ship_storage), ship_storage_mutex(shared_ic_objects.ship_storage_mutex),
-                      isle_storage(shared_ic_objects.isle_storage), isle_storage_mutex(shared_ic_objects.isle_storage_mutex)
+                      isle_storage(shared_ic_objects.isle_storage), isle_storage_mutex(shared_ic_objects.isle_storage_mutex),
+                      environment(environment)
 {
     if (const auto &packet = this->module_endpoint.TryRead())
     {
@@ -22,19 +23,116 @@ Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& m
 
 Interconnect::Environment::Environment(const environment_t& environment) : environment(environment) {}
 
-const geom::Vector2u Interconnect::Environment::get_view_area()
+geom::Vector2u Interconnect::Environment::get_view_area() const
 {
     return this->environment.view_area;
 }
 
-const geom::Vector2u Interconnect::Environment::get_mouse_position()
+geom::Vector2u Interconnect::Environment::get_mouse_position() const
 {
     return this->environment.mouse_position;
 }
 
-const int Interconnect::Environment::get_map_scale()
+int Interconnect::Environment::get_map_scale() const
 {
     return this->environment.map_scale;
+}
+
+void Interconnect::Render::send()
+{
+    Interconnect *ic = container_of(this, Interconnect, render);
+    ic->module_endpoint.SendData({ "gui", ic->module_name, "draw", this->graphics_output });
+}
+
+void Interconnect::Render::set_fill_color(graphics::Color color)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "setFillColor"},
+            {"settings",
+                {
+                    {"color", color}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::set_outline_color(graphics::Color color)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "setOutlineColor"},
+            {"settings",
+                {
+                    {"color", color}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::draw_line(geom::Vector2f a, geom::Vector2f b, float width)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "line"},
+            {"settings",
+                {
+                    {"a", a},
+                    {"b", b},
+                    {"width", width}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::draw_circle(geom::Vector2f pos, float radius, float border_width)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "circle"},
+            {"settings",
+                {
+                    {"pos", pos},
+                    {"radius", radius},
+                    {"border_width", border_width}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::draw_triangle(geom::Vector2f a, geom::Vector2f b, geom::Vector2f c, float border_width)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "triangle"},
+            {"settings",
+                {
+                    {"a", a},
+                    {"b", b},
+                    {"c", c},
+                    {"border_width", border_width}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::draw_ship(const Ship& ship)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "ship"},
+            {"settings",
+                {
+                    {"ship", ship}
+                }
+            }
+        }
+    );
 }
 
 void Interconnect::WGTI::send()

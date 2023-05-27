@@ -121,3 +121,24 @@ constexpr Vector2<T> operator%(const Vector2<T>& lhs, const T& rhs) {
 }
 
 } // namespace geom
+
+
+namespace nlohmann 
+{
+    template <typename T>
+    struct adl_serializer<geom::Vector2<T>>
+    {
+        static void to_json(nlohmann::json& j, const geom::Vector2<T>& vector)
+        {
+            j = nlohmann::json{
+                {"x", vector.x},
+                {"y", vector.y}
+            };
+        }
+        static void from_json(const nlohmann::json& j, geom::Vector2<T>& vector)
+        {
+            j.at("x").get_to(vector.x);
+            j.at("y").get_to(vector.y);
+        }
+    };
+} // namespace nlohmann

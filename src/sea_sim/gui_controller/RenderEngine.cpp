@@ -1,5 +1,5 @@
 ﻿#include <sea_sim/gui_controller/RenderEngine.h>
-#include <sea_sim/gui_controller/window_storage.h>
+#include <sea_sim/gui_controller/WindowStorage.h>
 
 #include <iostream>
 
@@ -7,7 +7,11 @@
 namespace gui
 {
 	RenderEngine::RenderEngine(WindowStorage* parent)
-		: parent_ptr_(parent), graphics_storage_(this) {}
+		: parent_ptr_(parent), graphics_storage_(this)
+	{
+		swap_texture();
+	}
+
 	RenderEngine::~RenderEngine()
 	{
 		parent_ptr_ = nullptr;
@@ -224,12 +228,13 @@ namespace nlohmann
 	}
 	void adl_serializer<sf::Color>::to_json(nlohmann::json& j, const sf::Color& obj)
 	{
-		j = nlohmann::json{ {"r", obj.r}, {"g", obj.g}, {"b", obj.b} };
+		j = nlohmann::json{ {"r", obj.r}, {"g", obj.g}, {"b", obj.b}, {"a", obj.a} };
 	}
 	void adl_serializer<sf::Color>::from_json(const nlohmann::json& j, sf::Color& obj)
 	{
 		j.at("r").get_to(obj.r);
 		j.at("g").get_to(obj.g);
 		j.at("b").get_to(obj.b);
+		j.at("a").get_to(obj.a);
 	}
 } // namespace nlohmann

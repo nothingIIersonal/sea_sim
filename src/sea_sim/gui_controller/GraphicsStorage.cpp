@@ -97,7 +97,7 @@ namespace gui
 		drawborderline(c, a, border_width);
 	}
 
-	void GraphicsStorage::drawship(Ship& ship)
+	void GraphicsStorage::drawship(const Ship& ship)
 	{
 		auto angle = ship.get_angle();
 

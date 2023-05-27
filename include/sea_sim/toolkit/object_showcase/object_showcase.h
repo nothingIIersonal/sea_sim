@@ -23,7 +23,7 @@ public:
     explicit Object(const std::string& identifier) noexcept : identifier(identifier) {}
     ~Object() noexcept = default;
 
-    const std::string get_identifier() noexcept { return this->identifier; }
+    std::string get_identifier() const { return this->identifier; }
 };
 
 
@@ -41,8 +41,8 @@ public:
     explicit Ship(const std::string& identifier, geom::Vector2f position, float angle) noexcept : Object(identifier), position(position), angle(angle) {};
     ~Ship() noexcept = default;
 
-    geom::Vector2f get_position() { return this->position; }
-    float get_angle() { return this->angle; }
+    geom::Vector2f get_position() const { return this->position; }
+    float get_angle() const { return this->angle; }
 
     void set_position(geom::Vector2f position) { this->position = position; }
     void set_angle(float angle) { this->angle = angle; }
@@ -67,27 +67,10 @@ public:
 */
 namespace nlohmann 
 {
-    template <typename T>
-    struct adl_serializer<geom::Vector2<T>>
-    {
-        static void to_json(nlohmann::json& j, const geom::Vector2<T>& vector)
-        {
-            j = nlohmann::json{
-                {"x", vector.x},
-                {"y", vector.y}
-            };
-        }
-        static void from_json(const nlohmann::json& j, geom::Vector2<T>& vector)
-        {
-            j.at("x").get_to(vector.x);
-            j.at("y").get_to(vector.y);
-        }
-    };
-
     template <>
     struct adl_serializer<Ship>
     {
-        static void to_json(nlohmann::json& j, Ship& ship);
+        static void to_json(nlohmann::json& j, const Ship& ship);
         static void from_json(const nlohmann::json& j, Ship& ship);
     };
 } // namespace nlohmann
