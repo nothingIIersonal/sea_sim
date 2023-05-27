@@ -93,6 +93,17 @@ int main()
                         }
                         else if (event == "view_area_resized")
                         {
+                            packet.value().data["view_area"].get_to<geom::Vector2u>(environment.view_area);
+                            continue;
+                        }
+                        else if (event == "mouse_position_changed")
+                        {
+                            packet.value().data["mousle_position"].get_to<geom::Vector2u>(environment.mouse_position);
+                            continue;
+                        }
+                        else if (event == "map_scale_changed")
+                        {
+                            packet.value().data["map_scale"].get_to<int>(environment.map_scale);
                             continue;
                         }
 
@@ -228,9 +239,13 @@ int main()
 
             for (const auto& path : module_storage.get_paths())
             {
-                auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
-                auto [mn, nm] = endpoint_storage.insert( {path, std::move(core_module_channel_core_side)} );
-                stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
+                if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
+                {
+                    auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
+                    endpoint_storage.insert( {path, std::move(core_module_channel_core_side)} );
+                    module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
+                    stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
+                }
             }
         }
         else if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_1 && endpoint_storage.size() == 1 )

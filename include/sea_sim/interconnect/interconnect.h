@@ -23,6 +23,14 @@ typedef struct shared_ic_objects_t
 } shared_ic_objects_t;
 
 
+typedef struct environment_t
+{
+    geom::Vector2u view_area;
+    geom::Vector2u mouse_position;
+    int map_scale;
+} environment_t;
+
+
 class Interconnect
 {
 private:
@@ -38,6 +46,18 @@ private:
     std::map<std::string, Isle>& isle_storage;
     std::map<std::string, Isle> ::iterator isle_storage_it;
     std::shared_mutex& isle_storage_mutex;
+
+    class Environment
+    {
+    private:
+        environment_t environment;
+    public:
+        explicit Environment(const environment_t& environment);
+
+        const geom::Vector2u get_view_area();
+        const geom::Vector2u get_mouse_position();
+        const int get_map_scale();
+    };
 
     class WGTI
     {
@@ -69,6 +89,21 @@ private:
         void add_text(const std::string& text);
     };
 
+    class Ships
+    {
+    public:
+        void create(const std::string& identifier, geom::Vector2f position, float angle);
+        void set_position(const std::string& identifier, geom::Vector2f position);
+        void set_angle(const std::string& identifier, float angle);
+        std::optional<Ship> get_by_id(const std::string& identifier);
+        std::vector<Ship> get_all();
+    };
+
+    class Isle
+    {
+    public:
+    };
+
 protected:
     Interconnect() noexcept = delete;
     Interconnect(const Interconnect&) = delete;
@@ -80,25 +115,14 @@ public:
 
     WGTI wgti;
     WGTO wgto;
+    Ships ships;
+    Isle isle;
 
     const std::string& get_trigger();
 
     std::optional<int> get_field_int(const std::string& field_name);
     std::optional<float> get_field_float(const std::string& field_name);
     std::optional<std::string> get_field_string(const std::string& field_name);
-
-    int object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff);
-    std::optional<Ship> object_ship_get(const std::string& identifier);
-    std::optional<Ship> object_ship_get_next();
-    std::optional<int64_t> object_ship_get_x(const std::string& identifier);
-    std::optional<int64_t> object_ship_get_y(const std::string& identifier);
-    std::optional<std::vector<std::string>> object_ship_get_staff(const std::string& identifier);
-    void object_ship_iterator_reset();
-
-    int object_isle_set(const std::string& identifier, Isle isle);
-    std::optional<Isle> object_isle_get(const std::string& identifier);
-    std::optional<Isle> object_isle_get_next();
-    void object_isle_iterator_reset();
 };
 
 

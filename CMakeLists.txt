@@ -27,6 +27,12 @@ find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 find_package(ImGui-SFML CONFIG REQUIRED)
 
 
+add_library(object_showcase STATIC
+    src/sea_sim/toolkit/object_showcase/object_showcase.cpp
+)
+set_property(TARGET object_showcase PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+
 add_library(interconnect STATIC
     src/sea_sim/interconnect/interconnect.cpp
 )
@@ -50,6 +56,7 @@ target_link_libraries(GUI
     imgui::imgui
     sfml-graphics sfml-system sfml-window
     ImGui-SFML::ImGui-SFML
+    object_showcase
 )
 
 
@@ -64,6 +71,7 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     GUI
     thread_pool
+    object_showcase
     interconnect
     ${CMAKE_THREAD_LIBS_INIT}
     ${CMAKE_DL_LIBS}
