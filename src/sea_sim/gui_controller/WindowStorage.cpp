@@ -332,7 +332,60 @@ namespace gui
 	}
 	void WindowStorage::show_child_view()
 	{
-		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
+		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar);
+
+		if (ImGui::BeginMenuBar())
+		{
+			ImGui::Separator();
+
+			if (ImGui::Button(ICON_sea_sim__BACKWARD) && windows_show_state_.sim_speed >= -4)
+			{
+				--windows_show_state_.sim_speed;
+				send_to_core("speed_down", {});
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::Button(ICON_sea_sim__PAUSE))
+			{
+				windows_show_state_.frame_pause = true;
+				send_to_core("pause_on", {});
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::Button(ICON_sea_sim__PLAY))
+			{
+				windows_show_state_.frame_pause = false;
+				send_to_core("pause_off", {});
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::Button(ICON_sea_sim__FORWARD) && windows_show_state_.sim_speed <= 4)
+			{
+				++windows_show_state_.sim_speed;
+				send_to_core("speed_up", {});
+			}
+
+			ImGui::Separator();
+
+			if (windows_show_state_.sim_speed >= 0)
+				ImGui::Text("x%i", static_cast<int>(pow(2, windows_show_state_.sim_speed)));
+			else
+				ImGui::Text("1/%i", static_cast<int>(pow(2, abs(windows_show_state_.sim_speed))));
+
+			ImGui::Separator();
+
+			if (windows_show_state_.frame_pause)
+			{
+				ImGui::Text(u8"Пауза"_C);
+
+				ImGui::Separator();
+			}
+
+			ImGui::EndMenuBar();
+		}
 
 		ImVec2 view_area = ImGui::GetWindowContentRegionMax() -
 			               ImGui::GetWindowContentRegionMin();

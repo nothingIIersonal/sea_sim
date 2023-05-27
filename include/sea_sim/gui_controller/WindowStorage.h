@@ -92,6 +92,8 @@ namespace gui
 			bool reset_docking_layout = true;
 			ImVec2 render_size = { 500, 500 };
 
+			int8_t sim_speed = 0;
+			bool frame_pause = true;
 		} windows_show_state_;
 
 		bool shutdown_flag_ = false;
