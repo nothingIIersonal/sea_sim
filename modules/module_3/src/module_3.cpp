@@ -6,9 +6,8 @@
 /*
 * LOCAL DATA
 */
-std::optional<std::string> ship_g = std::nullopt;
-std::optional<std::vector<std::string>> staff_g = std::nullopt;
-bool staff_clicked = false;
+std::optional<std::string> selected_ship_g = std::nullopt;
+bool btn_choice_clicked_g = false;
 
 /*
 * LOCAL FUNCTIONS
@@ -18,9 +17,8 @@ std::vector<std::string> get_ship_names(Interconnect &ic)
 { 
     std::vector<std::string> ship_names;
 
-    ic.object_ship_iterator_reset();
-    while ( auto i = ic.object_ship_get_next() )
-        ship_names.push_back(i.value().get_identifier());
+    for ( auto& i : ic.ships.get_all() )
+        ship_names.push_back(i.get_identifier());
 
     return ship_names;
 }
@@ -36,56 +34,49 @@ void ship_choice(Interconnect &ic)
 
 void move(Interconnect &ic)
 {
-    std::vector<std::string> ship_names = get_ship_names(ic);
-    for (const auto& ship : ship_names)
+    for ( auto& ship : ic.ships.get_all() )
     {
-        auto ship_x = ic.object_ship_get_x(ship);
-        auto ship_y = ic.object_ship_get_y(ship);
-        auto ship_staff = ic.object_ship_get_staff(ship);
+        auto ship_identifier = ship.get_identifier();
+        auto ship_position = ship.get_position();
+        auto ship_angle = ship.get_angle();
 
-        if ( ship_x && ship_y && ship_staff )
-            ic.object_ship_set(ship, ship_x.value() + std::rand() % 20 - 10, ship_y.value() + std::rand() % 20 - 10, ship_staff.value());
+        ic.ships.set_position(ship_identifier, ship_position + geom::Vector2f{std::rand() % 20 - 10.f, std::rand() % 20 - 10.f});
     }
 }
 
 void out_info(Interconnect &ic)
 {
-    if ( staff_g )
+    if ( !btn_choice_clicked_g )
     {
-        ic.wgto.add_text("Персонал:");
-        for (const auto& person : staff_g.value())
-            ic.wgto.add_text("\t" + person);
-    }
-    else
-    {
-        if ( staff_clicked )
-            ic.wgto.add_text("Персонал не обнаружен!");
-        else
-            ic.wgto.add_text("Выберите корабль");
+        ic.wgto.add_text("Выберите корабль");
+        ic.wgto.add_text("\n\n\n");
     }
 
-    ic.wgto.add_text("\n\n\n");
-
-    if ( ship_g )
+    if ( selected_ship_g )
     {
-        auto ship_x = ic.object_ship_get_x(ship_g.value());
-        auto ship_y = ic.object_ship_get_y(ship_g.value());
-        if ( ship_x && ship_y )
+        auto ship = ic.ships.get_by_id(selected_ship_g.value());
+
+        if ( !ship )
         {
-            ic.wgto.add_text("Координаты корабля:");
-            ic.wgto.add_text("x: " + std::to_string(ship_x.value()));
-            ic.wgto.add_text("y: " + std::to_string(ship_y.value()));
+            ic.wgto.add_text("Корабль не найден.");
+            return;
         }
+
+        auto ship_position = ship.value().get_position();
+
+        ic.wgto.add_text("Координаты корабля:");
+        ic.wgto.add_text("\tx: " + std::to_string(ship_position.x));
+        ic.wgto.add_text("\ty: " + std::to_string(ship_position.y));
     }
 }
 
 void set_initial_ships(Interconnect &ic)
 {
-    ic.object_ship_set("destroyer", 0, 0, {"Иванов", "Петров", "Сидоров"});
-    ic.object_ship_set("линкор_1", 0, 100, {"Малахов", "Капитанов"});
-    ic.object_ship_set("hovercraft", 100, 100, {"Алексеев", "Кузнецов"});
-    ic.object_ship_set("cruiser", 100, 0, {"Пиратов", "Петренко", "Резнов"});
-    ic.object_ship_set("суворов_0", 50, 50, {"Суворов"});
+    ic.ships.create("destroyer", {0.f, 0.f}, 0.f);
+    ic.ships.create("линкор_1", {0.f, 100.f}, 0.f);
+    ic.ships.create("hovercraft", {100.f, 100.f}, 0.f);
+    ic.ships.create("cruiser", {100.f, 0.f}, 0.f);
+    ic.ships.create("суворов_0", {50.f, 50.f}, 0.f);
 }
 ////
 
@@ -113,18 +104,13 @@ int sea_module_exec(Interconnect &&ic)
 
     if (tr == "btn_ship_data_get")
     {
-        ship_g = ic.get_field_string("ddl_ships");
+        selected_ship_g = ic.get_field_string("ddl_ships");
 
-        if ( !ship_g )
-        {
-            staff_g = std::nullopt;
+        if ( !selected_ship_g )
             return 0;
-        }
-
-        staff_g = ic.object_ship_get_staff(ship_g.value());
     }
 
-    staff_clicked = true;
+    btn_choice_clicked_g = true;
 
     return 0;
 }

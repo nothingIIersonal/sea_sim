@@ -7,6 +7,10 @@
 #include <vector>
 
 
+#include <sea_sim/gears/json/json.hpp>
+#include <sea_sim/toolkit/geom/geom.hpp>
+
+
 /*
 * Abstract object in vacuum
 */
@@ -16,7 +20,10 @@ protected:
     std::string identifier;
 
 public:
-    Object(const std::string& identifier) noexcept : identifier(identifier) {}
+    Object() noexcept = delete;
+    explicit Object(const std::string& identifier) noexcept : identifier(identifier) {}
+    ~Object() noexcept = default;
+
     const std::string get_identifier() noexcept { return this->identifier; }
 };
 
@@ -27,17 +34,19 @@ public:
 class Ship : public Object
 {
 private:
-    float x = 0, y = 0;
-    std::vector<std::string> staff;
+    geom::Vector2f position;
+    float angle;
 
 public:
-    Ship() noexcept : Object("unnamed") {};
-    Ship(const std::string& identifier, float x, float y, const std::vector<std::string>& staff) noexcept : Object(identifier), x(x), y(y), staff(staff) {};
+    Ship() noexcept : Object("unknown") {}
+    explicit Ship(const std::string& identifier, geom::Vector2f position, float angle) noexcept : Object(identifier), position(position), angle(angle) {};
     ~Ship() noexcept = default;
 
-    std::vector<std::string> get_staff() { return this->staff; };
-    float get_x() { return this->x; }
-    float get_y() { return this->y; }
+    geom::Vector2f get_position() { return this->position; }
+    float get_angle() { return this->angle; }
+
+    void set_position(geom::Vector2f position) { this->position = position; }
+    void set_angle(float angle) { this->angle = angle; }
 };
 
 
@@ -52,6 +61,37 @@ public:
     Isle() noexcept = default;
     ~Isle() noexcept = default;
 };
+
+
+/*
+* Serialization / Deserialization
+*/
+namespace nlohmann 
+{
+    template <typename T>
+    struct adl_serializer<geom::Vector2<T>>
+    {
+        static void to_json(nlohmann::json& j, const geom::Vector2<T>& vector)
+        {
+            j = nlohmann::json{
+                {"x", vector.x},
+                {"y", vector.y}
+            };
+        }
+        static void from_json(const nlohmann::json& j, geom::Vector2<T>& vector)
+        {
+            j.at("x").get_to(vector.x);
+            j.at("y").get_to(vector.y);
+        }
+    };
+
+    template <>
+    struct adl_serializer<Ship>
+    {
+        static void to_json(nlohmann::json& j, Ship& ship);
+        static void from_json(const nlohmann::json& j, Ship& ship);
+    };
+} // namespace nlohmann
 
 namespace nlohmann 
 {
