@@ -195,7 +195,7 @@ namespace gui
 
 	void WindowStorage::show_main()
     {
-        show_main_menu_bar();
+		show_main_menu_bar();
         show_file_dialog();
 		show_module_dialog();
 
