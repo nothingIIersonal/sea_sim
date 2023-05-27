@@ -239,7 +239,7 @@ int main()
                 {"type", "line"},
                 {"settings", {
                     {"a", sf::Vector2f{26.f, 26.f}},
-                    {"b", sf::Vector2f{view_area.x - 26.f, view_area.y - 26.f}}}
+                    {"b", sf::Vector2f{environment.view_area.x - 26.f, environment.view_area.y - 26.f}}}
                 }
             }
         };
@@ -249,8 +249,8 @@ int main()
             {
                 {"type", "line"},
                 {"settings", {
-                    {"a", sf::Vector2f{view_area.x - 26.f, 26.f}},
-                    {"b", sf::Vector2f{26.f, view_area.y - 26.f}}}
+                    {"a", sf::Vector2f{environment.view_area.x - 26.f, 26.f}},
+                    {"b", sf::Vector2f{26.f, environment.view_area.y - 26.f}}}
                 }
             }
         };
@@ -280,7 +280,7 @@ int main()
             {
                 {"type", "circle"},
                 {"settings", {
-                    {"pos", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f}},
+                    {"pos", sf::Vector2f{environment.view_area.x / 2.f, environment.view_area.y / 2.f}},
                     {"radius", 100.f}}
                 }
             }
@@ -306,9 +306,9 @@ int main()
             {
                 {"type", "triangle"},
                 {"settings", {
-                    {"a", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f} + rotator_a},
-                    {"b", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f} + rotator_b},
-                    {"c", sf::Vector2f{view_area.x / 2.f, view_area.y / 2.f} + rotator_c}}
+                    {"a", sf::Vector2f{environment.view_area.x / 2.f, environment.view_area.y / 2.f} + rotator_a},
+                    {"b", sf::Vector2f{environment.view_area.x / 2.f, environment.view_area.y / 2.f} + rotator_b},
+                    {"c", sf::Vector2f{environment.view_area.x / 2.f, environment.view_area.y / 2.f} + rotator_c}}
                 }
             }
         };

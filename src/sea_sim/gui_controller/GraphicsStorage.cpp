@@ -42,6 +42,7 @@ namespace gui
 		
 		parent_ptr_->get_texture(true).draw(line);
 	}
+
 	float x = 100, y = 10, angle = 0;
 
 	void GraphicsStorage::drawcircle(sf::Vector2f pos, float radius, float border_width)
@@ -62,7 +63,10 @@ namespace gui
 
 		x += 4 * cosf(angle);
 		y += 4 * sinf(angle);
-		drawship({ "a", x, y, {} });
+
+		angle += 0.05f;
+
+		drawship(Ship{ "a", geom::Vector2f{x, y} , 0 });
 	}
 
 	void GraphicsStorage::drawtriangle(sf::Vector2f a, sf::Vector2f b, sf::Vector2f c, float border_width)
@@ -81,7 +85,7 @@ namespace gui
 		parent_ptr_->get_texture(true).draw(convex);
 	}
 
-	void GraphicsStorage::drawship(Ship ship)
+	void GraphicsStorage::drawship(const Ship& ship)
 	{
 		sf::Vector2f rotator_a = sf::Vector2f{ 60 * cosf(angle      ), 60 * sinf(angle      ) } + sf::Vector2f{x, y};
         sf::Vector2f rotator_b = sf::Vector2f{ 20 * cosf(angle + PI2), 20 * sinf(angle + PI2) } + sf::Vector2f{x, y};

@@ -93,14 +93,4 @@ namespace nlohmann
     };
 } // namespace nlohmann
 
-namespace nlohmann 
-{
-    template <>
-    struct adl_serializer<Ship>
-    {
-        static void to_json(nlohmann::json& j, Ship& ship);
-        static void from_json(const nlohmann::json& j, Ship& ship);
-    };
-} // namespace nlohmann
-
 #endif
