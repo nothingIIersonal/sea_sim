@@ -1,6 +1,7 @@
 ﻿#ifndef OBJECT_SHOWCASE
 #define OBJECT_SHOWCASE
 
+#include <sea_sim/gears/json/json.hpp>
 
 #include <string>
 #include <vector>
@@ -11,7 +12,7 @@
 */
 class Object
 {
-private:
+protected:
     std::string identifier;
 
 public:
@@ -26,11 +27,11 @@ public:
 class Ship : public Object
 {
 private:
-    float x, y;
+    float x = 0, y = 0;
     std::vector<std::string> staff;
 
 public:
-    Ship() noexcept = default;
+    Ship() noexcept : Object("unnamed") {};
     Ship(const std::string& identifier, float x, float y, const std::vector<std::string>& staff) noexcept : Object(identifier), x(x), y(y), staff(staff) {};
     ~Ship() noexcept = default;
 
@@ -52,5 +53,14 @@ public:
     ~Isle() noexcept = default;
 };
 
+namespace nlohmann 
+{
+    template <>
+    struct adl_serializer<Ship>
+    {
+        static void to_json(nlohmann::json& j, Ship& ship);
+        static void from_json(const nlohmann::json& j, Ship& ship);
+    };
+} // namespace nlohmann
 
 #endif

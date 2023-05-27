@@ -76,12 +76,4 @@ namespace nlohmann {
 	};
 } // namespace nlohmann
 
-namespace nlohmann {
-	void to_json(json& j, const Ship& ship);
-	void from_json(const json& j, Ship& ship);
 
-	template <typename T>
-	void to_json(json& j, const geom::Vector2<T>& ship);
-	template <typename T>
-	void from_json(const json& j, geom::Vector2<T>& ship);
-} // namespace nlohmann

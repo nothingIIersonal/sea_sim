@@ -42,6 +42,7 @@ namespace gui
 		
 		parent_ptr_->get_texture(true).draw(line);
 	}
+	float x = 100, y = 10, angle = 0;
 
 	void GraphicsStorage::drawcircle(sf::Vector2f pos, float radius, float border_width)
 	{
@@ -82,9 +83,9 @@ namespace gui
 
 	void GraphicsStorage::drawship(Ship ship)
 	{
-		sf::Vector2f rotator_a = sf::Vector2f{ 60 * cosf(ship.angle      ), 60 * sinf(ship.angle      ) } + ship.position;
-        sf::Vector2f rotator_b = sf::Vector2f{ 20 * cosf(ship.angle + PI2), 20 * sinf(ship.angle + PI2) } + ship.position;
-        sf::Vector2f rotator_c = sf::Vector2f{ 20 * cosf(ship.angle - PI2), 20 * sinf(ship.angle - PI2) } + ship.position;
+		sf::Vector2f rotator_a = sf::Vector2f{ 60 * cosf(angle      ), 60 * sinf(angle      ) } + sf::Vector2f{x, y};
+        sf::Vector2f rotator_b = sf::Vector2f{ 20 * cosf(angle + PI2), 20 * sinf(angle + PI2) } + sf::Vector2f{x, y};
+        sf::Vector2f rotator_c = sf::Vector2f{ 20 * cosf(angle - PI2), 20 * sinf(angle - PI2) } + sf::Vector2f{x, y};
 
 		sf::Vector2u view_area = parent_ptr_->get_texture(true).getSize();
 

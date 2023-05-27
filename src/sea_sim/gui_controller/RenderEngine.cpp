@@ -73,11 +73,9 @@ namespace gui
 			}
 			else if (type == "ship")
 			{
-				auto position = settings["a"].get<sf::Vector2f>();
-				auto b = settings["b"].get<sf::Vector2f>();
-				auto c = settings["c"].get<sf::Vector2f>();
+				auto ship = settings["ship"].get<Ship>();
 
-				graphics_storage_.drawship()
+				graphics_storage_.drawship(ship);
 			}
 			else if (type == "setFillColor")
 			{
