@@ -6,16 +6,23 @@
 #include <vector>
 
 
+#include <sea_sim/gears/json/json.hpp>
+#include <sea_sim/toolkit/geom/geom.hpp>
+
+
 /*
 * Abstract object in vacuum
 */
 class Object
 {
-private:
+protected:
     std::string identifier;
 
 public:
-    Object(const std::string& identifier) noexcept : identifier(identifier) {}
+    Object() noexcept = delete;
+    explicit Object(const std::string& identifier) noexcept : identifier(identifier) {}
+    ~Object() noexcept = default;
+
     const std::string get_identifier() noexcept { return this->identifier; }
 };
 
@@ -26,17 +33,19 @@ public:
 class Ship : public Object
 {
 private:
-    int64_t x, y;
-    std::vector<std::string> staff;
+    geom::Vector2f position;
+    float angle;
 
 public:
-    Ship() noexcept = default;
-    Ship(const std::string& identifier, int64_t x, int64_t y, const std::vector<std::string>& staff) noexcept : Object(identifier), x(x), y(y), staff(staff) {};
+    Ship() noexcept : Object("unknown") {}
+    explicit Ship(const std::string& identifier, geom::Vector2f position, float angle) noexcept : Object(identifier), position(position), angle(angle) {};
     ~Ship() noexcept = default;
 
-    std::vector<std::string> get_staff() { return this->staff; };
-    int64_t get_x() { return this->x; }
-    int64_t get_y() { return this->y; }
+    geom::Vector2f get_position() { return this->position; }
+    float get_angle() { return this->angle; }
+
+    void set_position(geom::Vector2f position) { this->position = position; }
+    void set_angle(float angle) { this->angle = angle; }
 };
 
 
@@ -51,6 +60,25 @@ public:
     Isle() noexcept = default;
     ~Isle() noexcept = default;
 };
+
+
+/*
+* Serialization / Deserialization
+*/
+namespace nlohmann 
+{
+    template <typename T>
+    struct adl_serializer<geom::Vector2<T>> {
+        static void to_json(nlohmann::json&, const geom::Vector2<T>&);
+        static void from_json(const nlohmann::json&, geom::Vector2<T>&);
+    };
+
+    template <>
+    struct adl_serializer<Ship> {
+        static void to_json(nlohmann::json&, Ship&);
+        static void from_json(const nlohmann::json&, Ship&);
+    };
+} // namespace nlohmann
 
 
 #endif

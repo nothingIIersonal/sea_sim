@@ -228,9 +228,13 @@ int main()
 
             for (const auto& path : module_storage.get_paths())
             {
-                auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
-                auto [mn, nm] = endpoint_storage.insert( {path, std::move(core_module_channel_core_side)} );
-                stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
+                if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
+                {
+                    auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
+                    endpoint_storage.insert( {path, std::move(core_module_channel_core_side)} );
+                    module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
+                    stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
+                }
             }
         }
         else if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_1 && endpoint_storage.size() == 1 )

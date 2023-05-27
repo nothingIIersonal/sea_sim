@@ -272,66 +272,56 @@ std::optional<std::string> Interconnect::get_field_string(const std::string& fie
     return std::nullopt;
 }
 
-int Interconnect::object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff)
+void Interconnect::Ships::create(const std::string& identifier, geom::Vector2f position, float angle)
 {
-    std::unique_lock lock(this->ship_storage_mutex);
+    Interconnect *ic = container_of(this, Interconnect, ships);
 
-    this->ship_storage.insert_or_assign(identifier, Ship{identifier, x, y, staff} );
+    std::unique_lock lock(ic->ship_storage_mutex);
 
-    return 0;
+    ic->ship_storage.insert_or_assign(identifier, Ship{identifier, position, angle} );
 }
 
-std::optional<Ship> Interconnect::object_ship_get(const std::string& identifier)
+void Interconnect::Ships::set_position(const std::string& identifier, geom::Vector2f position)
 {
-    std::shared_lock lock(this->ship_storage_mutex);
+    Interconnect *ic = container_of(this, Interconnect, ships);
 
-    if ( this->ship_storage.contains(identifier) )
-        return this->ship_storage.at(identifier);
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_position(position);
+}
+
+void Interconnect::Ships::set_angle(const std::string& identifier, float angle)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_angle(angle);
+}
+
+std::optional<Ship> Interconnect::Ships::get_by_id(const std::string& identifier)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::shared_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        return ic->ship_storage.at(identifier);
 
     return std::nullopt;
 }
 
-std::optional<Ship> Interconnect::object_ship_get_next()
+std::vector<Ship> Interconnect::Ships::get_all()
 {
-    std::shared_lock lock(this->ship_storage_mutex);
+    Interconnect *ic = container_of(this, Interconnect, ships);
 
-    if ( this->ship_storage_it == this->ship_storage.end() )
-        return std::nullopt;
+    std::vector<Ship> ships;
 
-    return (this->ship_storage_it++)->second;
-}
+    std::shared_lock lock(ic->ship_storage_mutex);
 
-std::optional<int64_t> Interconnect::object_ship_get_x(const std::string& identifier)
-{
-    std::shared_lock lock(this->ship_storage_mutex);
+    std::for_each(ic->ship_storage.begin(), ic->ship_storage.end(), [&](auto & element) { ships.push_back(element.second); });
 
-    if ( this->ship_storage.contains(identifier) )
-        return this->ship_storage.at(identifier).get_x();
-
-    return std::nullopt;
-}
-
-std::optional<int64_t> Interconnect::object_ship_get_y(const std::string& identifier)
-{
-    std::shared_lock lock(this->ship_storage_mutex);
-
-    if ( this->ship_storage.contains(identifier) )
-        return this->ship_storage.at(identifier).get_y();
-
-    return std::nullopt;
-}
-
-std::optional<std::vector<std::string>> Interconnect::object_ship_get_staff(const std::string& identifier)
-{
-    std::shared_lock lock(this->ship_storage_mutex);
-
-    if ( this->ship_storage.contains(identifier) )
-        return this->ship_storage.at(identifier).get_staff();
-
-    return std::nullopt;
-}
-
-void Interconnect::object_ship_iterator_reset()
-{
-    this->ship_storage_it = this->ship_storage.begin();
+    return ships;
 }
