@@ -93,6 +93,17 @@ int main()
                         }
                         else if (event == "view_area_resized")
                         {
+                            packet.value().data["view_area"].get_to<geom::Vector2u>(environment.view_area);
+                            continue;
+                        }
+                        else if (event == "mouse_position_changed")
+                        {
+                            packet.value().data["mousle_position"].get_to<geom::Vector2u>(environment.mouse_position);
+                            continue;
+                        }
+                        else if (event == "map_scale_changed")
+                        {
+                            packet.value().data["map_scale"].get_to<int>(environment.map_scale);
                             continue;
                         }
 

@@ -23,6 +23,14 @@ typedef struct shared_ic_objects_t
 } shared_ic_objects_t;
 
 
+typedef struct environment_t
+{
+    geom::Vector2u view_area;
+    geom::Vector2u mouse_position;
+    int map_scale;
+} environment_t;
+
+
 class Interconnect
 {
 private:
@@ -38,6 +46,18 @@ private:
     std::map<std::string, Isle>& isle_storage;
     std::map<std::string, Isle> ::iterator isle_storage_it;
     std::shared_mutex& isle_storage_mutex;
+
+    class Environment
+    {
+    private:
+        environment_t environment;
+    public:
+        explicit Environment(const environment_t& environment);
+
+        const geom::Vector2u get_view_area();
+        const geom::Vector2u get_mouse_position();
+        const int get_map_scale();
+    };
 
     class WGTI
     {

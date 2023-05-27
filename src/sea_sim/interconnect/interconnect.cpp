@@ -20,6 +20,23 @@ Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& m
     }
 }
 
+Interconnect::Environment::Environment(const environment_t& environment) : environment(environment) {}
+
+const geom::Vector2u Interconnect::Environment::get_view_area()
+{
+    return this->environment.view_area;
+}
+
+const geom::Vector2u Interconnect::Environment::get_mouse_position()
+{
+    return this->environment.mouse_position;
+}
+
+const int Interconnect::Environment::get_map_scale()
+{
+    return this->environment.map_scale;
+}
+
 void Interconnect::WGTI::send()
 {
     Interconnect *ic = container_of(this, Interconnect, wgti);

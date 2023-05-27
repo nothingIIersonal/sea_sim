@@ -68,15 +68,27 @@ public:
 namespace nlohmann 
 {
     template <typename T>
-    struct adl_serializer<geom::Vector2<T>> {
-        static void to_json(nlohmann::json&, const geom::Vector2<T>&);
-        static void from_json(const nlohmann::json&, geom::Vector2<T>&);
+    struct adl_serializer<geom::Vector2<T>>
+    {
+        static void to_json(nlohmann::json& j, const geom::Vector2<T>& vector)
+        {
+            j = nlohmann::json{
+                {"x", vector.x},
+                {"y", vector.y}
+            };
+        }
+        static void from_json(const nlohmann::json& j, geom::Vector2<T>& vector)
+        {
+            j.at("x").get_to(vector.x);
+            j.at("y").get_to(vector.y);
+        }
     };
 
     template <>
-    struct adl_serializer<Ship> {
-        static void to_json(nlohmann::json&, Ship&);
-        static void from_json(const nlohmann::json&, Ship&);
+    struct adl_serializer<Ship>
+    {
+        static void to_json(nlohmann::json& j, Ship& ship);
+        static void from_json(const nlohmann::json& j, Ship& ship);
     };
 } // namespace nlohmann
 
