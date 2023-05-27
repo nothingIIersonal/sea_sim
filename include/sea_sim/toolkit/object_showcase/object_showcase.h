@@ -1,7 +1,6 @@
 ﻿#ifndef OBJECT_SHOWCASE
 #define OBJECT_SHOWCASE
 
-#include <sea_sim/gears/json/json.hpp>
 
 #include <string>
 #include <vector>
@@ -92,5 +91,6 @@ namespace nlohmann
         static void from_json(const nlohmann::json& j, Ship& ship);
     };
 } // namespace nlohmann
+
 
 #endif
