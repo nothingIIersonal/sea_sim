@@ -58,12 +58,16 @@ namespace gui
 		circle.setOutlineThickness(border_width);
 
 		parent_ptr_->get_texture(true).draw(circle);
+
+		x += 4 * cosf(angle);
+		y += 4 * sinf(angle);
+		drawship({ "a", x, y, {} });
 	}
 
 	void GraphicsStorage::drawtriangle(sf::Vector2f a, sf::Vector2f b, sf::Vector2f c, float border_width)
 	{
 		sf::ConvexShape convex;
-
+		
 		convex.setPointCount(3);
 
 		convex.setPoint(0, a);
@@ -74,6 +78,17 @@ namespace gui
 		convex.setOutlineColor(outline_color_);
 
 		parent_ptr_->get_texture(true).draw(convex);
+	}
+
+	void GraphicsStorage::drawship(Ship ship)
+	{
+		sf::Vector2f rotator_a = sf::Vector2f{ 60 * cosf(ship.angle      ), 60 * sinf(ship.angle      ) } + ship.position;
+        sf::Vector2f rotator_b = sf::Vector2f{ 20 * cosf(ship.angle + PI2), 20 * sinf(ship.angle + PI2) } + ship.position;
+        sf::Vector2f rotator_c = sf::Vector2f{ 20 * cosf(ship.angle - PI2), 20 * sinf(ship.angle - PI2) } + ship.position;
+
+		sf::Vector2u view_area = parent_ptr_->get_texture(true).getSize();
+
+		drawtriangle(rotator_a, rotator_b, rotator_c);
 	}
 
 } // namespace gui

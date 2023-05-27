@@ -272,7 +272,7 @@ std::optional<std::string> Interconnect::get_field_string(const std::string& fie
     return std::nullopt;
 }
 
-int Interconnect::object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff)
+int Interconnect::object_ship_set(const std::string& identifier, float x, float y, std::vector<std::string> staff)
 {
     std::unique_lock lock(this->ship_storage_mutex);
 
@@ -301,7 +301,7 @@ std::optional<Ship> Interconnect::object_ship_get_next()
     return (this->ship_storage_it++)->second;
 }
 
-std::optional<int64_t> Interconnect::object_ship_get_x(const std::string& identifier)
+std::optional<float> Interconnect::object_ship_get_x(const std::string& identifier)
 {
     std::shared_lock lock(this->ship_storage_mutex);
 
@@ -311,7 +311,7 @@ std::optional<int64_t> Interconnect::object_ship_get_x(const std::string& identi
     return std::nullopt;
 }
 
-std::optional<int64_t> Interconnect::object_ship_get_y(const std::string& identifier)
+std::optional<float> Interconnect::object_ship_get_y(const std::string& identifier)
 {
     std::shared_lock lock(this->ship_storage_mutex);
 

@@ -62,7 +62,7 @@ namespace gui
 				auto radius = settings["radius"].get<float>();
 
 				graphics_storage_.drawcircle(pos, radius);
-			} 
+			}
 			else if (type == "triangle")
 			{
 				auto a = settings["a"].get<sf::Vector2f>();
@@ -70,6 +70,14 @@ namespace gui
 				auto c = settings["c"].get<sf::Vector2f>();
 
 				graphics_storage_.drawtriangle(a, b, c);
+			}
+			else if (type == "ship")
+			{
+				auto position = settings["a"].get<sf::Vector2f>();
+				auto b = settings["b"].get<sf::Vector2f>();
+				auto c = settings["c"].get<sf::Vector2f>();
+
+				graphics_storage_.drawship()
 			}
 			else if (type == "setFillColor")
 			{

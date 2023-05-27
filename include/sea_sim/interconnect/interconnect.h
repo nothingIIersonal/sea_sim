@@ -87,11 +87,11 @@ public:
     std::optional<float> get_field_float(const std::string& field_name);
     std::optional<std::string> get_field_string(const std::string& field_name);
 
-    int object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff);
+    int object_ship_set(const std::string& identifier, float x, float y, std::vector<std::string> staff);
     std::optional<Ship> object_ship_get(const std::string& identifier);
     std::optional<Ship> object_ship_get_next();
-    std::optional<int64_t> object_ship_get_x(const std::string& identifier);
-    std::optional<int64_t> object_ship_get_y(const std::string& identifier);
+    std::optional<float> object_ship_get_x(const std::string& identifier);
+    std::optional<float> object_ship_get_y(const std::string& identifier);
     std::optional<std::vector<std::string>> object_ship_get_staff(const std::string& identifier);
     void object_ship_iterator_reset();
 

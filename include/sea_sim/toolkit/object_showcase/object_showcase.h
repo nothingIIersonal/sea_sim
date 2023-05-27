@@ -26,17 +26,17 @@ public:
 class Ship : public Object
 {
 private:
-    int64_t x, y;
+    float x, y;
     std::vector<std::string> staff;
 
 public:
     Ship() noexcept = default;
-    Ship(const std::string& identifier, int64_t x, int64_t y, const std::vector<std::string>& staff) noexcept : Object(identifier), x(x), y(y), staff(staff) {};
+    Ship(const std::string& identifier, float x, float y, const std::vector<std::string>& staff) noexcept : Object(identifier), x(x), y(y), staff(staff) {};
     ~Ship() noexcept = default;
 
     std::vector<std::string> get_staff() { return this->staff; };
-    int64_t get_x() { return this->x; }
-    int64_t get_y() { return this->y; }
+    float get_x() { return this->x; }
+    float get_y() { return this->y; }
 };
 
 

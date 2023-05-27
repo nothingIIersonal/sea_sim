@@ -4,6 +4,7 @@
 #include <sea_sim/gui_controller/Fonts.h>
 #include <sea_sim/gui_controller/GraphicsStorage.h>
 #include <sea_sim/gears/channel_packet.h>
+#include <sea_sim/toolkit/geom/geom.hpp>
 
 
 namespace gui
@@ -73,4 +74,14 @@ namespace nlohmann {
 		static void to_json(nlohmann::json&, const sf::Color&);
 		static void from_json(const nlohmann::json&, sf::Color&);
 	};
+} // namespace nlohmann
+
+namespace nlohmann {
+	void to_json(json& j, const Ship& ship);
+	void from_json(const json& j, Ship& ship);
+
+	template <typename T>
+	void to_json(json& j, const geom::Vector2<T>& ship);
+	template <typename T>
+	void from_json(const json& j, geom::Vector2<T>& ship);
 } // namespace nlohmann
