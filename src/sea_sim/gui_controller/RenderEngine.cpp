@@ -59,23 +59,26 @@ namespace gui
 			{
 				auto a = settings["a"].get<sf::Vector2f>();
 				auto b = settings["b"].get<sf::Vector2f>();
+				auto width = settings["width"].get<float>();
 
-				graphics_storage_.drawline(a, b);
+				graphics_storage_.drawline(a, b, width);
 			}
 			else if (type == "circle")
 			{
 				auto pos = settings["pos"].get<sf::Vector2f>();
 				auto radius = settings["radius"].get<float>();
+				auto border_width = settings["border_width"].get<float>();
 
-				graphics_storage_.drawcircle(pos, radius);
+				graphics_storage_.drawcircle(pos, radius, border_width);
 			}
 			else if (type == "triangle")
 			{
 				auto a = settings["a"].get<sf::Vector2f>();
 				auto b = settings["b"].get<sf::Vector2f>();
 				auto c = settings["c"].get<sf::Vector2f>();
+				auto border_width = settings["border_width"].get<float>();
 
-				graphics_storage_.drawtriangle(a, b, c);
+				graphics_storage_.drawtriangle(a, b, c, border_width);
 			}
 			else if (type == "ship")
 			{

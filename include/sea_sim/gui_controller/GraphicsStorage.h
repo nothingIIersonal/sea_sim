@@ -32,7 +32,7 @@ namespace gui
 	private:
 		RenderEngine* parent_ptr_;
 
-		sf::Color fill_color_ = { 255, 255, 255 };
-		sf::Color outline_color_ = { 255, 255, 255 };
+		sf::Color fill_color_ = { 255, 255, 255, 255 };
+		sf::Color outline_color_ = { 255, 255, 255, 255 };
 	};
 } // namespace gui
