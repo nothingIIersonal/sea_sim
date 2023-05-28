@@ -22,7 +22,7 @@ typedef struct environment_t
     uint8_t mouse_buttons = 0;
     int8_t sim_speed = 0;
     int map_scale = 1;
-    bool paused = false;
+    bool paused = true;
 } environment_t;
 
 
