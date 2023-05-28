@@ -455,7 +455,20 @@ namespace gui
 			sf::Vector2u scene_size = render_engine_.get_texture_size();
 		}
 
+
+		ImVec2 relative_mouse_pos = ImGui::GetMousePos() - ImGui::GetCursorScreenPos();
+
 		ImGui::Image(render_engine_.get_texture(), ImVec2(render_engine_.get_texture_size()), sf::Color::White, sf::Color(70, 70, 70));
+
+		if (ImGui::IsItemHovered())
+		{
+			if (windows_show_state_.last_mouse_pos != relative_mouse_pos)
+			{
+				windows_show_state_.last_mouse_pos = relative_mouse_pos;
+
+				send_to_core("mouse_position_changed", { { "mouse_position", sf::Vector2u(relative_mouse_pos)} });
+			}
+		}
 
 		ImGui::End();
 	}

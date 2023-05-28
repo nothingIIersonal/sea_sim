@@ -92,6 +92,8 @@ namespace gui
 
 			bool reset_docking_layout = true;
 			ImVec2 render_size = { 500, 500 };
+
+			ImVec2 last_mouse_pos;
 		} windows_show_state_;
 
 		struct TimeManipulation

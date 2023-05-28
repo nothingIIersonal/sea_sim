@@ -120,7 +120,7 @@ namespace gui
 
 		sf::Vector2f text_pos =
 		{
-			max_pos.x + 5,
+			max_pos.x + 5.f,
 			min_pos.y + (max_pos.y - min_pos.y) / 2.f
 		};
 

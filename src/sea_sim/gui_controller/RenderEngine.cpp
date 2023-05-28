@@ -116,12 +116,12 @@ namespace gui
 		sf::Vector2u scene_size = get_texture(true).getSize();
 
 		sf::Vector2f rect_size{
-			max(0.f, static_cast<float>(scene_size.x) - 50.f),
-			max(0.f, static_cast<float>(scene_size.y) - 50.f) };
+			max(0.f, static_cast<float>(scene_size.x)),
+			max(0.f, static_cast<float>(scene_size.y)) };
 
 		sf::RectangleShape rectangle(rect_size);
 		rectangle.setFillColor(sf::Color(0, 50, 150));
-		rectangle.setPosition(25, 25);
+		rectangle.setPosition(0, 0);
 
 		get_texture(true).draw(rectangle);
 	}
