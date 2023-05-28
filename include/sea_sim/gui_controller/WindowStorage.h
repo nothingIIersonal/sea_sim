@@ -103,6 +103,12 @@ namespace gui
 			std::chrono::system_clock::time_point last_elapsed;
 		} time_manipulations_;
 
+		struct ButtonsCache
+		{
+			ImVec2 last_mouse_pos;
+			int last_mouse_buttons;
+		} button_cache_;
+
 		bool shutdown_flag_ = false;
 	};
 } // namespace gui
