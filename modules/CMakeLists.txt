@@ -1,14 +1,19 @@
-add_library(module_1 SHARED
-    module_1/src/module_1.cpp
+add_library(ship_spawner_module SHARED
+    ship_spawner_module/src/ship_spawner_module.cpp
 )
-target_link_libraries(module_1 interconnect object_showcase)
+target_link_libraries(ship_spawner_module interconnect object_showcase)
 
-add_library(module_2 SHARED
-    module_2/src/module_2.cpp
+add_library(ship_info_out_module SHARED
+    ship_info_out_module/src/ship_info_out_module.cpp
 )
-target_link_libraries(module_2 interconnect object_showcase)
+target_link_libraries(ship_info_out_module interconnect object_showcase)
 
-add_library(module_3 SHARED
-    module_3/src/module_3.cpp
+add_library(render_module SHARED
+    render_module/src/render_module.cpp
 )
-target_link_libraries(module_3 interconnect object_showcase)
+target_link_libraries(render_module interconnect object_showcase)
+
+add_library(move_module SHARED
+    move_module/src/move_module.cpp
+)
+target_link_libraries(move_module interconnect object_showcase)
