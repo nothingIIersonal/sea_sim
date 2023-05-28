@@ -19,6 +19,9 @@ namespace gui
 		{
 			keyHit[reset_array] = false;
 		}
+
+		time_manipulations_.clock = std::chrono::system_clock::now();
+		time_manipulations_.last_elapsed = std::chrono::system_clock::now();
 		
 		render_engine_.create_texture({ 500u, 500u });
 		render_engine_.swap_texture();
@@ -332,15 +335,57 @@ namespace gui
 	}
 	void WindowStorage::show_child_view()
 	{
+		// --- Time
+
+		auto current_time = std::chrono::system_clock::now();
+		auto elapsed = current_time - time_manipulations_.last_elapsed;
+		time_manipulations_.last_elapsed = current_time;
+
+		if (time_manipulations_.frame_pause)
+			elapsed *= 0;
+		if (time_manipulations_.sim_speed >= 0)
+			elapsed *= int64_t(pow(2, time_manipulations_.sim_speed));
+		else
+			elapsed /= int64_t(pow(2, abs(time_manipulations_.sim_speed)));
+
+		time_manipulations_.clock += elapsed;
+
+		// convert time_stamp to string
+
+		const auto nowAsTimeT = std::chrono::system_clock::to_time_t(time_manipulations_.clock);
+		const auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+			time_manipulations_.clock.time_since_epoch()) % 1000;
+
+		struct tm newtime;
+		localtime_s(&newtime, &nowAsTimeT);
+
+		std::stringstream nowSs;
+		nowSs << std::put_time(&newtime, "%H:%M:%S");
+
+		// --- Window
+		
 		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar);
 
 		if (ImGui::BeginMenuBar())
 		{
 			ImGui::Separator();
 
-			if (ImGui::Button(ICON_sea_sim__BACKWARD) && windows_show_state_.sim_speed >= -4)
+
+			ImGui::Text(u8"Время: "_C);
+
+			int32_t width = static_cast<int32_t>(get_button_width(nowSs.str(), ImGui::GetStyle()));
+			ImGui::BeginChildFrame(ImGui::GetID("view_time_area"), {(width / 25 + 1) * 25.f, 0.f});
+
+			ImGui::Text(nowSs.str().c_str());
+
+			ImGui::EndChildFrame();
+
+
+			ImGui::Separator();
+
+			if (ImGui::Button(ICON_sea_sim__BACKWARD) && time_manipulations_.sim_speed >= -4)
 			{
-				--windows_show_state_.sim_speed;
+				--time_manipulations_.sim_speed;
 				send_to_core("speed_down", {});
 			}
 
@@ -348,7 +393,7 @@ namespace gui
 
 			if (ImGui::Button(ICON_sea_sim__PAUSE))
 			{
-				windows_show_state_.frame_pause = true;
+				time_manipulations_.frame_pause = true;
 				send_to_core("pause_on", {});
 			}
 
@@ -356,28 +401,28 @@ namespace gui
 
 			if (ImGui::Button(ICON_sea_sim__PLAY))
 			{
-				windows_show_state_.frame_pause = false;
+				time_manipulations_.frame_pause = false;
 				send_to_core("pause_off", {});
 			}
 
 			ImGui::Separator();
 
-			if (ImGui::Button(ICON_sea_sim__FORWARD) && windows_show_state_.sim_speed <= 4)
+			if (ImGui::Button(ICON_sea_sim__FORWARD) && time_manipulations_.sim_speed <= 4)
 			{
-				++windows_show_state_.sim_speed;
+				++time_manipulations_.sim_speed;
 				send_to_core("speed_up", {});
 			}
 
 			ImGui::Separator();
 
-			if (windows_show_state_.sim_speed >= 0)
-				ImGui::Text("x%i", static_cast<int>(pow(2, windows_show_state_.sim_speed)));
+			if (time_manipulations_.sim_speed >= 0)
+				ImGui::Text("x%i", static_cast<int>(pow(2, time_manipulations_.sim_speed)));
 			else
-				ImGui::Text("1/%i", static_cast<int>(pow(2, abs(windows_show_state_.sim_speed))));
+				ImGui::Text("1/%i", static_cast<int>(pow(2, abs(time_manipulations_.sim_speed))));
 
 			ImGui::Separator();
 
-			if (windows_show_state_.frame_pause)
+			if (time_manipulations_.frame_pause)
 			{
 				ImGui::Text(u8"Пауза"_C);
 
@@ -555,5 +600,4 @@ namespace gui
         if (!shutdown_flag_)
             channel_to_core.SendData(packet);
     }
-
 } // namespace gui
