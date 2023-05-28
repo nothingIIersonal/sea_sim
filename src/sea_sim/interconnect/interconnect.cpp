@@ -33,6 +33,16 @@ geom::Vector2u Interconnect::Environment::get_mouse_position() const
     return this->environment.mouse_position;
 }
 
+uint8_t Interconnect::Environment::get_mouse_buttons() const
+{
+    return this->environment.mouse_buttons;
+}
+
+bool Interconnect::Environment::get_mouse_button(controllers::MouseButtonEnum key) const
+{
+    return this->environment.mouse_buttons & (uint8_t)key;
+}
+
 int Interconnect::Environment::get_map_scale() const
 {
     return this->environment.map_scale;

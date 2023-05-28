@@ -17,3 +17,8 @@ add_library(move_module SHARED
     move_module/src/move_module.cpp
 )
 target_link_libraries(move_module interconnect object_showcase)
+
+add_library(mouse_controller_module SHARED
+    mouse_controller_module/src/mouse_controller_module.cpp
+)
+target_link_libraries(mouse_controller_module interconnect object_showcase)
