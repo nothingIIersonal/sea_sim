@@ -14,7 +14,7 @@ void controller(Interconnect &ic)
     ic.render.set_fill_color(color);
     ic.render.set_outline_color(outline_color);
 
-    ic.render.draw_circle( {(float)mouse_position.x, (float)mouse_position.y}, 50, 3 );
+    ic.render.draw_circle( {(float)mouse_position.x, (float)mouse_position.y}, 10, 3 );
 
     ic.render.send();
 }

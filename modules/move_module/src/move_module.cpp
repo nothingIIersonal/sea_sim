@@ -77,7 +77,8 @@ int sea_module_exec(Interconnect &&ic)
 
 int sea_module_hotf(Interconnect &&ic)
 {
-    move(ic);
+    if ( !ic.environment.is_paused() )
+        move(ic);
 
     return 0;
 }

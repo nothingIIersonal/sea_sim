@@ -48,6 +48,11 @@ int Interconnect::Environment::get_map_scale() const
     return this->environment.map_scale;
 }
 
+bool Interconnect::Environment::is_paused() const
+{
+    return this->environment.paused;
+}
+
 void Interconnect::Render::send()
 {
     Interconnect *ic = container_of(this, Interconnect, render);

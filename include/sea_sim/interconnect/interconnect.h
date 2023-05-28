@@ -22,6 +22,7 @@ typedef struct environment_t
     uint8_t mouse_buttons = 0;
     int8_t sim_speed = 0;
     int map_scale = 1;
+    bool paused = false;
 } environment_t;
 
 
@@ -65,6 +66,7 @@ private:
         uint8_t get_mouse_buttons() const;
         bool get_mouse_button(controllers::MouseButtonEnum key) const;
         int get_map_scale() const;
+        bool is_paused() const;
     };
 
     class Render
