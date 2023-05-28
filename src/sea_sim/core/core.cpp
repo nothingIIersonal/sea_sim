@@ -109,7 +109,7 @@ int main()
                         }
                         else if (event == "mouse_buttons_changed")
                         {
-                            auto hash = packet.value().data["mouse_buttons"].get<int32_t>();
+                            auto hash = packet.value().data["mouse_buttons"].get<uint8_t>();
                             continue;
                         }
                         else if (event == "map_scale_changed")
