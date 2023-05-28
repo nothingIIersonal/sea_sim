@@ -114,10 +114,15 @@ void out_info(Interconnect &ic)
         }
 
         auto ship_position = ship.value().get_position();
+        auto ship_angle = ship.value().get_angle();
+        auto ship_desired_angle = ship.value().get_desired_angle();
 
         ic.wgto.add_text("Координаты корабля:");
         ic.wgto.add_text("\tx: " + std::to_string(ship_position.x));
         ic.wgto.add_text("\ty: " + std::to_string(ship_position.y));
+        ic.wgto.add_text("\n");
+        ic.wgto.add_text("\tКурсовой угол: " + std::to_string(ship_angle));
+        ic.wgto.add_text("\tПутевой угол: " + std::to_string(ship_desired_angle));
     }
 }
 

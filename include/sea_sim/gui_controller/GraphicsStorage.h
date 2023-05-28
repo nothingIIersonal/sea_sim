@@ -27,6 +27,7 @@ namespace gui
 		void drawtriangle(sf::Vector2f a, sf::Vector2f b, sf::Vector2f c, float border_width = 1.f);
 
 		void drawship(const Ship& ship);
+		void drawtext(sf::Vector2f position, const std::string& text);
 
 	private:
 		RenderEngine* parent_ptr_;

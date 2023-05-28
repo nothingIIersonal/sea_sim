@@ -35,6 +35,8 @@ namespace gui
 		sf::RenderTexture& get_texture(bool get_writing_texture = false);
 		sf::Vector2u get_texture_size(bool current_texture = false);
 
+		sf::Font& get_font();
+
 		void set_notification(const std::string& text);
 	
 	private:
@@ -52,6 +54,8 @@ namespace gui
 
 		std::string selected_module = "";
 		std::map<std::string, ModulePageStorage> module_pages;
+
+		sf::Font cyrillic_font;
 
 	};
 } // namespace gui

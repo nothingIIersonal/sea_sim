@@ -9,6 +9,8 @@ namespace gui
 	RenderEngine::RenderEngine(WindowStorage* parent)
 		: parent_ptr_(parent), graphics_storage_(this)
 	{
+		cyrillic_font.loadFromFile("cyrillic.ttf");
+
 		swap_texture();
 	}
 
@@ -195,6 +197,11 @@ namespace gui
 	sf::Vector2u RenderEngine::get_texture_size(bool current_texture)
 	{
 		return (current_texture) ? get_texture(true).getSize() : sf::Vector2u(graphic_buffer_.size_to_set);
+	}
+
+	sf::Font& RenderEngine::get_font()
+	{
+		return cyrillic_font;
 	}
 
 	void RenderEngine::set_notification(const std::string& text)
