@@ -94,8 +94,9 @@ void move(Interconnect &ic)
 
 
             ic.render.set_fill_color(colors_g.at(ship_identifier).second);
+
             // --- Desired angle
-            ic.render.draw_line(ship.get_position(), ship.get_position() + geom::Vector2f{50 * cosf(desired_angle), 50 * sinf(desired_angle)}, 1);
+            ic.render.draw_line(ship.get_position(), ship.get_position() + geom::Vector2f{100 * cosf(desired_angle), 100 * sinf(desired_angle)}, 1);
 
             // --- Current angle
             ic.render.draw_line(ship.get_position(), ship.get_position() + geom::Vector2f{50 * cosf(res_angle), 50 * sinf(res_angle)}, 1);
