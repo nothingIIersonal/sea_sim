@@ -103,9 +103,12 @@ namespace gui
 
 		sf::Vector2f position {ship.get_position().x, ship.get_position().y};
 
-		sf::Vector2f rotator_a = sf::Vector2f{ 60 * cosf(angle      ), 60 * sinf(angle      ) } + position;
-        sf::Vector2f rotator_b = sf::Vector2f{ 20 * cosf(angle + PI2), 20 * sinf(angle + PI2) } + position;
-        sf::Vector2f rotator_c = sf::Vector2f{ 20 * cosf(angle - PI2), 20 * sinf(angle - PI2) } + position;
+		sf::Transform rotation;
+		rotation.rotate(angle / PI * 180.f, 0.f, 0.f);
+
+		sf::Vector2f rotator_a = rotation.transformPoint(sf::Vector2f{  30,   0 }) + position;
+        sf::Vector2f rotator_b = rotation.transformPoint(sf::Vector2f{ -30, -20 }) + position;
+        sf::Vector2f rotator_c = rotation.transformPoint(sf::Vector2f{ -30,  20 }) + position;
 
 		sf::Vector2u view_area = parent_ptr_->get_texture(true).getSize();
 

@@ -383,7 +383,8 @@ namespace gui
 
 			ImGui::Separator();
 
-			if (ImGui::Button(ICON_sea_sim__BACKWARD) && time_manipulations_.sim_speed >= -4)
+			if ((ImGui::Button(ICON_sea_sim__BACKWARD) || key_hit(sf::Keyboard::PageDown)) 
+				&& time_manipulations_.sim_speed >= -4)
 			{
 				--time_manipulations_.sim_speed;
 				send_to_core("speed_down", {});
@@ -391,7 +392,13 @@ namespace gui
 
 			ImGui::Separator();
 
-			if (ImGui::Button(ICON_sea_sim__PAUSE))
+			bool keyboard_is_captured = ImGui::GetIO().WantCaptureKeyboard;
+			bool space_hit = key_hit(sf::Keyboard::Space);
+			bool flip_pause = !keyboard_is_captured && space_hit;
+			bool pause_on = flip_pause && !time_manipulations_.frame_pause;
+			bool pause_off = flip_pause && time_manipulations_.frame_pause;
+
+			if (ImGui::Button(ICON_sea_sim__PAUSE) || pause_on)
 			{
 				time_manipulations_.frame_pause = true;
 				send_to_core("pause_on", {});
@@ -399,7 +406,7 @@ namespace gui
 
 			ImGui::Separator();
 
-			if (ImGui::Button(ICON_sea_sim__PLAY))
+			if (ImGui::Button(ICON_sea_sim__PLAY) || pause_off)
 			{
 				time_manipulations_.frame_pause = false;
 				send_to_core("pause_off", {});
@@ -407,7 +414,8 @@ namespace gui
 
 			ImGui::Separator();
 
-			if (ImGui::Button(ICON_sea_sim__FORWARD) && time_manipulations_.sim_speed <= 4)
+			if ((ImGui::Button(ICON_sea_sim__FORWARD) || key_hit(sf::Keyboard::PageUp))
+				&& time_manipulations_.sim_speed <= 4)
 			{
 				++time_manipulations_.sim_speed;
 				send_to_core("speed_up", {});
