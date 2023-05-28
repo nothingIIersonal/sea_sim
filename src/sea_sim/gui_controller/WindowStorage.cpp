@@ -469,7 +469,7 @@ namespace gui
 				send_to_core("mouse_position_changed", { { "mouse_position", sf::Vector2u(relative_mouse_pos)} });
 			}
 
-			int32_t hash =
+			uint8_t hash =
 				(mouse_down(sf::Mouse::Left)   << 0) +
 				(mouse_down(sf::Mouse::Middle) << 1) +
 				(mouse_down(sf::Mouse::Right)  << 2);
