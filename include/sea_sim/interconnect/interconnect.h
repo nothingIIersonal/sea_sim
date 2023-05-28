@@ -113,7 +113,7 @@ private:
     class Ships
     {
     public:
-        void create(const std::string& identifier, geom::Vector2f position, float angle, float desired_angle, float speed, float rotation_speed);
+        void create(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color, graphics::Color outline_color, float angle, float desired_angle, float speed, float rotation_speed);
         void set_position(const std::string& identifier, geom::Vector2f position);
         void set_angle(const std::string& identifier, float angle);
         void set_desired_angle(const std::string& identifier, float desired_angle);

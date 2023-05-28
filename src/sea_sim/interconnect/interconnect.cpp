@@ -387,13 +387,13 @@ std::optional<std::string> Interconnect::get_field_string(const std::string& fie
     return std::nullopt;
 }
 
-void Interconnect::Ships::create(const std::string& identifier, geom::Vector2f position, float angle, float desired_angle, float speed, float rotation_speed)
+void Interconnect::Ships::create(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color, graphics::Color outline_color, float angle, float desired_angle, float speed, float rotation_speed)
 {
     Interconnect *ic = container_of(this, Interconnect, ships);
 
     std::unique_lock lock(ic->ship_storage_mutex);
 
-    ic->ship_storage.insert_or_assign(identifier, Ship{identifier, position, angle, desired_angle, speed, rotation_speed} );
+    ic->ship_storage.insert_or_assign(identifier, Ship{identifier, position, fill_color, outline_color, angle, desired_angle, speed, rotation_speed} );
 }
 
 void Interconnect::Ships::set_position(const std::string& identifier, geom::Vector2f position)
