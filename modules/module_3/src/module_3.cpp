@@ -98,7 +98,7 @@ void move(Interconnect &ic)
             ic.render.draw_line(ship.get_position(), ship.get_position() + geom::Vector2f{50 * cosf(desired_angle), 50 * sinf(desired_angle)}, 1);
 
             // --- Current angle
-            ic.render.draw_line(ship.get_position(), ship.get_position() + geom::Vector2f{25 * cosf(res_angle), 25 * sinf(res_angle)}, 1);
+            ic.render.draw_line(ship.get_position(), ship.get_position() + geom::Vector2f{50 * cosf(res_angle), 50 * sinf(res_angle)}, 1);
         }
     }
 }
