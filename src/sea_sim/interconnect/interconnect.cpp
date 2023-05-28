@@ -387,13 +387,13 @@ std::optional<std::string> Interconnect::get_field_string(const std::string& fie
     return std::nullopt;
 }
 
-void Interconnect::Ships::create(const std::string& identifier, geom::Vector2f position, float angle)
+void Interconnect::Ships::create(const std::string& identifier, geom::Vector2f position, float angle, float desired_angle, float speed, float rotation_speed)
 {
     Interconnect *ic = container_of(this, Interconnect, ships);
 
     std::unique_lock lock(ic->ship_storage_mutex);
 
-    ic->ship_storage.insert_or_assign(identifier, Ship{identifier, position, angle} );
+    ic->ship_storage.insert_or_assign(identifier, Ship{identifier, position, angle, desired_angle, speed, rotation_speed} );
 }
 
 void Interconnect::Ships::set_position(const std::string& identifier, geom::Vector2f position)
@@ -415,6 +415,37 @@ void Interconnect::Ships::set_angle(const std::string& identifier, float angle)
     if ( ic->ship_storage.contains(identifier) )
         ic->ship_storage.at(identifier).set_angle(angle);
 }
+
+void Interconnect::Ships::set_desired_angle(const std::string& identifier, float desired_angle)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_desired_angle(desired_angle);
+}
+
+void Interconnect::Ships::set_speed(const std::string& identifier, float speed)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_speed(speed);
+}
+
+void Interconnect::Ships::set_rotation_speed(const std::string& identifier, float rotation_speed)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_rotatin_speed(rotation_speed);
+}
+
 
 std::optional<Ship> Interconnect::Ships::get_by_id(const std::string& identifier)
 {

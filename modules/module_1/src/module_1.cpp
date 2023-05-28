@@ -13,8 +13,7 @@ int sea_module_init(Interconnect &&ic)
     ic.wgti.add_inputtext("name_par", "Имя");
     ic.wgti.add_button("btn_res", "Agree");
 
-    ic.ships.create("линкор_2", {-100.f, 100.f}, 0.f);
-    ic.ships.create("суворов_0", {-50.f, 100.f}, 0.f);
+    ic.ships.create("линкор_2", {-100.f, 100.f}, 0.f, 0.f, 10.f, .05f);
 
     ic.wgti.send();
 

@@ -159,7 +159,8 @@ public:
     void insert(const std::string& path, Module&& module)
     {
         std::unique_lock lock(ModuleStorage::mtx);
-        this->modules_order.push_back(path);
+        if ( std::find(this->modules_order.begin(), this->modules_order.end(), path) == this->modules_order.end() )
+            this->modules_order.push_back(path);
         this->modules.emplace( std::make_pair(path, std::move(module)) );
     }
 

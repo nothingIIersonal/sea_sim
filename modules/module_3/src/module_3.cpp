@@ -1,4 +1,6 @@
 #include <iostream>
+
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 #include <sea_sim/interconnect/interconnect.h>
@@ -8,7 +10,7 @@
 */
 std::optional<std::string> selected_ship_g = std::nullopt;
 bool btn_choice_clicked_g = false;
-float speed_g = 4.f;
+std::map<std::string, std::pair<graphics::Color, graphics::Color>> colors_g;
 
 /*
 * LOCAL FUNCTIONS
@@ -40,20 +42,56 @@ void move(Interconnect &ic)
         auto ship_identifier = ship.get_identifier();
         auto ship_position = ship.get_position();
         auto ship_angle = ship.get_angle();
+        auto ship_desired_angle = ship.get_desired_angle();
+        auto ship_speed = ship.get_speed();
+        auto ship_rotation_speed = ship.get_rotation_speed();
         auto va = ic.environment.get_view_area();
 
-        if ( ship_identifier == "суворов_0" )
+        if ( colors_g.contains(ship_identifier) )
         {
-            if ( ship_position.x < 0 || ship_position.x > va.x )
-                speed_g *= -1;
-            ic.ships.set_position( ship_identifier, ship_position + geom::Vector2f{speed_g, 0.f} );
-        }
-        else
-        {
-            ic.ships.set_position(ship_identifier, ship_position + geom::Vector2f{ (std::rand() - 3) % 20 - 10.f, (std::rand() - 3) % 20 - 10.f});
-        }
+            geom::Vector2f speed = { ship_speed * cos(ship_angle), ship_speed * sin(ship_angle) };
+            geom::Vector2f desired_direction = { cos(ship_desired_angle), sin(ship_desired_angle) };
 
-        ic.render.draw_ship(ship);
+            if ( ship_position.x < 100 && desired_direction.x < 0 || ship_position.x > va.x - 100 && desired_direction.x > 0 )
+                desired_direction.x *= -1;
+            if ( ship_position.y < 100 && desired_direction.y < 0 || ship_position.y > va.y - 100 && desired_direction.y > 0 )
+                desired_direction.y *= -1;
+
+            auto desired_angle = atan2(desired_direction.y, desired_direction.x);
+
+            ic.ships.set_desired_angle(ship_identifier, desired_angle);
+
+            float res_angle = 0.f;
+
+            float cosa = cos( ship_angle ) * cos( desired_angle ) + sin( ship_angle ) * sin( desired_angle );
+            float a = acos( cosa );
+
+            if ( a < ship_rotation_speed )
+            {
+                res_angle = desired_angle;
+            }
+            else
+            {
+                if ( desired_angle > ship_angle )
+                {
+                    res_angle = abs(desired_angle - ship_angle) > M_PI ? ship_angle - ship_rotation_speed : ship_angle + ship_rotation_speed;
+                }
+                else
+                {
+                    res_angle = abs(desired_angle - ship_angle) > M_PI ? ship_angle + ship_rotation_speed : ship_angle - ship_rotation_speed;
+                }
+            }
+
+            speed = { ship_speed * cos(res_angle), ship_speed * sin(res_angle) };
+            ic.ships.set_position(ship_identifier, ship_position + speed);
+
+            ic.ships.set_angle(ship_identifier, res_angle);
+
+            ic.render.set_fill_color(colors_g.at(ship_identifier).first);
+            ic.render.set_outline_color(colors_g.at(ship_identifier).second);
+
+            ic.render.draw_ship(ship);
+        }
     }
 }
 
@@ -87,11 +125,18 @@ void set_initial_ships(Interconnect &ic)
 {
     auto va = ic.environment.get_view_area();
 
-    ic.ships.create("destroyer",  geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
-    ic.ships.create("линкор_1",   geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
-    ic.ships.create("hovercraft", geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
-    ic.ships.create("cruiser",    geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
-    ic.ships.create("суворов_0",  geom::Vector2f{ float(va.x / 2u), float(va.y / 2u) }, 0.f);
+    ic.ships.create("destroyer",  geom::Vector2f{ float(va.x / 2u + 50),  float(va.y / 2u + 50) },  0.f, 0.f,  5.f, .08f);
+    ic.ships.create("линкор_1",   geom::Vector2f{ float(va.x / 2u - 50),  float(va.y / 2u - 25) },  0.25f, 1.f,  4.f, .07f);
+    ic.ships.create("hovercraft", geom::Vector2f{ float(va.x / 2u - 100), float(va.y / 2u + 100) }, 0.5f, 2.f,  3.f, .01f);
+    ic.ships.create("cruiser",    geom::Vector2f{ float(va.x / 2u + 100), float(va.y / 2u + 0) },   0.75f, 3.f,  1.f, .05f);
+    ic.ships.create("суворов_0",  geom::Vector2f{ float(va.x / 2u + 0),   float(va.y / 2u - 50) },  0.95f, 4.f,  2.f, .02f);
+
+    srand( (unsigned int)(time(0)) );
+    colors_g["destroyer"]   = { graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255)}, graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255) } };
+    colors_g["линкор_1"]    = { graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255)}, graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255) } };
+    colors_g["hovercraft"]  = { graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255)}, graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255) } };
+    colors_g["cruiser"]     = { graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255)}, graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255) } };
+    colors_g["суворов_0"]   = { graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255)}, graphics::Color{ (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(std::rand() % 255), (uint8_t)(255) } };
 }
 ////
 
