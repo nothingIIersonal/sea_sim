@@ -107,6 +107,11 @@ int main()
                             packet.value().data["mouse_position"].get_to<geom::Vector2u>(environment.mouse_position);
                             continue;
                         }
+                        else if (event == "mouse_buttons_changed")
+                        {
+                            auto hash = packet.value().data["mouse_buttons"].get<int32_t>();
+                            continue;
+                        }
                         else if (event == "map_scale_changed")
                         {
                             packet.value().data["map_scale"].get_to<int>(environment.map_scale);

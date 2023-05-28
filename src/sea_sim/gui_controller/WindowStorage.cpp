@@ -462,11 +462,23 @@ namespace gui
 
 		if (ImGui::IsItemHovered())
 		{
-			if (windows_show_state_.last_mouse_pos != relative_mouse_pos)
+			if (button_cache_.last_mouse_pos != relative_mouse_pos)
 			{
-				windows_show_state_.last_mouse_pos = relative_mouse_pos;
+				button_cache_.last_mouse_pos = relative_mouse_pos;
 
 				send_to_core("mouse_position_changed", { { "mouse_position", sf::Vector2u(relative_mouse_pos)} });
+			}
+
+			int32_t hash =
+				(mouse_down(sf::Mouse::Left)   << 0) +
+				(mouse_down(sf::Mouse::Middle) << 1) +
+				(mouse_down(sf::Mouse::Right)  << 2);
+
+			if (button_cache_.last_mouse_buttons != hash)
+			{
+				button_cache_.last_mouse_buttons = hash;
+
+				send_to_core("mouse_buttons_changed", { { "mouse_buttons", hash } });
 			}
 		}
 
