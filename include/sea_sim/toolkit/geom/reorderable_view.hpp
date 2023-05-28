@@ -134,7 +134,7 @@ bool ReorderableView<T>::Empty() const noexcept {
 
 template <typename T>
 std::size_t ReorderableView<T>::Size() const noexcept {
-    values_.size();
+    return values_.size();
 }
 
 } // namespace geom

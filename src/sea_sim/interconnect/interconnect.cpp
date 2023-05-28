@@ -388,6 +388,13 @@ std::optional<int> Interconnect::get_field_int(const std::string& field_name)
     return std::nullopt;
 }
 
+std::optional<bool> Interconnect::get_field_bool(const std::string& field_name)
+{
+    if (this->ui_fields.contains(field_name) )
+        return this->ui_fields[field_name].get<bool>();
+    return std::nullopt;
+}
+
 std::optional<float> Interconnect::get_field_float(const std::string& field_name)
 {
     if (this->ui_fields.contains(field_name) )

@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 
-#include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/Functions.h>
 
 namespace gui::utils
 {

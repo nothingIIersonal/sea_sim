@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/Functions.h>
 
 #define FONT_CYRILLIC_FILE_NAME_sea_sim_ "cyrillic.ttf"
 #define FONT_ICON_FILE_NAME_sea_sim_ "icons.ttf"

@@ -129,9 +129,11 @@ private:
         std::vector<Ship> get_all();
     };
 
-    class Isle
+    class Isles
     {
     public:
+        Isles() noexcept = default;
+        ~Isles() noexcept = default;
     };
 
 protected:
@@ -153,6 +155,7 @@ public:
     const std::string& get_trigger();
 
     std::optional<int> get_field_int(const std::string& field_name);
+    std::optional<bool> get_field_bool(const std::string& field_name);
     std::optional<float> get_field_float(const std::string& field_name);
     std::optional<std::string> get_field_string(const std::string& field_name);
 };

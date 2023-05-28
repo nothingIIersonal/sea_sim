@@ -1,7 +1,7 @@
 #pragma once
 #include <variant>
 
-#include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/Functions.h>
 #include <sea_sim/gears/json/json.hpp>
 
 

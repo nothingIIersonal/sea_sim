@@ -352,12 +352,14 @@ namespace gui
 
 		// convert time_stamp to string
 
-		const auto nowAsTimeT = std::chrono::system_clock::to_time_t(time_manipulations_.clock);
-		const auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-			time_manipulations_.clock.time_since_epoch()) % 1000;
-
 		struct tm newtime;
+#ifdef WIN32
+		const auto nowAsTimeT = std::chrono::system_clock::to_time_t(time_manipulations_.clock);
 		localtime_s(&newtime, &nowAsTimeT);
+#else
+		auto nowAsTimeT = std::chrono::system_clock::to_time_t(time_manipulations_.clock);
+		newtime = *localtime(&nowAsTimeT);
+#endif
 
 		std::stringstream nowSs;
 		nowSs << std::put_time(&newtime, "%H:%M:%S");
@@ -371,12 +373,12 @@ namespace gui
 			ImGui::Separator();
 
 
-			ImGui::Text(u8"Время: "_C);
+			ImGui::Text("%s", u8"Время: "_C);
 
 			int32_t width = static_cast<int32_t>(get_button_width(nowSs.str(), ImGui::GetStyle()));
 			ImGui::BeginChildFrame(ImGui::GetID("view_time_area"), {(width / 25 + 1) * 25.f, 0.f});
 
-			ImGui::Text(nowSs.str().c_str());
+			ImGui::Text("%s", nowSs.str().c_str());
 
 			ImGui::EndChildFrame();
 
@@ -432,7 +434,7 @@ namespace gui
 
 			if (time_manipulations_.frame_pause)
 			{
-				ImGui::Text(u8"Пауза"_C);
+				ImGui::Text("%s", u8"Пауза"_C);
 
 				ImGui::Separator();
 			}

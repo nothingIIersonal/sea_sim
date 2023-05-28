@@ -19,8 +19,8 @@ void move(Interconnect &ic)
         auto ship_rotation_speed = ship.get_rotation_speed();
         auto va = ic.environment.get_view_area();
 
-        geom::Vector2f speed = { ship_speed * cos(ship_angle), ship_speed * sin(ship_angle) };
-        geom::Vector2f desired_direction = { cos(ship_desired_angle), sin(ship_desired_angle) };
+        geom::Vector2f speed = { (float)(ship_speed * cos(ship_angle)), (float)(ship_speed * sin(ship_angle)) };
+        geom::Vector2f desired_direction = { (float)(cos(ship_desired_angle)), (float)(sin(ship_desired_angle)) };
 
         if ( ship_position.x < 100 && desired_direction.x < 0 || ship_position.x > va.x - 100 && desired_direction.x > 0 )
             desired_direction.x *= -1;
@@ -52,7 +52,7 @@ void move(Interconnect &ic)
             }
         }
 
-        speed = { ship_speed * cos(res_angle), ship_speed * sin(res_angle) };
+        speed = { (float)(ship_speed * cos(res_angle)), (float)(ship_speed * sin(res_angle)) };
         ic.ships.set_position(ship_identifier, ship_position + speed);
 
         ic.ships.set_angle(ship_identifier, res_angle);

@@ -20,7 +20,7 @@ protected:
     std::string identifier;
 
 public:
-    Object() noexcept = delete;
+    Object() noexcept = default;
     explicit Object(const std::string& identifier) noexcept : identifier(identifier) {}
     ~Object() noexcept = default;
 

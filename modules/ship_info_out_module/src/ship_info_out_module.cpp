@@ -61,15 +61,15 @@ void out_info(Interconnect &ic)
         ic.wgto.add_text("Скорость движения: " + std::to_string(ship_speed));
         ic.wgto.add_text("Скорость вращения: " + std::to_string(ship_rotation_speed));
         ic.wgto.add_text("Цвет корабля:");
-            ic.wgto.add_text("R: " + std::to_string(ship_fill_color.r));
-            ic.wgto.add_text("G: " + std::to_string(ship_fill_color.g));
-            ic.wgto.add_text("B: " + std::to_string(ship_fill_color.b));
-            ic.wgto.add_text("A: " + std::to_string(ship_fill_color.a));
+            ic.wgto.add_text("\tR: " + std::to_string(ship_fill_color.r));
+            ic.wgto.add_text("\tG: " + std::to_string(ship_fill_color.g));
+            ic.wgto.add_text("\tB: " + std::to_string(ship_fill_color.b));
+            ic.wgto.add_text("\tA: " + std::to_string(ship_fill_color.a));
         ic.wgto.add_text("Цвет обводки: ");
-            ic.wgto.add_text("R: " + std::to_string(ship_outline_color.r));
-            ic.wgto.add_text("G: " + std::to_string(ship_outline_color.g));
-            ic.wgto.add_text("B: " + std::to_string(ship_outline_color.b));
-            ic.wgto.add_text("A: " + std::to_string(ship_outline_color.a));
+            ic.wgto.add_text("\tR: " + std::to_string(ship_outline_color.r));
+            ic.wgto.add_text("\tG: " + std::to_string(ship_outline_color.g));
+            ic.wgto.add_text("\tB: " + std::to_string(ship_outline_color.b));
+            ic.wgto.add_text("\tA: " + std::to_string(ship_outline_color.a));
     }
 }
 
