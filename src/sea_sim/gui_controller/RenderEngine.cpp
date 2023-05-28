@@ -9,6 +9,8 @@ namespace gui
 	RenderEngine::RenderEngine(WindowStorage* parent)
 		: parent_ptr_(parent), graphics_storage_(this)
 	{
+		cyrillic_font.loadFromFile("cyrillic.ttf");
+
 		swap_texture();
 	}
 
@@ -57,23 +59,26 @@ namespace gui
 			{
 				auto a = settings["a"].get<sf::Vector2f>();
 				auto b = settings["b"].get<sf::Vector2f>();
+				auto width = settings["width"].get<float>();
 
-				graphics_storage_.drawline(a, b);
+				graphics_storage_.drawline(a, b, width);
 			}
 			else if (type == "circle")
 			{
 				auto pos = settings["pos"].get<sf::Vector2f>();
 				auto radius = settings["radius"].get<float>();
+				auto border_width = settings["border_width"].get<float>();
 
-				graphics_storage_.drawcircle(pos, radius);
+				graphics_storage_.drawcircle(pos, radius, border_width);
 			}
 			else if (type == "triangle")
 			{
 				auto a = settings["a"].get<sf::Vector2f>();
 				auto b = settings["b"].get<sf::Vector2f>();
 				auto c = settings["c"].get<sf::Vector2f>();
+				auto border_width = settings["border_width"].get<float>();
 
-				graphics_storage_.drawtriangle(a, b, c);
+				graphics_storage_.drawtriangle(a, b, c, border_width);
 			}
 			else if (type == "ship")
 			{
@@ -111,12 +116,12 @@ namespace gui
 		sf::Vector2u scene_size = get_texture(true).getSize();
 
 		sf::Vector2f rect_size{
-			max(0.f, static_cast<float>(scene_size.x) - 50.f),
-			max(0.f, static_cast<float>(scene_size.y) - 50.f) };
+			max(0.f, static_cast<float>(scene_size.x)),
+			max(0.f, static_cast<float>(scene_size.y)) };
 
 		sf::RectangleShape rectangle(rect_size);
 		rectangle.setFillColor(sf::Color(0, 50, 150));
-		rectangle.setPosition(25, 25);
+		rectangle.setPosition(0, 0);
 
 		get_texture(true).draw(rectangle);
 	}
@@ -195,6 +200,11 @@ namespace gui
 	sf::Vector2u RenderEngine::get_texture_size(bool current_texture)
 	{
 		return (current_texture) ? get_texture(true).getSize() : sf::Vector2u(graphic_buffer_.size_to_set);
+	}
+
+	sf::Font& RenderEngine::get_font()
+	{
+		return cyrillic_font;
 	}
 
 	void RenderEngine::set_notification(const std::string& text)

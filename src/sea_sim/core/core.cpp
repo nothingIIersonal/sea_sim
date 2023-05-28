@@ -12,7 +12,7 @@
 using gears::StaticThreadPool;
 
 
-#define __CORE_DEBUG
+// #define __CORE_DEBUG
 
 
 #ifdef __CORE_DEBUG
@@ -67,7 +67,6 @@ int main()
 
     uint16_t frame_counter = 0;
     uint16_t frame_cycles = 0;
-    bool frame_pause = true;
 
     while ( shutdown_type != SHUTDOWN_TYPE_ENUM::SHUTDOWN )
     {
@@ -107,6 +106,11 @@ int main()
                             packet.value().data["mouse_position"].get_to<geom::Vector2u>(environment.mouse_position);
                             continue;
                         }
+                        else if (event == "mouse_buttons_changed")
+                        {
+                            packet.value().data["mouse_buttons"].get_to<uint8_t>(environment.mouse_buttons);
+                            continue;
+                        }
                         else if (event == "map_scale_changed")
                         {
                             packet.value().data["map_scale"].get_to<int>(environment.map_scale);
@@ -114,12 +118,12 @@ int main()
                         }
                         else if (event == "pause_on")
                         {
-                            frame_pause = true;
+                            environment.paused = true;
                             continue;
                         }
                         else if (event == "pause_off")
                         {
-                            frame_pause = false;
+                            environment.paused = false;
                             continue;
                         }
                         else if (event == "speed_up")
@@ -231,63 +235,60 @@ int main()
         }
 
 
-        if ( !frame_pause )
+        if ( environment.sim_speed < 0 )
         {
-            if ( environment.sim_speed < 0 )
-            {
-                if ( frame_counter++ >= static_cast<uint16_t>(std::pow(2, abs(environment.sim_speed))) )
-                {
-                    frame_counter = 0;
-                    frame_cycles = 1;
-                }
-            }
-            else
+            if ( frame_counter++ >= static_cast<uint16_t>(std::pow(2, abs(environment.sim_speed))) )
             {
                 frame_counter = 0;
-                frame_cycles = static_cast<uint16_t>(std::pow(2, environment.sim_speed));
+                frame_cycles = 1;
             }
-    
-            while ( frame_cycles )
+        }
+        else
+        {
+            frame_counter = 0;
+            frame_cycles = static_cast<uint16_t>(std::pow(2, environment.sim_speed));
+        }
+
+        while ( frame_cycles )
+        {
+            --frame_cycles;
+
+            uint16_t M = static_cast<uint16_t>( std::pow(2, std::max(0, environment.sim_speed - 4)) );
+            bool show_frame = (frame_cycles % M) == 0;
+
+            for ( const auto& path : module_storage.get_paths() )
             {
-                --frame_cycles;
-
-                uint16_t M = static_cast<uint16_t>( std::pow(2, std::max(0, environment.sim_speed - 4)) );
-                bool show_frame = (frame_cycles % M) == 0;
-
-                for ( const auto& path : module_storage.get_paths() )
+                if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
                 {
-                    if ( module_storage.get_state(path) == Module::ModuleStateEnum::IDLE )
+                    auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
+
+                    module_storage.set_state(path, Module::ModuleStateEnum::HOT);
+                    run_hot_function(path.c_str(), core_module_channel_module_side);
+
+                    while (const auto& packet = core_module_channel_core_side.TryRead())
                     {
-                        auto [core_module_channel_core_side, core_module_channel_module_side] = fdx::MakeChannel<channel_value_type>();
-
-                        module_storage.set_state(path, Module::ModuleStateEnum::HOT);
-                        run_hot_function(path.c_str(), core_module_channel_module_side);
-
-                        while (const auto& packet = core_module_channel_core_side.TryRead())
+                        if ( packet.value().to == "gui" )
                         {
-                            if ( packet.value().to == "gui" )
+                            if (   packet.value().event != "draw"
+                                || packet.value().event == "draw" && show_frame )
                             {
-                                if (   packet.value().event != "draw"
-                                    || packet.value().event == "draw" && show_frame )
-                                {
-                                    endpoint_storage.at(packet.value().to).SendData( packet.value() );
-                                }
+                                endpoint_storage.at(packet.value().to).SendData( packet.value() );
+                            }
 
-                                if ( packet.value().event == "module_error" )
-                                {
-                                    auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
-                                    endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
-                                    module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
-                                    stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
-                                }
+                            if ( packet.value().event == "module_error" )
+                            {
+                                auto [core_module_channel_core_side_err, core_module_channel_module_side_err] = fdx::MakeChannel<channel_value_type>();
+                                endpoint_storage.insert( {path, std::move(core_module_channel_core_side_err)} );
+                                module_storage.set_state(path, Module::ModuleStateEnum::UNLOAD);
+                                stp.SubmitTask( MODULE_TASK(core_module_channel_module_side, path, unload_module) );
                             }
                         }
                     }
                 }
-
-                if ( show_frame )
-                    endpoint_storage.at("gui").SendData( {"gui", "core", "swap_texture", {}} );
             }
+
+            if ( show_frame )
+                endpoint_storage.at("gui").SendData( {"gui", "core", "swap_texture", {}} );
         }
 
         if ( shutdown_type == SHUTDOWN_TYPE_ENUM::STAGE_0 && endpoint_storage.size() == 1 )

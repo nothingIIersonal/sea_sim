@@ -11,6 +11,7 @@
 #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/toolkit/object_showcase/object_showcase.h>
 #include <sea_sim/toolkit/graphics/color.hpp>
+#include <sea_sim/toolkit/controllers/mouse.hpp>
 #include <shared_mutex>
 
 
@@ -18,8 +19,10 @@ typedef struct environment_t
 {
     geom::Vector2u view_area = {500u, 500u};
     geom::Vector2u mouse_position = {0u, 0u};
+    uint8_t mouse_buttons = 0;
     int8_t sim_speed = 0;
     int map_scale = 1;
+    bool paused = false;
 } environment_t;
 
 
@@ -60,7 +63,10 @@ private:
 
         geom::Vector2u get_view_area() const;
         geom::Vector2u get_mouse_position() const;
+        uint8_t get_mouse_buttons() const;
+        bool get_mouse_button(controllers::MouseButtonEnum key) const;
         int get_map_scale() const;
+        bool is_paused() const;
     };
 
     class Render
@@ -113,7 +119,7 @@ private:
     class Ships
     {
     public:
-        void create(const std::string& identifier, geom::Vector2f position, float angle, float desired_angle, float speed, float rotation_speed);
+        void create(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color, graphics::Color outline_color, float angle, float desired_angle, float speed, float rotation_speed);
         void set_position(const std::string& identifier, geom::Vector2f position);
         void set_angle(const std::string& identifier, float angle);
         void set_desired_angle(const std::string& identifier, float desired_angle);

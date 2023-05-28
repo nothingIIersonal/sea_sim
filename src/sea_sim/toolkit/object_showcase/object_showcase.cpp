@@ -8,6 +8,8 @@ namespace nlohmann
         j = nlohmann::json{
             {"identifier", ship.get_identifier()},
             {"position", ship.get_position()},
+            {"fill_color", ship.get_fill_color()},
+            {"outline_color", ship.get_outline_color()},
             {"angle", ship.get_angle()},
             {"desired_angle", ship.get_desired_angle()},
             {"speed", ship.get_speed()},
@@ -19,6 +21,8 @@ namespace nlohmann
         ship = Ship{
             j.at("identifier").get<std::string>(),
             j.at("position").get<geom::Vector2f>(),
+            j.at("fill_color").get<graphics::Color>(),
+            j.at("outline_color").get<graphics::Color>(),
             j.at("angle").get<float>(),
             j.at("desired_angle").get<float>(),
             j.at("speed").get<float>(),

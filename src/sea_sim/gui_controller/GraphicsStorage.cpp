@@ -103,13 +103,47 @@ namespace gui
 
 		sf::Vector2f position {ship.get_position().x, ship.get_position().y};
 
-		sf::Vector2f rotator_a = sf::Vector2f{ 60 * cosf(angle      ), 60 * sinf(angle      ) } + position;
-        sf::Vector2f rotator_b = sf::Vector2f{ 20 * cosf(angle + PI2), 20 * sinf(angle + PI2) } + position;
-        sf::Vector2f rotator_c = sf::Vector2f{ 20 * cosf(angle - PI2), 20 * sinf(angle - PI2) } + position;
+		sf::Transform rotation;
+		rotation.rotate(angle / PI * 180.f, 0.f, 0.f);
+
+		sf::Vector2f rotator_a = rotation.transformPoint(sf::Vector2f{  30,   0 }) + position;
+        sf::Vector2f rotator_b = rotation.transformPoint(sf::Vector2f{ -30, -20 }) + position;
+        sf::Vector2f rotator_c = rotation.transformPoint(sf::Vector2f{ -30,  20 }) + position;
 
 		sf::Vector2u view_area = parent_ptr_->get_texture(true).getSize();
 
 		drawtriangle(rotator_a, rotator_b, rotator_c);
+
+
+		sf::Vector2f min_pos = { min(min(rotator_a.x, rotator_b.x), rotator_c.x), min(min(rotator_a.y, rotator_b.y), rotator_c.y) };
+		sf::Vector2f max_pos = { max(max(rotator_a.x, rotator_b.x), rotator_c.x), max(max(rotator_a.y, rotator_b.y), rotator_c.y) };
+
+		sf::Vector2f text_pos =
+		{
+			max_pos.x + 5.f,
+			min_pos.y + (max_pos.y - min_pos.y) / 2.f
+		};
+
+		drawtext(text_pos, ship.get_identifier());
+	}
+
+	void GraphicsStorage::drawtext(sf::Vector2f position, const std::string& text)
+	{
+		const unsigned int character_size = 20;
+
+		sf::Text sf_text;
+
+		sf_text.setPosition(position - sf::Vector2f{0, character_size / 2u});
+
+		sf_text.setFont(parent_ptr_->get_font());
+		sf_text.setString(sf::String::fromUtf8(text.begin(), text.end()));
+		sf_text.setCharacterSize(character_size);
+
+		sf_text.setFillColor(fill_color_);
+
+		sf_text.setStyle(sf::Text::Bold);
+
+		parent_ptr_->get_texture(true).draw(sf_text);
 	}
 
 } // namespace gui

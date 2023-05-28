@@ -1,6 +1,7 @@
 #pragma once
 
 #include <queue>
+#include <chrono>
 
 #include <sea_sim/gui_controller/Functions.h>
 #include <sea_sim/gui_controller/RenderEngine.h>
@@ -91,10 +92,22 @@ namespace gui
 
 			bool reset_docking_layout = true;
 			ImVec2 render_size = { 500, 500 };
+		} windows_show_state_;
 
+		struct TimeManipulation
+		{
 			int8_t sim_speed = 0;
 			bool frame_pause = true;
-		} windows_show_state_;
+
+			std::chrono::system_clock::time_point clock;
+			std::chrono::system_clock::time_point last_elapsed;
+		} time_manipulations_;
+
+		struct ButtonsCache
+		{
+			ImVec2 last_mouse_pos;
+			int last_mouse_buttons;
+		} button_cache_;
 
 		bool shutdown_flag_ = false;
 	};
