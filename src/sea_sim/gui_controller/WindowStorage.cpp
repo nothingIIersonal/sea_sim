@@ -204,7 +204,7 @@ namespace gui
 
         ImGuiID my_dockspace = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
         if (windows_show_state_.reset_docking_layout)
-        {
+		{
             ImGui_reset_docking_layout(my_dockspace);
             windows_show_state_.reset_docking_layout = false;
         }
@@ -564,20 +564,21 @@ namespace gui
 	{
 		if (file_dialog_.is_open())
 		{
-			if (auto file_path = file_dialog_.render_dialog())
+			bool keyboard_is_captured = ImGui::GetIO().WantCaptureKeyboard;
+
+			if (auto file_paths = file_dialog_.render_dialog())
 			{
-				if (auto file_path = file_dialog_.try_take_files())
-				{
-					send_to_core("load_module", { {"module_path", file_path.value().front()} });
-				}
+				for (auto& file : file_paths.value())
+					send_to_core("load_module", { {"module_path", file} });
 			}
-			if (key_hit(sf::Keyboard::Escape))
+			else if (key_hit(sf::Keyboard::Escape))
 				file_dialog_.close();
-			else if (key_hit(sf::Keyboard::Enter))
+			else if (key_hit(sf::Keyboard::Enter) && !keyboard_is_captured)
 			{
-				if (auto file_path = file_dialog_.try_take_files())
+				if (auto file_paths = file_dialog_.try_take_files())
 				{
-					send_to_core("load_module", { {"module_path", file_path.value().front()} });
+					for (auto& file : file_paths.value())
+						send_to_core("load_module", { {"module_path", file} });
 				}
 			}
 		}

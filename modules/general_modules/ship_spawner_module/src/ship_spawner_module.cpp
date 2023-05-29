@@ -15,7 +15,7 @@ void set_initial_ships(Interconnect &ic)
     auto va = ic.environment.get_view_area();
 
     srand( (unsigned int)(time(0)) );
- 7.f,
+
     ic.ships.create("линкор_1" , {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.25f, 1.f,  4.f, 7.f, .07f);
     ic.ships.create("линкор_2" , {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 1.f  , 2.f,  6.f, 7.f, .03f);
     ic.ships.create("крейсер_1", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.f  , 0.f,  5.f, 7.f, .08f);
