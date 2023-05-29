@@ -28,7 +28,7 @@ int chase_btn(Interconnect& ic)
         if ( !target_identifier )
             ic.wgto.add_text("Нет идентификатора цели!");
         if ( !peace_distance )
-            ic.wgto.add_text("Нет величины максимального сближения!");
+            ic.wgto.add_text("Нет расстояния начала снижения скорости!");
         ic.wgto.send();
         return -1;
     }
@@ -112,7 +112,7 @@ void router_task_chase_selected(Interconnect &ic)
 {
     ic.wgti.add_text("Идентификатор преследователя:"); ic.wgti.sameline(); ic.wgti.add_dropdownlist("ddl_ships_chaser", get_ship_identifiers(ic));
     ic.wgti.add_text("Идентификатор цели:"); ic.wgti.sameline(); ic.wgti.add_dropdownlist("ddl_ships_target", get_ship_identifiers(ic));
-    ic.wgti.add_text("Максимальное сближение:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("peace_distance");
+    ic.wgti.add_text("Расстояние начала снижения скорости:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("peace_distance");
     ic.wgti.add_button("chase_btn", "Начать преследование"); ic.wgti.sameline(); ic.wgti.add_button("unchase_btn", "Прекратить преследование");
 }
 
