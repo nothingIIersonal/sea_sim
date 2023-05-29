@@ -9,6 +9,8 @@ namespace gui
 	namespace fs = ::std::filesystem;
 	using namespace utils;
 
+	// --- File Info
+
 	FileInfo::FileInfo(FileDialog* parent)
 		: parent_ptr_(parent)
 	{
@@ -128,6 +130,30 @@ namespace gui
 		return 1;
 	}
 
+	// --- File Info Container
+
+	bool FileInfoContaier::contains(const FileInfo& name_optimized)
+	{
+		return std::find(files.begin(), files.end(), x) != v.end()
+	}
+	void FileInfoContaier::push(const FileInfo& file)
+	{
+
+	}
+	void FileInfoContaier::pop(const FileInfo& file)
+	{
+
+	}
+	void FileInfoContaier::swap(const FileInfo& file, int32_t position)
+	{
+
+	}
+	std::vector<FileInfo>& FileInfoContaier::get_files()
+	{
+		return files;
+	}
+
+	// --- File Dialog
 
 	FileDialog::FileDialog(WindowStorage* parent, const fs::path& starting_path)
 		: parent_ptr_(parent),
@@ -535,6 +561,8 @@ namespace gui
 		return std::nullopt;
 	}
 
+	// --- Additional functions
+
 	std::string get_FileTypeName(FileInfo::FileTypeEnum type)
 	{
 		switch (type)
@@ -595,4 +623,5 @@ namespace gui
 #endif // WIN32
 		return res;
 	}
+	
 } // namespace gui

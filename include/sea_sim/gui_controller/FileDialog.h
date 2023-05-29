@@ -60,6 +60,23 @@ namespace gui
 		FileDialog* parent_ptr_;
 	};
 
+	class FileInfoContaier
+	{
+	public:
+		bool contains(const FileInfo& name_optimized);
+
+		void push(const FileInfo& file);
+		void pop(const FileInfo& file);
+
+		void swap(const FileInfo& file, int32_t position);
+
+		std::vector<FileInfo>& get_files();
+
+	private:
+		std::vector<FileInfo> files;
+
+	};
+
 	class FileDialog
 	{
 	public:
@@ -107,7 +124,7 @@ namespace gui
 		SortingTypeEnum selected_sorting_type;
 
 		std::vector<FileInfo> current_directory_content;
-		FileInfo selected_file;
+		FileInfoContaier selected_files;
 	};
 
 	std::string get_FileTypeName(FileInfo::FileTypeEnum type);
