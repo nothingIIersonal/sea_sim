@@ -409,13 +409,13 @@ std::optional<std::string> Interconnect::get_field_string(const std::string& fie
     return std::nullopt;
 }
 
-void Interconnect::Ships::create(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color, graphics::Color outline_color, float angle, float desired_angle, float speed, float rotation_speed)
+void Interconnect::Ships::create(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color, graphics::Color outline_color, float angle, float desired_angle, float speed, float max_speed, float rotation_speed)
 {
     Interconnect *ic = container_of(this, Interconnect, ships);
 
     std::unique_lock lock(ic->ship_storage_mutex);
 
-    ic->ship_storage.insert_or_assign(identifier, Ship{identifier, position, fill_color, outline_color, angle, desired_angle, speed, rotation_speed} );
+    ic->ship_storage.insert_or_assign(identifier, Ship{identifier, position, fill_color, outline_color, angle, desired_angle, speed, max_speed, rotation_speed} );
 }
 
 void Interconnect::Ships::set_position(const std::string& identifier, geom::Vector2f position)
@@ -456,6 +456,16 @@ void Interconnect::Ships::set_speed(const std::string& identifier, float speed)
 
     if ( ic->ship_storage.contains(identifier) )
         ic->ship_storage.at(identifier).set_speed(speed);
+}
+
+void Interconnect::Ships::set_max_speed(const std::string& identifier, float max_speed)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_speed(max_speed);
 }
 
 void Interconnect::Ships::set_rotation_speed(const std::string& identifier, float rotation_speed)

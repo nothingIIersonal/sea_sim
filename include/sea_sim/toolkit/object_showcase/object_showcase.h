@@ -40,14 +40,15 @@ private:
     float angle;
     float desired_angle;
     float speed;
+    float max_speed;
     float rotation_speed;
 
 public:
     Ship() noexcept : Object("unknown") {}
     explicit Ship(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color,
-                  graphics::Color outline_color, float angle, float desired_angle, float speed, float rotation_speed) noexcept
+                  graphics::Color outline_color, float angle, float desired_angle, float speed, float max_speed, float rotation_speed) noexcept
                   : Object(identifier), position(position), fill_color(fill_color), outline_color(outline_color),
-                    angle(angle), desired_angle(desired_angle), speed(speed), rotation_speed(rotation_speed) {}
+                    angle(angle), desired_angle(desired_angle), speed(speed), max_speed(max_speed), rotation_speed(rotation_speed) {}
     ~Ship() noexcept = default;
 
     geom::Vector2f get_position() const { return this->position; }
@@ -56,6 +57,7 @@ public:
     float get_angle() const { return this->angle; }
     float get_desired_angle() const { return this->desired_angle; }
     float get_speed() const { return this->speed; }
+    float get_max_speed() const { return this->max_speed; }
     float get_rotation_speed() const { return this->rotation_speed; }
 
     void set_position(geom::Vector2f position) { this->position = position; }
@@ -64,6 +66,7 @@ public:
     void set_angle(float angle) { this->angle = angle; }
     void set_desired_angle(float desired_angle) { this->desired_angle = desired_angle; }
     void set_speed(float speed) { this->speed = speed; }
+    void set_max_speed(float max_speed) { this->max_speed = max_speed; }
     void set_rotatin_speed(float rotatin_speed) { this->rotation_speed = rotatin_speed; }
 };
 

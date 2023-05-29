@@ -13,6 +13,7 @@ namespace nlohmann
             {"angle", ship.get_angle()},
             {"desired_angle", ship.get_desired_angle()},
             {"speed", ship.get_speed()},
+            {"max_speed", ship.get_max_speed()},
             {"rotation_speed", ship.get_rotation_speed()},
         };
     }
@@ -26,6 +27,7 @@ namespace nlohmann
             j.at("angle").get<float>(),
             j.at("desired_angle").get<float>(),
             j.at("speed").get<float>(),
+            j.at("max_speed").get<float>(),
             j.at("rotation_speed").get<float>(),
         };
     }

@@ -15,13 +15,13 @@ void set_initial_ships(Interconnect &ic)
     auto va = ic.environment.get_view_area();
 
     srand( (unsigned int)(time(0)) );
-
-    ic.ships.create("линкор_1" , {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.25f, 1.f,  4.f, .07f);
-    ic.ships.create("линкор_2" , {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 1.f  , 2.f,  6.f, .03f);
-    ic.ships.create("крейсер_1", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.f  , 0.f,  5.f, .08f);
-    ic.ships.create("крейсер_2", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.5f , 2.f,  3.f, .01f);
-    ic.ships.create("эсминец_1", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.75f, 3.f,  1.f, .05f);
-    ic.ships.create("эсминец_2", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.95f, 4.f,  2.f, .02f);
+ 7.f,
+    ic.ships.create("линкор_1" , {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.25f, 1.f,  4.f, 7.f, .07f);
+    ic.ships.create("линкор_2" , {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 1.f  , 2.f,  6.f, 7.f, .03f);
+    ic.ships.create("крейсер_1", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.f  , 0.f,  5.f, 7.f, .08f);
+    ic.ships.create("крейсер_2", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.5f , 2.f,  3.f, 7.f, .01f);
+    ic.ships.create("эсминец_1", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.75f, 3.f,  1.f, 7.f, .05f);
+    ic.ships.create("эсминец_2", {RAND_POSITION(0, va.x), RAND_POSITION(0, va.y)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, {RAND_COLOR, RAND_COLOR, RAND_COLOR, TRANSPARENT(0)}, 0.95f, 4.f,  2.f, 7.f, .02f);
 }
 
 
@@ -35,6 +35,7 @@ int sea_module_init(Interconnect &&ic)
     ic.wgti.add_text("Курсовой угол:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_angle");
     ic.wgti.add_text("Путевой угол:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_desired_angle");
     ic.wgti.add_text("Скорость движения:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_speed");
+    ic.wgti.add_text("Максимальная скорость движения:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_max_speed");
     ic.wgti.add_text("Скорость вращения:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_rotation_speed");
     ic.wgti.add_text("Цвет корабля:");
         ic.wgti.add_text("\tR:"); ic.wgti.sameline(); ic.wgti.add_sliderint("ship_fill_color_r", 0, 255);
@@ -90,9 +91,10 @@ int sea_module_exec(Interconnect &&ic)
     auto ship_angle          = ic.get_field_float("ship_angle").value();
     auto ship_desired_angle  = ic.get_field_float("ship_desired_angle").value();
     auto ship_speed          = ic.get_field_float("ship_speed").value();
+    auto ship_max_speed      = ic.get_field_float("ship_max_speed").value();
     auto ship_rotation_speed = ic.get_field_float("ship_rotation_speed").value();
 
-    ic.ships.create( ship_identifier, ship_position, ship_fill_color, ship_outline_color, ship_angle, ship_desired_angle, ship_speed, ship_rotation_speed );
+    ic.ships.create( ship_identifier, ship_position, ship_fill_color, ship_outline_color, ship_angle, ship_desired_angle, ship_speed, ship_max_speed, ship_rotation_speed );
 
     ic.wgto.add_text("Корабль создан!");
     ic.wgto.send();

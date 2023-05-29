@@ -50,6 +50,7 @@ void out_info(Interconnect &ic)
         auto ship_angle          = ship.value().get_angle();
         auto ship_desired_angle  = ship.value().get_desired_angle();
         auto ship_speed          = ship.value().get_speed();
+        auto ship_max_speed      = ship.value().get_max_speed();
         auto ship_rotation_speed = ship.value().get_rotation_speed();
 
         ic.wgto.add_text("Название:"); ic.wgto.sameline(); ic.wgto.add_text(ship_identifier);
@@ -59,6 +60,7 @@ void out_info(Interconnect &ic)
         ic.wgto.add_text("Курсовой угол: " + std::to_string(ship_angle));
         ic.wgto.add_text("Путевой угол: " + std::to_string(ship_desired_angle));
         ic.wgto.add_text("Скорость движения: " + std::to_string(ship_speed));
+        ic.wgto.add_text("Максимальная скорость движения: " + std::to_string(ship_max_speed));
         ic.wgto.add_text("Скорость вращения: " + std::to_string(ship_rotation_speed));
         ic.wgto.add_text("Цвет корабля:");
             ic.wgto.add_text("\tR: " + std::to_string(ship_fill_color.r));
