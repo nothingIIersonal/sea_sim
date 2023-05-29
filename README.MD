@@ -22,7 +22,7 @@ git clone https://github.com/Microsoft/vcpkg.git
 ```
 ```
 cd /opt/vcpkg/
-./bootstrap-vcpkg.sh && ./vcpkg install imgui-sfml:x64-linux && ./vcpkg install imgui[docking-experimental]:x64-linux --recurse
+./bootstrap-vcpkg.sh && ln -s vcpkg /bin/vcpkg
 ```
 
 ## Непосредственно сборка:
