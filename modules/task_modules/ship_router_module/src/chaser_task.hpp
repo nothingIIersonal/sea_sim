@@ -56,6 +56,7 @@ int chase_btn(Interconnect& ic)
     chases_g.insert_or_assign( chaser_identifier.value(), chase_t{ chaser_identifier.value(), target_identifier.value(), peace_distance.value() } );
 
     ic.wgto.add_text("Преследование начато!");
+    ic.wgto.send();
 
     return 0;
 }
@@ -93,7 +94,8 @@ int unchase_btn(Interconnect& ic)
 
     ic.wgto.add_text("Преследование завершено!");
     ic.wgto.send();
-    return -1;
+
+    return 0;
 }
 
 std::vector<std::string> get_ship_identifiers(Interconnect &ic)
