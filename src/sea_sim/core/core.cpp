@@ -77,8 +77,7 @@ int main()
             if (const auto &packet = endpoint_iter->second.TryRead())
             {
 #ifdef __CORE_DEBUG
-                if (packet.value().event != "mouse_position_changed")
-                    print_packet(packet);
+                print_packet(packet);
 #endif // __CORE_DEBUG
                 if (packet.value().to == "core")
                 {
