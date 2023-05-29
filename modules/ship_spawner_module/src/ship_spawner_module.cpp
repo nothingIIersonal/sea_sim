@@ -30,12 +30,12 @@ int sea_module_init(Interconnect &&ic)
     ic.wgti.set_module_title("Верфь");
     ic.wgti.add_text("Название корабля:"); ic.wgti.sameline(); ic.wgti.add_inputtext("ship_identifier", "Название");
     ic.wgti.add_text("Координаты корабля:");
-        ic.wgti.add_text("\tX:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_position_x", "Координата X");
-        ic.wgti.add_text("\tY:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_position_y", "Координата Y");
-    ic.wgti.add_text("Курсовой угол:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_angle", "Курсовой угол");
-    ic.wgti.add_text("Путевой угол:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_desired_angle", "Путевой угол");
-    ic.wgti.add_text("Скорость движения:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_speed", "Скорость движения");
-    ic.wgti.add_text("Скорость вращения:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_rotation_speed", "Скорость вращения");
+        ic.wgti.add_text("\tX:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_position_x");
+        ic.wgti.add_text("\tY:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_position_y");
+    ic.wgti.add_text("Курсовой угол:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_angle");
+    ic.wgti.add_text("Путевой угол:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_desired_angle");
+    ic.wgti.add_text("Скорость движения:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_speed");
+    ic.wgti.add_text("Скорость вращения:"); ic.wgti.sameline(); ic.wgti.add_inputfloat("ship_rotation_speed");
     ic.wgti.add_text("Цвет корабля:");
         ic.wgti.add_text("\tR:"); ic.wgti.sameline(); ic.wgti.add_sliderint("ship_fill_color_r", 0, 255);
         ic.wgti.add_text("\tG:"); ic.wgti.sameline(); ic.wgti.add_sliderint("ship_fill_color_g", 0, 255);
