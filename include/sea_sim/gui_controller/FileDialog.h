@@ -63,10 +63,11 @@ namespace gui
 	class FileInfoContaier
 	{
 	public:
-		bool contains(const FileInfo& name_optimized);
+		bool contains(const FileInfo& file);
 
 		void push(const FileInfo& file);
 		void pop(const FileInfo& file);
+		std::vector<FileInfo>::iterator at(const FileInfo& file);
 
 		void swap(const FileInfo& file, int32_t position);
 

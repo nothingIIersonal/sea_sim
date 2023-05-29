@@ -68,6 +68,9 @@ int main()
     uint16_t frame_counter = 0;
     uint16_t frame_cycles = 0;
 
+    int cnt = 0;
+    std::chrono::duration<double, std::milli> timer_elapsed_stack{0};
+
     while ( shutdown_type != SHUTDOWN_TYPE_ENUM::SHUTDOWN )
     {
         auto timer_start = std::chrono::steady_clock::now();
@@ -313,6 +316,15 @@ int main()
 
         auto timer_stop = std::chrono::steady_clock::now();
         const std::chrono::duration<double, std::milli> timer_elapsed = std::chrono::duration<double, std::milli>(1000. / 60.) - (timer_stop - timer_start);
+
+        if (cnt++ % 10 == 0)
+        {
+            std::cout << timer_elapsed_stack / 10 << std::endl;
+            timer_elapsed_stack = timer_elapsed;
+        }
+        else
+            timer_elapsed_stack += timer_elapsed;
+
         std::this_thread::sleep_for(timer_elapsed);
     }
 

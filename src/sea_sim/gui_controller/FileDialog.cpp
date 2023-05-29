@@ -132,21 +132,39 @@ namespace gui
 
 	// --- File Info Container
 
-	bool FileInfoContaier::contains(const FileInfo& name_optimized)
+	bool FileInfoContaier::contains(const FileInfo& file)
 	{
-		return std::find(files.begin(), files.end(), x) != v.end()
+		return std::find(files.begin(), files.end(), file) != files.end();
 	}
 	void FileInfoContaier::push(const FileInfo& file)
 	{
-
+		files.push_back(file);
 	}
 	void FileInfoContaier::pop(const FileInfo& file)
 	{
+		auto it = std::find(files.begin(), files.end(), file);
 
+		if (it != files.end())
+			files.erase(it);
+	}
+
+	std::vector<FileInfo>::iterator FileInfoContaier::at(const FileInfo& file)
+	{
+		return std::find(files.begin(), files.end(), file);
 	}
 	void FileInfoContaier::swap(const FileInfo& file, int32_t position)
 	{
+		if (position > files.size())
+			files.push_back(file);
+		else if (position > 0)
+		{
+			if (!contains(file))
+				files.push_back(file);
 
+			std::iter_swap(at(file), files.at(position));
+		}
+		else
+			files.insert(files.begin(), file);
 	}
 	std::vector<FileInfo>& FileInfoContaier::get_files()
 	{
