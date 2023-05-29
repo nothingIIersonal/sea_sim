@@ -44,7 +44,9 @@ private:
     float rotation_speed;
 
 public:
-    Ship() noexcept : Object("unknown") {}
+    Ship() noexcept : Object("unknown"), position({.0f, .0f}), fill_color({0, 0, 0, 255}),
+                      outline_color({0, 0, 0, 255}), angle(.0f), desired_angle(.0f),
+                      speed(.0f), max_speed(.0f), rotation_speed(.0f) {}
     explicit Ship(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color,
                   graphics::Color outline_color, float angle, float desired_angle, float speed, float max_speed, float rotation_speed) noexcept
                   : Object(identifier), position(position), fill_color(fill_color), outline_color(outline_color),
