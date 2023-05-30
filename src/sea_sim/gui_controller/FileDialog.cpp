@@ -479,7 +479,7 @@ namespace gui
 
 				ImGui::TableNextColumn(); // --- Multiple Selection Area --- //
 
-				ImGui::Text(u8"Множественный выбор"_C);
+				ImGui::Text("%s", u8"Множественный выбор"_C);
 				ImGui::Separator();
 
 				if (ImGui::BeginListBox("##multiple selection list area", { -1.f, -ImGui::GetFrameHeightWithSpacing() - 4.f }))
@@ -534,7 +534,7 @@ namespace gui
 
 						ImGui::SameLine();
 
-						ImGui::Text(val.name.c_str());
+						ImGui::Text("%s", val.name.c_str());
 
 						if (!skip_increment)
 							++it; 

@@ -1,6 +1,7 @@
 #pragma once
 #include <filesystem>
 #include <algorithm>
+#include <list>
 
 #include <sea_sim/gui_controller/Functions.h>
 #include <sea_sim/gui_controller/Fonts.h>
