@@ -10,7 +10,20 @@
 
 #include <sea_sim/gears/channel_packet.h>
 #include <sea_sim/toolkit/object_showcase/object_showcase.h>
+#include <sea_sim/toolkit/graphics/color.hpp>
+#include <sea_sim/toolkit/controllers/mouse.hpp>
 #include <shared_mutex>
+
+
+typedef struct environment_t
+{
+    geom::Vector2u view_area = {500u, 500u};
+    geom::Vector2u mouse_position = {0u, 0u};
+    uint8_t mouse_buttons = 0;
+    int8_t sim_speed = 0;
+    int map_scale = 1;
+    bool paused = true;
+} environment_t;
 
 
 typedef struct shared_ic_objects_t
@@ -20,6 +33,8 @@ typedef struct shared_ic_objects_t
 
     std::map<std::string, Isle>& isle_storage;
     std::shared_mutex& isle_storage_mutex;
+
+    environment_t environment;
 } shared_ic_objects_t;
 
 
@@ -38,6 +53,38 @@ private:
     std::map<std::string, Isle>& isle_storage;
     std::map<std::string, Isle> ::iterator isle_storage_it;
     std::shared_mutex& isle_storage_mutex;
+
+    class Environment
+    {
+    private:
+        environment_t environment;
+    public:
+        explicit Environment(const environment_t& environment);
+
+        geom::Vector2u get_view_area() const;
+        geom::Vector2u get_mouse_position() const;
+        uint8_t get_mouse_buttons() const;
+        bool get_mouse_button(controllers::MouseButtonEnum key) const;
+        int get_map_scale() const;
+        bool is_paused() const;
+    };
+
+    class Render
+    {
+    private:
+        nlohmann::json graphics_output;
+    public:
+        void send();
+
+		void set_fill_color(graphics::Color color);
+		void set_outline_color(graphics::Color color);
+
+		void draw_line(geom::Vector2f a, geom::Vector2f b, float width = 1.f);
+		void draw_circle(geom::Vector2f pos, float radius, float border_width = 1.f);
+		void draw_triangle(geom::Vector2f a, geom::Vector2f b, geom::Vector2f c, float border_width = 1.f);
+
+		void draw_ship(const Ship& ship);
+    };
 
     class WGTI
     {
@@ -69,36 +116,49 @@ private:
         void add_text(const std::string& text);
     };
 
+    class Ships
+    {
+    public:
+        void create(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color, graphics::Color outline_color, float angle, float desired_angle, float speed, float max_speed, float rotation_speed);
+        void set_position(const std::string& identifier, geom::Vector2f position);
+        void set_angle(const std::string& identifier, float angle);
+        void set_desired_angle(const std::string& identifier, float desired_angle);
+        void set_speed(const std::string& identifier, float speed);
+        void set_max_speed(const std::string& identifier, float max_speed);
+        void set_rotation_speed(const std::string& identifier, float rotation_speed);
+        std::optional<Ship> get_by_id(const std::string& identifier);
+        std::vector<Ship> get_all();
+    };
+
+    class Isles
+    {
+    public:
+        Isles() noexcept = default;
+        ~Isles() noexcept = default;
+    };
+
 protected:
     Interconnect() noexcept = delete;
     Interconnect(const Interconnect&) = delete;
     void operator=(const Interconnect&) = delete;
 
 public:
-    explicit Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects_t);
+    explicit Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects_t, const environment_t& environment);
     ~Interconnect() noexcept = default;
 
+    Environment environment;
+    Render render;
     WGTI wgti;
     WGTO wgto;
+    Ships ships;
+    Isle isle;
 
     const std::string& get_trigger();
 
     std::optional<int> get_field_int(const std::string& field_name);
+    std::optional<bool> get_field_bool(const std::string& field_name);
     std::optional<float> get_field_float(const std::string& field_name);
     std::optional<std::string> get_field_string(const std::string& field_name);
-
-    int object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff);
-    std::optional<Ship> object_ship_get(const std::string& identifier);
-    std::optional<Ship> object_ship_get_next();
-    std::optional<int64_t> object_ship_get_x(const std::string& identifier);
-    std::optional<int64_t> object_ship_get_y(const std::string& identifier);
-    std::optional<std::vector<std::string>> object_ship_get_staff(const std::string& identifier);
-    void object_ship_iterator_reset();
-
-    int object_isle_set(const std::string& identifier, Isle isle);
-    std::optional<Isle> object_isle_get(const std::string& identifier);
-    std::optional<Isle> object_isle_get_next();
-    void object_isle_iterator_reset();
 };
 
 

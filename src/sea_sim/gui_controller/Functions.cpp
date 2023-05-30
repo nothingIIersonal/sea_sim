@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 
-#include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/Functions.h>
 
 namespace gui::utils
 {
@@ -20,11 +20,11 @@ namespace gui::utils
 		else
 			return fmod(Y - fmod(-X, Y), Y);
 	}
-
 	double randf(double start, double end, int amount)
 	{
 		return start + (rand() % amount) / double(amount) * (end - start);
 	}
+	float pif(float a, float b) { return sqrt(a * a + b * b); }
 
 	// --- ImGui
 
@@ -72,13 +72,18 @@ namespace gui::utils
 	// --- SFML
 
 	bool keyHit[sf::Keyboard::KeyCount] = { 0 };
+	bool ignore_input = false;
 
 	int mouse_down(const sf::Mouse::Button& B)
 	{
+		if (ignore_input)
+			return false;
 		return sf::Mouse::isButtonPressed(B);
 	}
 	int key_down(const sf::Keyboard::Key& B)
 	{
+		if (ignore_input)
+			return false;
 		return sf::Keyboard::isKeyPressed(B);
 	}
 	int key_hit(const sf::Keyboard::Key& key)
@@ -86,7 +91,8 @@ namespace gui::utils
 		if (!keyHit[key]) {
 			if (sf::Keyboard::isKeyPressed(key)) {
 				keyHit[key] = true;
-				return true;
+				if (!ignore_input)
+					return true;
 			}
 		}
 		return false;

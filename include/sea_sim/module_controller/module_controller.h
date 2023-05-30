@@ -159,7 +159,8 @@ public:
     void insert(const std::string& path, Module&& module)
     {
         std::unique_lock lock(ModuleStorage::mtx);
-        this->modules_order.push_back(path);
+        if ( std::find(this->modules_order.begin(), this->modules_order.end(), path) == this->modules_order.end() )
+            this->modules_order.push_back(path);
         this->modules.emplace( std::make_pair(path, std::move(module)) );
     }
 
@@ -265,9 +266,9 @@ const int load_module(const char *module_path, Endpoint module_endpoint)
     printf("Init function address: 0x%p\n", init);
 
     printf("Call init function...\n");
-    int init_res = (* init)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
+    int init_res = (* init)( Interconnect(module_endpoint, module_path, shared_ic_objects, environment) );
 #else
-    (* init)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
+    (* init)( Interconnect(module_endpoint, module_path, shared_ic_objects, environment) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Init function done with code %d\n", init_res);
@@ -302,9 +303,9 @@ const int exec_module(const char *module_path, Endpoint module_endpoint)
     printf("Exec function address: 0x%p\n", exec);
 
     printf("Call exec function...\n");
-    int exec_res = (* exec)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
+    int exec_res = (* exec)( Interconnect(module_endpoint, module_path, shared_ic_objects, environment) );
 #else
-    (* exec)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
+    (* exec)( Interconnect(module_endpoint, module_path, shared_ic_objects, environment) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Exec function done with code %d\n", exec_res);
@@ -341,9 +342,9 @@ const int unload_module(const char *module_path, Endpoint module_endpoint)
     printf("Exit function address: 0x%p\n", exit);
 
     printf("Call exit function...\n");
-    int exit_res = (* exit)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
+    int exit_res = (* exit)( Interconnect(module_endpoint, module_path, shared_ic_objects, environment) );
 #else
-    (* exit)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
+    (* exit)( Interconnect(module_endpoint, module_path, shared_ic_objects, environment) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Exit function done with code %d\n", exit_res);
@@ -386,9 +387,9 @@ const int run_hot_function(const char *module_path, Endpoint module_endpoint)
     printf("Hot function address: 0x%p\n", hotf);
 
     printf("Call hot function...\n");
-    int hotf_res = (* hotf)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
+    int hotf_res = (* hotf)( Interconnect(module_endpoint, module_path, shared_ic_objects, environment) );
 #else
-    (* hotf)( Interconnect(module_endpoint, module_path, shared_ic_objects) );
+    (* hotf)( Interconnect(module_endpoint, module_path, shared_ic_objects, environment) );
 #endif // __MC_DEBUG
 #ifdef __MC_DEBUG
     printf("Hot function done with code %d\n", hotf_res);

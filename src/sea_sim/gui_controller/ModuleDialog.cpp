@@ -38,7 +38,7 @@ namespace gui
 			{
 				if (modules_order_.empty())
 				{
-					ImGui::Text(u8"Загрузите модули в меню \"Модули->Добавить\""_C);
+					ImGui::Text("%s", u8"Загрузите модули в меню \"Модули->Добавить\""_C);
 				}
 				else
 				{

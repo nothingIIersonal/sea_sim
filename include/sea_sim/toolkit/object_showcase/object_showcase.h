@@ -6,17 +6,25 @@
 #include <vector>
 
 
+#include <sea_sim/gears/json/json.hpp>
+#include <sea_sim/toolkit/geom/geom.hpp>
+#include <sea_sim/toolkit/graphics/color.hpp>
+
+
 /*
 * Abstract object in vacuum
 */
 class Object
 {
-private:
+protected:
     std::string identifier;
 
 public:
-    Object(const std::string& identifier) noexcept : identifier(identifier) {}
-    const std::string get_identifier() noexcept { return this->identifier; }
+    Object() noexcept = default;
+    explicit Object(const std::string& identifier) noexcept : identifier(identifier) {}
+    ~Object() noexcept = default;
+
+    std::string get_identifier() const { return this->identifier; }
 };
 
 
@@ -26,17 +34,42 @@ public:
 class Ship : public Object
 {
 private:
-    int64_t x, y;
-    std::vector<std::string> staff;
+    geom::Vector2f position;
+    graphics::Color fill_color;
+    graphics::Color outline_color;
+    float angle;
+    float desired_angle;
+    float speed;
+    float max_speed;
+    float rotation_speed;
 
 public:
-    Ship() noexcept = default;
-    Ship(const std::string& identifier, int64_t x, int64_t y, const std::vector<std::string>& staff) noexcept : Object(identifier), x(x), y(y), staff(staff) {};
+    Ship() noexcept : Object("unknown"), position({.0f, .0f}), fill_color({0, 0, 0, 255}),
+                      outline_color({0, 0, 0, 255}), angle(.0f), desired_angle(.0f),
+                      speed(.0f), max_speed(.0f), rotation_speed(.0f) {}
+    explicit Ship(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color,
+                  graphics::Color outline_color, float angle, float desired_angle, float speed, float max_speed, float rotation_speed) noexcept
+                  : Object(identifier), position(position), fill_color(fill_color), outline_color(outline_color),
+                    angle(angle), desired_angle(desired_angle), speed(speed), max_speed(max_speed), rotation_speed(rotation_speed) {}
     ~Ship() noexcept = default;
 
-    std::vector<std::string> get_staff() { return this->staff; };
-    int64_t get_x() { return this->x; }
-    int64_t get_y() { return this->y; }
+    geom::Vector2f get_position() const { return this->position; }
+    graphics::Color get_fill_color() const { return this->fill_color; }
+    graphics::Color get_outline_color() const { return this->outline_color; }
+    float get_angle() const { return this->angle; }
+    float get_desired_angle() const { return this->desired_angle; }
+    float get_speed() const { return this->speed; }
+    float get_max_speed() const { return this->max_speed; }
+    float get_rotation_speed() const { return this->rotation_speed; }
+
+    void set_position(geom::Vector2f position) { this->position = position; }
+    void set_fill_color(graphics::Color fill_color) { this->fill_color = fill_color; }
+    void set_outline_color(graphics::Color outline_color) { this->outline_color = outline_color; }
+    void set_angle(float angle) { this->angle = angle; }
+    void set_desired_angle(float desired_angle) { this->desired_angle = desired_angle; }
+    void set_speed(float speed) { this->speed = speed; }
+    void set_max_speed(float max_speed) { this->max_speed = max_speed; }
+    void set_rotatin_speed(float rotatin_speed) { this->rotation_speed = rotatin_speed; }
 };
 
 
@@ -51,6 +84,20 @@ public:
     Isle() noexcept = default;
     ~Isle() noexcept = default;
 };
+
+
+/*
+* Serialization / Deserialization
+*/
+namespace nlohmann 
+{
+    template <>
+    struct adl_serializer<Ship>
+    {
+        static void to_json(nlohmann::json& j, const Ship& ship);
+        static void from_json(const nlohmann::json& j, Ship& ship);
+    };
+} // namespace nlohmann
 
 
 #endif

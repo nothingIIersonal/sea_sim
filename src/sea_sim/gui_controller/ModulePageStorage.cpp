@@ -228,12 +228,14 @@ namespace gui
 		case WidgetEnum::INPUTINT:
 			return { {{ "value", std::get<int>(stored_value_) }} };
 
+		case WidgetEnum::CHECKBOX:
+			return { {{ "value", std::get<bool>(stored_value_) }} };
+
 		case WidgetEnum::SLIDERFLOAT:
 		case WidgetEnum::INPUTFLOAT:
 			return { {{ "value", std::get<float>(stored_value_) }} };
 
 		case WidgetEnum::INPUTTEXT:
-		case WidgetEnum::CHECKBOX:
 		case WidgetEnum::RADIOBUTTON:
 		case WidgetEnum::COMBO:
 			return { {{ "value", std::get<std::string>(stored_value_) }} };

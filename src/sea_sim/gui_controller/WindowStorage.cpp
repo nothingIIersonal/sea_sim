@@ -1,5 +1,4 @@
-﻿#include <sea_sim/gui_controller/window_storage.h>
-#include <sea_sim/gui_controller/functions.h>
+﻿#include <sea_sim/gui_controller/WindowStorage.h>
 
 #include <iostream>
 
@@ -20,18 +19,20 @@ namespace gui
 		{
 			keyHit[reset_array] = false;
 		}
+
+		time_manipulations_.clock = std::chrono::system_clock::now();
+		time_manipulations_.last_elapsed = std::chrono::system_clock::now();
 		
-		render_engine_.create_texture(500u, 500u);
+		render_engine_.create_texture({ 500u, 500u });
 		render_engine_.swap_texture();
 
 		sf::Vector2u scene_size = render_engine_.get_texture_size();
-		send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
+		send_to_core("view_area_resized", { { "view_area", scene_size} });
 	}
 
 	void WindowStorage::build_window()
 	{
 		window_.create(sf::VideoMode(1920, 1080), "Sea Interface");
-		window_.setFramerateLimit(60);
 
 		screen_size_ = window_.getSize();
 	}
@@ -197,13 +198,13 @@ namespace gui
 
 	void WindowStorage::show_main()
     {
-        show_main_menu_bar();
+		show_main_menu_bar();
         show_file_dialog();
 		show_module_dialog();
 
         ImGuiID my_dockspace = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
         if (windows_show_state_.reset_docking_layout)
-        {
+		{
             ImGui_reset_docking_layout(my_dockspace);
             windows_show_state_.reset_docking_layout = false;
         }
@@ -334,7 +335,112 @@ namespace gui
 	}
 	void WindowStorage::show_child_view()
 	{
-		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse);
+		// --- Time
+
+		auto current_time = std::chrono::system_clock::now();
+		auto elapsed = current_time - time_manipulations_.last_elapsed;
+		time_manipulations_.last_elapsed = current_time;
+
+		if (time_manipulations_.frame_pause)
+			elapsed *= 0;
+		if (time_manipulations_.sim_speed >= 0)
+			elapsed *= int64_t(pow(2, time_manipulations_.sim_speed));
+		else
+			elapsed /= int64_t(pow(2, abs(time_manipulations_.sim_speed)));
+
+		time_manipulations_.clock += elapsed;
+
+		// convert time_stamp to string
+
+		struct tm newtime;
+#ifdef WIN32
+		const auto nowAsTimeT = std::chrono::system_clock::to_time_t(time_manipulations_.clock);
+		localtime_s(&newtime, &nowAsTimeT);
+#else
+		auto nowAsTimeT = std::chrono::system_clock::to_time_t(time_manipulations_.clock);
+		newtime = *localtime(&nowAsTimeT);
+#endif
+
+		std::stringstream nowSs;
+		nowSs << std::put_time(&newtime, "%H:%M:%S");
+
+		// --- Window
+		
+		ImGui::Begin(u8"Обзор"_C, NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar);
+
+		if (ImGui::BeginMenuBar())
+		{
+			ImGui::Separator();
+
+
+			ImGui::Text("%s", u8"Время: "_C);
+
+			int32_t width = static_cast<int32_t>(get_button_width(nowSs.str(), ImGui::GetStyle()));
+			ImGui::BeginChildFrame(ImGui::GetID("view_time_area"), {(width / 25 + 1) * 25.f, 0.f});
+
+			ImGui::Text("%s", nowSs.str().c_str());
+
+			ImGui::EndChildFrame();
+
+
+			ImGui::Separator();
+
+			if ((ImGui::Button(ICON_sea_sim__BACKWARD) || key_hit(sf::Keyboard::PageDown)) 
+				&& time_manipulations_.sim_speed >= -4)
+			{
+				--time_manipulations_.sim_speed;
+				send_to_core("speed_down", {});
+			}
+
+			ImGui::Separator();
+
+			bool keyboard_is_captured = ImGui::GetIO().WantCaptureKeyboard;
+			bool space_hit = key_hit(sf::Keyboard::Space);
+			bool flip_pause = !keyboard_is_captured && space_hit;
+			bool pause_on = flip_pause && !time_manipulations_.frame_pause;
+			bool pause_off = flip_pause && time_manipulations_.frame_pause;
+
+			if (ImGui::Button(ICON_sea_sim__PAUSE) || pause_on)
+			{
+				time_manipulations_.frame_pause = true;
+				send_to_core("pause_on", {});
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::Button(ICON_sea_sim__PLAY) || pause_off)
+			{
+				time_manipulations_.frame_pause = false;
+				send_to_core("pause_off", {});
+			}
+
+			ImGui::Separator();
+
+			if ((ImGui::Button(ICON_sea_sim__FORWARD) || key_hit(sf::Keyboard::PageUp))
+				&& time_manipulations_.sim_speed <= 4)
+			{
+				++time_manipulations_.sim_speed;
+				send_to_core("speed_up", {});
+			}
+
+			ImGui::Separator();
+
+			if (time_manipulations_.sim_speed >= 0)
+				ImGui::Text("x%i", static_cast<int>(pow(2, time_manipulations_.sim_speed)));
+			else
+				ImGui::Text("1/%i", static_cast<int>(pow(2, abs(time_manipulations_.sim_speed))));
+
+			ImGui::Separator();
+
+			if (time_manipulations_.frame_pause)
+			{
+				ImGui::Text("%s", u8"Пауза"_C);
+
+				ImGui::Separator();
+			}
+
+			ImGui::EndMenuBar();
+		}
 
 		ImVec2 view_area = ImGui::GetWindowContentRegionMax() -
 			               ImGui::GetWindowContentRegionMin();
@@ -346,16 +452,37 @@ namespace gui
 			view_area.x = max(1, view_area.x - 2);
 			view_area.y = max(1, view_area.y - 2);
 
-			render_engine_.create_texture(static_cast<unsigned int>(view_area.x), static_cast<unsigned int>(view_area.y));
+			render_engine_.create_texture(view_area);
 
 			sf::Vector2u scene_size = render_engine_.get_texture_size();
-
-			send_to_core("view_area_resized", { {"view_area_X", scene_size.x}, {"view_area_Y", scene_size.y} });
 		}
 
-		// render_engine_.render_scene();
 
-		ImGui::Image(render_engine_.get_texture(), sf::Color::White, sf::Color(70, 70, 70));
+		ImVec2 relative_mouse_pos = ImGui::GetMousePos() - ImGui::GetCursorScreenPos();
+
+		ImGui::Image(render_engine_.get_texture(), ImVec2(render_engine_.get_texture_size()), sf::Color::White, sf::Color(70, 70, 70));
+
+		if (ImGui::IsItemHovered())
+		{
+			if (button_cache_.last_mouse_pos != relative_mouse_pos)
+			{
+				button_cache_.last_mouse_pos = relative_mouse_pos;
+
+				send_to_core("mouse_position_changed", { { "mouse_position", sf::Vector2u(relative_mouse_pos)} });
+			}
+
+			uint8_t hash =
+				(mouse_down(sf::Mouse::Left)   << 0) +
+				(mouse_down(sf::Mouse::Middle) << 1) +
+				(mouse_down(sf::Mouse::Right)  << 2);
+
+			if (button_cache_.last_mouse_buttons != hash)
+			{
+				button_cache_.last_mouse_buttons = hash;
+
+				send_to_core("mouse_buttons_changed", { { "mouse_buttons", hash } });
+			}
+		}
 
 		ImGui::End();
 	}
@@ -437,20 +564,21 @@ namespace gui
 	{
 		if (file_dialog_.is_open())
 		{
-			if (auto file_path = file_dialog_.render_dialog())
+			bool keyboard_is_captured = ImGui::GetIO().WantCaptureKeyboard;
+
+			if (auto file_paths = file_dialog_.render_dialog())
 			{
-				if (auto file_path = file_dialog_.try_take_files())
-				{
-					send_to_core("load_module", { {"module_path", file_path.value().front()} });
-				}
+				for (auto& file : file_paths.value())
+					send_to_core("load_module", { {"module_path", file} });
 			}
-			if (key_hit(sf::Keyboard::Escape))
+			else if (key_hit(sf::Keyboard::Escape))
 				file_dialog_.close();
-			else if (key_hit(sf::Keyboard::Enter))
+			else if (key_hit(sf::Keyboard::Enter) && !keyboard_is_captured)
 			{
-				if (auto file_path = file_dialog_.try_take_files())
+				if (auto file_paths = file_dialog_.try_take_files())
 				{
-					send_to_core("load_module", { {"module_path", file_path.value().front()} });
+					for (auto& file : file_paths.value())
+						send_to_core("load_module", { {"module_path", file} });
 				}
 			}
 		}
@@ -508,5 +636,4 @@ namespace gui
         if (!shutdown_flag_)
             channel_to_core.SendData(packet);
     }
-
 } // namespace gui

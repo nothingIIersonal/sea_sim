@@ -1,11 +1,17 @@
 #pragma once
+
 #include <imgui.h>
 #include <imgui-SFML.h>
 #include <imgui_stdlib.h>
+#include <imgui_internal.h>
 
 #include <SFML/Graphics.hpp>
 #include <cmath>
 
+#ifndef PI
+#define PI 3.14159265f
+#define PI2 1.57079632f
+#endif
 
 namespace gui::utils
 {
@@ -19,8 +25,8 @@ namespace gui::utils
 	bool in(int a, int num, int b);         // true if - a <= num <= b
 	bool in_f(float a, float num, float b);
 	float mod_f(float X, float Y);          // modulus for float numbers
-
 	double randf(double start, double end, int amount); // returns random float inside (start / end) with the number of values specified in amount
+	float pif(float a, float b);            // Pythagorean theorem: a, b -> c
 
 	// --- ImGui
 
@@ -41,6 +47,8 @@ namespace gui::utils
 	// --- SFML
 
 	extern bool keyHit[];
+	extern bool ignore_input;
+
 	int mouse_down(const sf::Mouse::Button& B);
 	int key_down(const sf::Keyboard::Key& B);
 	int key_hit(const sf::Keyboard::Key& key);

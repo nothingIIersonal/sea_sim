@@ -1,16 +1,8 @@
 #pragma once
-#include <imgui.h>
-#include <imgui-SFML.h>
-#include <imgui_stdlib.h>
-#include <imgui_internal.h>
-
-#include <SFML/Graphics.hpp>
-
-#include <sea_sim/gears/json/json.hpp>
-#include <optional>
 #include <variant>
 
-#include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/Functions.h>
+#include <sea_sim/gears/json/json.hpp>
 
 
 namespace gui

@@ -4,10 +4,11 @@
 #define container_of(ptr, type, member) ((type *)((size_t)(ptr) - ((size_t)&(((type *)0)->member))))
 
 
-Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects) 
+Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& module_name, const shared_ic_objects_t& shared_ic_objects, const environment_t& environment) 
                     : module_endpoint(module_endpoint), module_name(module_name),
                       ship_storage(shared_ic_objects.ship_storage), ship_storage_mutex(shared_ic_objects.ship_storage_mutex),
-                      isle_storage(shared_ic_objects.isle_storage), isle_storage_mutex(shared_ic_objects.isle_storage_mutex)
+                      isle_storage(shared_ic_objects.isle_storage), isle_storage_mutex(shared_ic_objects.isle_storage_mutex),
+                      environment(environment)
 {
     if (const auto &packet = this->module_endpoint.TryRead())
     {
@@ -18,6 +19,135 @@ Interconnect::Interconnect(const Endpoint& module_endpoint, const std::string& m
     {
         this->ui_trigger = "";
     }
+}
+
+Interconnect::Environment::Environment(const environment_t& environment) : environment(environment) {}
+
+geom::Vector2u Interconnect::Environment::get_view_area() const
+{
+    return this->environment.view_area;
+}
+
+geom::Vector2u Interconnect::Environment::get_mouse_position() const
+{
+    return this->environment.mouse_position;
+}
+
+uint8_t Interconnect::Environment::get_mouse_buttons() const
+{
+    return this->environment.mouse_buttons;
+}
+
+bool Interconnect::Environment::get_mouse_button(controllers::MouseButtonEnum key) const
+{
+    return this->environment.mouse_buttons & (uint8_t)key;
+}
+
+int Interconnect::Environment::get_map_scale() const
+{
+    return this->environment.map_scale;
+}
+
+bool Interconnect::Environment::is_paused() const
+{
+    return this->environment.paused;
+}
+
+void Interconnect::Render::send()
+{
+    Interconnect *ic = container_of(this, Interconnect, render);
+    ic->module_endpoint.SendData({ "gui", ic->module_name, "draw", this->graphics_output });
+}
+
+void Interconnect::Render::set_fill_color(graphics::Color color)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "setFillColor"},
+            {"settings",
+                {
+                    {"color", color}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::set_outline_color(graphics::Color color)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "setOutlineColor"},
+            {"settings",
+                {
+                    {"color", color}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::draw_line(geom::Vector2f a, geom::Vector2f b, float width)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "line"},
+            {"settings",
+                {
+                    {"a", a},
+                    {"b", b},
+                    {"width", width}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::draw_circle(geom::Vector2f pos, float radius, float border_width)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "circle"},
+            {"settings",
+                {
+                    {"pos", pos},
+                    {"radius", radius},
+                    {"border_width", border_width}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::draw_triangle(geom::Vector2f a, geom::Vector2f b, geom::Vector2f c, float border_width)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "triangle"},
+            {"settings",
+                {
+                    {"a", a},
+                    {"b", b},
+                    {"c", c},
+                    {"border_width", border_width}
+                }
+            }
+        }
+    );
+}
+
+void Interconnect::Render::draw_ship(const Ship& ship)
+{
+    this->graphics_output.push_back(
+        {
+            {"type", "ship"},
+            {"settings",
+                {
+                    {"ship", ship}
+                }
+            }
+        }
+    );
 }
 
 void Interconnect::WGTI::send()
@@ -258,6 +388,13 @@ std::optional<int> Interconnect::get_field_int(const std::string& field_name)
     return std::nullopt;
 }
 
+std::optional<bool> Interconnect::get_field_bool(const std::string& field_name)
+{
+    if (this->ui_fields.contains(field_name) )
+        return this->ui_fields[field_name].get<bool>();
+    return std::nullopt;
+}
+
 std::optional<float> Interconnect::get_field_float(const std::string& field_name)
 {
     if (this->ui_fields.contains(field_name) )
@@ -272,66 +409,97 @@ std::optional<std::string> Interconnect::get_field_string(const std::string& fie
     return std::nullopt;
 }
 
-int Interconnect::object_ship_set(const std::string& identifier, int64_t x, int64_t y, std::vector<std::string> staff)
+void Interconnect::Ships::create(const std::string& identifier, geom::Vector2f position, graphics::Color fill_color, graphics::Color outline_color, float angle, float desired_angle, float speed, float max_speed, float rotation_speed)
 {
-    std::unique_lock lock(this->ship_storage_mutex);
+    Interconnect *ic = container_of(this, Interconnect, ships);
 
-    this->ship_storage.insert_or_assign(identifier, Ship{identifier, x, y, staff} );
+    std::unique_lock lock(ic->ship_storage_mutex);
 
-    return 0;
+    ic->ship_storage.insert_or_assign(identifier, Ship{identifier, position, fill_color, outline_color, angle, desired_angle, speed, max_speed, rotation_speed} );
 }
 
-std::optional<Ship> Interconnect::object_ship_get(const std::string& identifier)
+void Interconnect::Ships::set_position(const std::string& identifier, geom::Vector2f position)
 {
-    std::shared_lock lock(this->ship_storage_mutex);
+    Interconnect *ic = container_of(this, Interconnect, ships);
 
-    if ( this->ship_storage.contains(identifier) )
-        return this->ship_storage.at(identifier);
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_position(position);
+}
+
+void Interconnect::Ships::set_angle(const std::string& identifier, float angle)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_angle(angle);
+}
+
+void Interconnect::Ships::set_desired_angle(const std::string& identifier, float desired_angle)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_desired_angle(desired_angle);
+}
+
+void Interconnect::Ships::set_speed(const std::string& identifier, float speed)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_speed(speed);
+}
+
+void Interconnect::Ships::set_max_speed(const std::string& identifier, float max_speed)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_speed(max_speed);
+}
+
+void Interconnect::Ships::set_rotation_speed(const std::string& identifier, float rotation_speed)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::unique_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        ic->ship_storage.at(identifier).set_rotatin_speed(rotation_speed);
+}
+
+
+std::optional<Ship> Interconnect::Ships::get_by_id(const std::string& identifier)
+{
+    Interconnect *ic = container_of(this, Interconnect, ships);
+
+    std::shared_lock lock(ic->ship_storage_mutex);
+
+    if ( ic->ship_storage.contains(identifier) )
+        return ic->ship_storage.at(identifier);
 
     return std::nullopt;
 }
 
-std::optional<Ship> Interconnect::object_ship_get_next()
+std::vector<Ship> Interconnect::Ships::get_all()
 {
-    std::shared_lock lock(this->ship_storage_mutex);
+    Interconnect *ic = container_of(this, Interconnect, ships);
 
-    if ( this->ship_storage_it == this->ship_storage.end() )
-        return std::nullopt;
+    std::vector<Ship> ships;
 
-    return (this->ship_storage_it++)->second;
-}
+    std::shared_lock lock(ic->ship_storage_mutex);
 
-std::optional<int64_t> Interconnect::object_ship_get_x(const std::string& identifier)
-{
-    std::shared_lock lock(this->ship_storage_mutex);
+    std::for_each(ic->ship_storage.begin(), ic->ship_storage.end(), [&](auto & element) { ships.push_back(element.second); });
 
-    if ( this->ship_storage.contains(identifier) )
-        return this->ship_storage.at(identifier).get_x();
-
-    return std::nullopt;
-}
-
-std::optional<int64_t> Interconnect::object_ship_get_y(const std::string& identifier)
-{
-    std::shared_lock lock(this->ship_storage_mutex);
-
-    if ( this->ship_storage.contains(identifier) )
-        return this->ship_storage.at(identifier).get_y();
-
-    return std::nullopt;
-}
-
-std::optional<std::vector<std::string>> Interconnect::object_ship_get_staff(const std::string& identifier)
-{
-    std::shared_lock lock(this->ship_storage_mutex);
-
-    if ( this->ship_storage.contains(identifier) )
-        return this->ship_storage.at(identifier).get_staff();
-
-    return std::nullopt;
-}
-
-void Interconnect::object_ship_iterator_reset()
-{
-    this->ship_storage_it = this->ship_storage.begin();
+    return ships;
 }

@@ -1,15 +1,9 @@
 #pragma once
-#include <imgui.h>
-#include <imgui-SFML.h>
-#include <imgui_stdlib.h>
-#include <imgui_internal.h>
-
-#include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <algorithm>
-#include <optional>
+#include <list>
 
-#include <sea_sim/gui_controller/functions.h>
+#include <sea_sim/gui_controller/Functions.h>
 #include <sea_sim/gui_controller/Fonts.h>
 #include <sea_sim/gears/channel_packet.h>
 
@@ -53,6 +47,8 @@ namespace gui
 
 		void set_notification(const std::string& text);
 
+		bool operator== (const FileInfo& file);
+
 		FileTypeEnum file_type;
 
 		fs::path absolute_path;
@@ -65,6 +61,30 @@ namespace gui
 		std::string get_short_name();
 
 		FileDialog* parent_ptr_;
+	};
+
+	class FileInfoContainer
+	{
+	public:
+		FileInfoContainer() = default;
+		~FileInfoContainer() = default;
+
+		bool contains(const FileInfo& file);
+
+		void push_back(const FileInfo& file);
+		void push_front(const FileInfo& file);
+		void pop(const FileInfo& file);
+		void pop(std::list<FileInfo>::iterator& file_it);
+
+		std::list<FileInfo>::iterator at(const FileInfo& file);
+
+		void swap(std::list<FileInfo>::iterator& file_it, int32_t position);
+
+		std::list<FileInfo>& get_files();
+
+	private:
+		std::list<FileInfo> files;
+
 	};
 
 	class FileDialog
@@ -100,10 +120,9 @@ namespace gui
 
 		void new_path_update();
 
+		std::optional<std::vector<std::string>> return_files(bool take_multpiple = true);
 
 		WindowStorage* parent_ptr_;
-
-		std::optional<std::vector<std::string>> return_files();
 
 		bool is_open_ = false;
 
@@ -114,6 +133,7 @@ namespace gui
 		SortingTypeEnum selected_sorting_type;
 
 		std::vector<FileInfo> current_directory_content;
+		FileInfoContainer multi_selected_files;
 		FileInfo selected_file;
 	};
 
