@@ -22,9 +22,6 @@ void controller(Interconnect &ic)
 
 int sea_module_init(Interconnect &&ic)
 {
-    ic.wgti.set_module_title("Модуль управления мышью");
-    ic.wgti.send();
-
     return 0;
 }
 
