@@ -126,6 +126,41 @@
 
 <br>
 
+Теперь рассмотрим методы непосредственно объекта <b>Interconnect</b>.
+
+<br>
+
+| Метод | Аргументы | Описание |
+| - | - | - |
+| const std::string& get_trigger | - | Получение уникального идентификатора нажатой кнопки (от которой, собственно, и вызван <b>exec</b>) |
+| std::optional\<int\> get_field_int | <b>const std::string& field_name</b> - имя поля | Получить поле типа <b>int</b> |
+| std::optional\<bool\> get_field_bool | <b>const std::string& field_name</b> - имя поля | Получить поле типа <b>bool</b> |
+| std::optional\<float\> get_field_float | <b>const std::string& field_name</b> - имя поля | Получить поле типа <b>float</b> |
+| std::optional\<std::string\> get_field_string | <b>const std::string& field_name</b> - имя поля | Получить поле типа <b>string</b> |
+
+<br>
+
+С помощью <b>get_trigger</b> можно получить уникальный идентификатор кнопки, от которой была вызвана текущая функция <b>exec</b>:
+
+```c++
+auto clicked = ic.get_trigger();
+
+if ( clicked != "add_ship" ) // представим, что мы добавляли кнопку (ic.wgti.add_button("add_ship", "Создать корабль")) в инициализации
+    return 0;
+
+// здесь clicked равен "add_ship" - значит можно выполнять логику добавления корабля
+```
+
+<br>
+
+Методы <b>get_field_\<x\></b> позволяют получить значение из источников пользовательского ввода:
+
+```c++
+auto ship_identifier = ic.get_field_string("ship_identifier"); // так мы получим введенное пользователем значение в поле с уникальным идентификатором "ship_identifier" 
+```
+
+<br>
+
 Видно, что некоторые методы возвращают контейнер "<b>std::optional\<\></b>" на желамый объект. Это позволяет проверять существование запрошенного объекта перед его использованием:
 
 ```c++
@@ -137,5 +172,17 @@ if ( !ship )
     return;
 }
 ```
+или:
+```c++
+auto ship_identifier = ic.get_field_string("ship_identifier");
+
+if ( ship_identifier )
+{
+    auto ship = ic.ships.get_by_id(ship_identifier.value());
+    // ...
+}
+```
+
+Убедившись в существовании объекта, главное не забыть непосредственно его получить. Это делается с помощью вызова метода "<b>.value()</b>" .
 
 <br>
