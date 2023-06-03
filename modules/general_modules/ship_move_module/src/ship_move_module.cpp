@@ -42,9 +42,6 @@ void move(Interconnect &ic)
 
 int sea_module_init(Interconnect &&ic)
 {
-    ic.wgti.set_module_title("Модуль движения");
-    ic.wgti.send();
-
     return 0;
 }
 

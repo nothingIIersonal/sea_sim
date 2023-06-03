@@ -32,9 +32,6 @@ void render(Interconnect &ic)
 
 int sea_module_init(Interconnect &&ic)
 {
-    ic.wgti.set_module_title("Модуль отрисовки");
-    ic.wgti.send();
-
     return 0;
 }
 
