@@ -88,8 +88,8 @@
 
 | Метод | Аргументы | Описание |
 | - | - | - |
-| void set_fill_color() | <b>graphics::Color color</b> - цвет заливки | Устанавливает цвет заполнения следующему для отрисовки объекту |
-| void set_outline_color() | <b>graphics::Color color</b> - цвет контура | Устанавливает цвет контура следующему для отрисовки объекту |
+| void set_fill_color() | <b>graphics::Color color</b> - цвет заливки | Устанавливает цвет заполнения  всем следующим для отрисовки объектам |
+| void set_outline_color() | <b>graphics::Color color</b> - цвет контура | Устанавливает цвет контура следующим для отрисовки объектам |
 | void draw_line() | <b>geom::Vector2f a</b> - точка начала; <br><br> <b>geom::Vector2f b</b> - точка конца; <br><br> <b>float width</b> - ширина линии | Рисует линию толщиной <b>width</b> от точки <b>a</b> до точки <b>b</b> |
 | void draw_circle() | <b>geom::Vector2f pos</b> - точка центра; <br><br> <b>float radius</b> - радиус; <br><br> <b>float border_width</b> - ширина контура | Рисует окружность радиуса <b>radius</b> с шириной контура <b>border_width</b> в точке <b>pos</b> |
 | void draw_triangle() | <b>geom::Vector2f a</b> - первая точка; <br><br> <b>geom::Vector2f b</b> - вторая точка; <br><br> <b>geom::Vector2f c</b> - третья точка ; <br><br> <b>float border_width</b> - ширина контура | Рисует треугольник с шириной контура <b>border_width</b> по трём точкам |
@@ -104,9 +104,9 @@
 | view_area | geom::Vector2u | Размер видимой области (сцены) |
 | mouse_position | geom::Vector2u | Текущая позиция курсора мыши |
 | mouse_buttons | uint8_t | Зажатые кнопки мыши (с младшего бита: 1 - ЛКМ, 2 - СКМ, 4 - ПКМ) |
-| sim_speed | int8_t | Скорость симулации (в степенях двойки) |
+| sim_speed | int8_t | Скорость симуляции (в степенях двойки) |
 | map_scale | int | - |
-| paused | bool | Пауза |
+| paused | bool | Включена ли пауза |
 
 <br>
 
@@ -114,15 +114,15 @@
 
 | Метод | Аргументы | Описание |
 | - | - | - |
-| void create | <b>const std::string& identifier</b> - уникальный идентификатор корабля; <br><br> <b>geom::Vector2f position</b> - позиция появления; <br><br> <b>graphics::Color fill_color</b> - цвет заливки; <br><br> <b>graphics::Color outline_color</b> - цвет обводки; <br><br> <b>float angle</b> - текущий угол, направление; <br><br> <b>float desired_angle</b> - желаемое направление; <br><br> <b>float speed</b> - скорость движения; <br><br> <b>float max_speed</b> - максимальная скорость движения; <br><br> <b>float rotation_speed</b> - скорость вращения | Создание корабля |
+| void create | <b>const std::string& identifier</b> - уникальный идентификатор корабля; <br><br> <b>geom::Vector2f position</b> - позиция появления; <br><br> <b>graphics::Color fill_color</b> - цвет заливки; <br><br> <b>graphics::Color outline_color</b> - цвет обводки; <br><br> <b>float angle</b> - текущий угол, направление; <br><br> <b>float desired_angle</b> - желаемое направление; <br><br> <b>float speed</b> - текущая скорость движения; <br><br> <b>float max_speed</b> - максимальная скорость движения; <br><br> <b>float rotation_speed</b> - скорость вращения | Создание корабля |
 | void set_position | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>geom::Vector2f position</b> - позиция| Установить позицию корабля |
 | void set_angle | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float angle</b> - угол | Установить направления (угол) корабля |
 | void set_desired_angle | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float desired_angle</b> - желаемый угол| Установить желаемое направление (желаемый угол) корабля |
-| void set_speed | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float speed</b> - скорость| Установить скорость движения корабля |
-| void set_max_speed | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float max_speed</b> - максимальная скорость| Установить максимальную скорость движения корабля |
+| void set_speed | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float speed</b> - текущая скорость движения | Установить текущую скорость движения корабля |
+| void set_max_speed | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float max_speed</b> - максимальная скорость движения | Установить максимальную скорость движения корабля |
 | void set_rotation_speed | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float rotation_speed</b> - скорость вращения | Установить скорость вращения корабля |
-| std::optional<Ship> get_by_id | <b>const std::string& identifier</b> - уникальный идентификатор корабля| Получить корабль по его уникальному идентификатору |
-| std::vector<Ship> get_all | - | Получить вектор всех корблей |
+| std::optional\<Ship\> get_by_id | <b>const std::string& identifier</b> - уникальный идентификатор корабля| Получить корабль по его уникальному идентификатору |
+| std::vector\<Ship\> get_all | - | Получить вектор всех корблей |
 
 <br>
 
