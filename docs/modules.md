@@ -57,11 +57,11 @@
 - <b>ships</b> - этот объект позволяет управлять суднами.
 
 <br>
+<br>
 
+---
 #### Объект <b>wgti</b>
 ---
-
-<br>
 
 | Метод | Аргументы | Описание |
 | - | - | - |
@@ -69,5 +69,63 @@
 | void sameline() | - | Оставить следующий виджет на той же строке |
 | void add_text() | <b>const std::string& text</b> - текст  | Добавление виджета текста |
 | void add_button() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>const std::string& text</b> - текст на кнопке | Добавление виджета кнопки |
-| void add_sliderint() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>int64_t from</b> - значение "от" <br><br> <b>int64_t to</b> - значение "до" <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета целочисленного слайдера |
+| void add_sliderint() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>int64_t from</b> - значение "от"; <br><br> <b>int64_t to</b> - значение "до"; <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета слайдера ввода целого числа |
+| void add_sliderfloat() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>float from</b> - значение "от"; <br><br> <b>float to</b> - значение "до"; <br><br> <b>uint64_t precision</b> - точность; <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета слайдера ввода дробного числа |
+| void add_inputtext() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>const std::string& placeholder</b> - подсказка; <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета ввода текста |
+| void add_inputint() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета ввода целого числа |
+| void add_inputfloat() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета ввода дробного числа |
+| void add_checkbox() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>const std::string& text</b> - текст описания опции; <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета флажка |
+| void add_radiobutton() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>const std::vector\<std::string\>& elements</b> - набор элементов предоставляемых для выбора; <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета радиокнопок |
+| void add_dropdownlist() | <b>const std::string& identifier</b> - идентификатор; <br><br> <b>const std::vector\<std::string\>& elements</b> - набор элементов предоставляемых для выбора; <br><br> <b>bool keep_value</b> - не затирать введённое пользователем значение при повторной отправке элемента (с таким же идентификатором) | Добавление виджета выпадающего списка |
+| void send() | - | Отправляет виджеты на отображение |
+
+<br>
+<br>
+
+---
+#### Объект <b>wgto</b>
+---
+
+| Метод | Аргументы | Описание |
+| - | - | - |
+| void sameline() | - | Оставить следующий виджет на той же строке |
+| void add_text() | <b>const std::string& text</b> - текст  | Добавление виджета текста |
+| void send() | - | Отправляет виджеты на отображение |
+
+<br>
+<br>
+
+---
+#### Объект <b>render</b>
+---
+
+| Метод | Аргументы | Описание |
+| - | - | - |
+| void set_fill_color() | <b>graphics::Color color</b> - | - |
+| void set_outline_color() | <b>graphics::Color color</b> - | - |
+| void draw_line() | <b>geom::Vector2f a</b> - ; <br><br> <b>geom::Vector2f b</b> - ; <br><br> <b>float width</b> - | - |
+| void draw_circle() | <b>geom::Vector2f pos</b> - ; <br><br> <b>float radius</b> - ; <br><br> <b>float border_width</b> - | - |
+| void draw_triangle() | <b>geom::Vector2f a</b> - ; <br><br> <b>geom::Vector2f b</b> - ; <br><br> <b>geom::Vector2f c</b> - ; <br><br> <b>float border_width</b> - | - |
+| void draw_ship() | <b>const Ship& ship</b> | - |
+
+<br>
+<br>
+
+---
+#### Объект <b>environment</b>
+---
+
+| Метод | Аргументы | Описание |
+| - | - | - |
+| - | - | - |
+
+<br>
+<br>
+
+---
+#### Объект <b>ships</b>
+---
+
+| Метод | Аргументы | Описание |
+| - | - | - |
 | - | - | - |
