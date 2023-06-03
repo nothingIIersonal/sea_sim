@@ -115,13 +115,13 @@
 | Метод | Аргументы | Описание |
 | - | - | - |
 | void create | <b>const std::string& identifier</b> - уникальный идентификатор корабля; <br><br> <b>geom::Vector2f position</b> - позиция появления; <br><br> <b>graphics::Color fill_color</b> - цвет заливки; <br><br> <b>graphics::Color outline_color</b> - цвет обводки; <br><br> <b>float angle</b> - текущий угол, направление; <br><br> <b>float desired_angle</b> - желаемое направление; <br><br> <b>float speed</b> - текущая скорость движения; <br><br> <b>float max_speed</b> - максимальная скорость движения; <br><br> <b>float rotation_speed</b> - скорость вращения | Создание корабля |
-| void set_position | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>geom::Vector2f position</b> - позиция| Установить позицию корабля |
-| void set_angle | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float angle</b> - угол | Установить направления (угол) корабля |
-| void set_desired_angle | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float desired_angle</b> - желаемый угол| Установить желаемое направление (желаемый угол) корабля |
+| void set_position | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>geom::Vector2f position</b> - позиция | Установить позицию корабля |
+| void set_angle | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float angle</b> - текущий угол | Установить текущее направление (текущий угол) корабля |
+| void set_desired_angle | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float desired_angle</b> - желаемый угол | Установить желаемое направление (желаемый угол) корабля |
 | void set_speed | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float speed</b> - текущая скорость движения | Установить текущую скорость движения корабля |
 | void set_max_speed | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float max_speed</b> - максимальная скорость движения | Установить максимальную скорость движения корабля |
 | void set_rotation_speed | <b>const std::string& identifier</b> - уникальный идентификатор корабля;<br><br> <b>float rotation_speed</b> - скорость вращения | Установить скорость вращения корабля |
-| std::optional\<Ship\> get_by_id | <b>const std::string& identifier</b> - уникальный идентификатор корабля| Получить корабль по его уникальному идентификатору |
+| std::optional\<Ship\> get_by_id | <b>const std::string& identifier</b> - уникальный идентификатор корабля | Получить корабль по его уникальному идентификатору |
 | std::vector\<Ship\> get_all | - | Получить вектор всех корблей |
 
 <br>
