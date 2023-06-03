@@ -186,3 +186,35 @@ if ( ship_identifier )
 Убедившись в существовании объекта, главное не забыть непосредственно его получить. Это делается с помощью вызова метода "<b>.value()</b>" .
 
 <br>
+
+### Вспомогательные типы данных
+<br>
+
+#### Пространство имен <b>geom</b> 
+
+| Тип | Описание |
+| - | - |
+| geom::Vector2f | Вектор <b>{x, y}</b> с дробными (<b>float</b>) координатами |
+| geom::Vector2i | Вектор <b>{x, y}</b> с целочисленными координатами |
+| geom::Vector2u | Вектор <b>{x, y}</b> с целочисленным беззнаковыми координатами |
+| geom::Vector2d | Вектор <b>{x, y}</b> с дробными (<b>double</b>) координатами |
+| geom::vec2i_ptr | Указатель на geom::Vector2f |
+| geom::vec2f_ptr | Указатель на geom::Vector2i |
+| geom::vec2u_ptr | Указатель на geom::Vector2u |
+| geom::vec2d_ptr | Указатель на geom::Vector2d |
+
+<br>
+
+#### Пространство имен <b>graphics</b> 
+
+| Тип | Описание |
+| - | - |
+| <b>Color</b>: <br> <b>r</b> - красный; <br> <b>g</b> - зелёный; <br> <b>b</b> - синий; <br> <b>a</b> - прозрачность (альфа-канал) | Цвет |
+
+<br>
+
+#### Пространство имен <b>controllers</b> 
+
+| Тип | Описание |
+| - | - |
+| <b>MouseButtonEnum</b>: <br> MouseButtonEnum::LEFT; <br> MouseButtonEnum::MIDDLE; <br> MouseButtonEnum::RIGHT  | Кнопки мыши |
