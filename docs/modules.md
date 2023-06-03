@@ -209,7 +209,7 @@ if ( ship_identifier )
 
 | Тип | Описание |
 | - | - |
-| <b>Color</b>: <br> <b>r</b> - красный; <br> <b>g</b> - зелёный; <br> <b>b</b> - синий; <br> <b>a</b> - прозрачность (альфа-канал) | Цвет |
+| <b>graphics::Color</b>: <br> <b>r</b> - красный; <br> <b>g</b> - зелёный; <br> <b>b</b> - синий; <br> <b>a</b> - прозрачность (альфа-канал) | Цвет |
 
 <br>
 
@@ -217,4 +217,4 @@ if ( ship_identifier )
 
 | Тип | Описание |
 | - | - |
-| <b>MouseButtonEnum</b>: <br> MouseButtonEnum::LEFT; <br> MouseButtonEnum::MIDDLE; <br> MouseButtonEnum::RIGHT  | Кнопки мыши |
+| <b>controllers::MouseButtonEnum</b>: <br> MouseButtonEnum::LEFT; <br> MouseButtonEnum::MIDDLE; <br> MouseButtonEnum::RIGHT  | Кнопки мыши |
